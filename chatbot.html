@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente ER1 · Fundamentos Socioculturales de la Psicología</title>
+<meta name="description" content="Chatbot de estudio para Fundamentos Socioculturales de la Psicología. Responde con citas, ejemplos y lecturas recomendadas a partir del material del curso.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-alt: #11161f;
+  --surface: #161c27;
+  --surface-2: #1c2330;
+  --surface-hover: #212a3a;
+  --border: #2a3344;
+  --border-soft: #212938;
+  --ink: #eef1f7;
+  --ink-2: #a9b3c7;
+  --ink-3: #6b7690;
+  --gold: #d4a843;
+  --gold-soft: rgba(212,168,67,0.14);
+  --gold-2: #e8c168;
+  --teal: #4fd1c5;
+  --teal-soft: rgba(79,209,197,0.14);
+  --red: #f16565;
+  --red-soft: rgba(241,101,101,0.12);
+  --green: #4fd18a;
+  --green-soft: rgba(79,209,138,0.12);
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 14px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.45);
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  --serif: 'Cormorant Garamond', serif;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+:root[data-theme="light"] {
+  --bg: #f3f2ee;
+  --bg-alt: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f6f2;
+  --surface-hover: #efeee8;
+  --border: #e1ddd2;
+  --border-soft: #ecebe4;
+  --ink: #23201a;
+  --ink-2: #5c574a;
+  --ink-3: #8f8975;
+  --gold: #a9791f;
+  --gold-soft: rgba(169,121,31,0.10);
+  --gold-2: #8a6015;
+  --teal: #12857a;
+  --teal-soft: rgba(18,133,122,0.10);
+  --red: #b8352f;
+  --red-soft: rgba(184,53,47,0.08);
+  --green: #227a4f;
+  --green-soft: rgba(34,122,79,0.08);
+  --shadow: 0 2px 14px rgba(30,25,10,0.08);
+  --shadow-lg: 0 16px 40px rgba(30,25,10,0.14);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f2ee; --bg-alt:#ffffff; --surface:#ffffff; --surface-2:#f7f6f2; --surface-hover:#efeee8;
+    --border:#e1ddd2; --border-soft:#ecebe4; --ink:#23201a; --ink-2:#5c574a; --ink-3:#8f8975;
+    --gold:#a9791f; --gold-soft: rgba(169,121,31,0.10); --gold-2:#8a6015; --teal:#12857a; --teal-soft: rgba(18,133,122,0.10);
+    --red:#b8352f; --red-soft: rgba(184,53,47,0.08); --green:#227a4f; --green-soft: rgba(34,122,79,0.08);
+    --shadow: 0 2px 14px rgba(30,25,10,0.08); --shadow-lg: 0 16px 40px rgba(30,25,10,0.14);
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  overflow: hidden;
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, var(--gold-soft), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 110% 10%, var(--teal-soft), transparent 60%);
+  background-attachment: fixed;
+}
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+button, input, textarea, select { font-family: inherit; color: inherit; }
+a { color: var(--gold); }
+
+/* ══════ APP SHELL ══════ */
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100vh;
+  height: 100dvh;
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; inset: 0 20% 0 0; z-index: 200; transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: var(--shadow-lg); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 190; }
+  .sidebar-scrim.show { display: block; }
+  .mobile-menu-btn { display: inline-flex !important; }
+}
+
+/* ══════ SIDEBAR ══════ */
+.sidebar {
+  background: var(--bg-alt);
+  border-right: 1px solid var(--border-soft);
+  display: flex; flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.brand {
+  padding: 1.4rem 1.3rem 1.1rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+.brand-mark {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 0.9rem;
+}
+.brand-glyph {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(212,168,67,0.3);
+}
+.brand-text .k { font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); }
+.brand-text .n { font-family: var(--serif); font-size: 1.28rem; font-weight: 700; line-height: 1.15; color: var(--ink); }
+.brand-sub { font-size: 0.78rem; color: var(--ink-2); line-height: 1.5; }
+.brand-sub b { color: var(--ink); font-weight: 600; }
+
+.sidebar-section { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border-soft); }
+.sidebar-section:last-of-type { border-bottom: none; }
+.sidebar-h {
+  font-family: var(--mono); font-size: 0.66rem; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 0.7rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.docs-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+.doc-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 9px; border-radius: var(--radius-sm);
+  font-size: 0.8rem; color: var(--ink-2);
+  cursor: default; transition: background var(--transition);
+}
+.doc-row:hover { background: var(--surface); }
+.doc-row .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.doc-row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-row .count { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); }
+
+.kb-stat-row { display: flex; gap: 10px; margin-top: 2px; }
+.kb-stat { flex: 1; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 8px 10px; text-align: center; }
+.kb-stat .v { font-family: var(--mono); font-size: 1.1rem; color: var(--gold); }
+.kb-stat .l { font-size: 0.64rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+.mode-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mode-toggle-label { font-size: 0.83rem; color: var(--ink); font-weight: 500; }
+.mode-toggle-desc { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; line-height: 1.4; }
+.switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .track { position: absolute; inset: 0; background: var(--border); border-radius: 22px; transition: var(--transition); cursor: pointer; }
+.switch .track::before { content:''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: var(--transition); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.switch input:checked + .track { background: var(--teal); }
+.switch input:checked + .track::before { transform: translateX(18px); }
+
+.model-select-wrap { margin-top: 0.6rem; display: none; }
+.model-select-wrap.show { display: block; }
+.model-select {
+  width: 100%; padding: 7px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  font-size: 0.78rem; cursor: pointer;
+}
+
+.sidebar-footer { margin-top: auto; padding: 1rem 1.3rem; border-top: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 6px; }
+.side-link-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: none; color: var(--ink-2);
+  font-size: 0.8rem; padding: 7px 8px; border-radius: var(--radius-sm);
+  cursor: pointer; text-align: left; transition: all var(--transition); width: 100%;
+}
+.side-link-btn:hover { background: var(--surface); color: var(--ink); }
+.theme-toggle-row { display: flex; gap: 6px; }
+.theme-btn {
+  flex: 1; padding: 6px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-2); font-size: 0.72rem; cursor: pointer; transition: all var(--transition);
+}
+.theme-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+
+/* ══════ MAIN ══════ */
+.main {
+  display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;
+}
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0.9rem 1.5rem; border-bottom: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--bg-alt) 70%, transparent);
+  backdrop-filter: blur(10px);
+}
+.mobile-menu-btn {
+  display: none; background: none; border: 1px solid var(--border); color: var(--ink-2);
+  border-radius: var(--radius-sm); width: 34px; height: 34px; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; font-size: 1rem;
+}
+.topbar-title { flex: 1; min-width: 0; }
+.topbar-title h1 { font-family: var(--serif); font-size: 1.28rem; font-weight: 600; line-height: 1.2; }
+.topbar-title p { font-size: 0.76rem; color: var(--ink-3); margin-top: 1px; }
+.mode-pill {
+  font-family: var(--mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--ink-3); flex-shrink: 0;
+}
+.mode-pill.ai-on { border-color: var(--teal); color: var(--teal); background: var(--teal-soft); }
+.icon-btn {
+  background: none; border: 1px solid var(--border); color: var(--ink-2);
+  width: 34px; height: 34px; border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0;
+  transition: all var(--transition);
+}
+.icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ══════ CHAT ══════ */
+.chat-scroll { flex: 1; overflow-y: auto; padding: 1.6rem 1.5rem 1rem; }
+.chat-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.3rem; }
+
+.welcome-card {
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg); padding: 1.8rem 1.7rem;
+  box-shadow: var(--shadow);
+}
+.welcome-card .eyebrow { font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 0.6rem; }
+.welcome-card h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 700; margin-bottom: 0.7rem; }
+.welcome-card p { font-size: 0.88rem; color: var(--ink-2); line-height: 1.7; margin-bottom: 0.5rem; }
+.welcome-card .note { font-size: 0.76rem; color: var(--ink-3); border-top: 1px solid var(--border-soft); padding-top: 0.8rem; margin-top: 0.8rem; line-height: 1.6; }
+
+.suggest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 1.1rem; }
+.suggest-chip {
+  text-align: left; background: var(--surface-2); border: 1px solid var(--border-soft);
+  border-radius: var(--radius); padding: 10px 13px; font-size: 0.81rem; color: var(--ink-2);
+  cursor: pointer; transition: all var(--transition); line-height: 1.4;
+}
+.suggest-chip:hover { border-color: var(--gold); color: var(--ink); background: var(--gold-soft); transform: translateY(-1px); }
+
+.msg-row { display: flex; gap: 10px; align-items: flex-start; animation: msgIn 0.3s cubic-bezier(0.2,0.8,0.2,1) both; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.msg-row.user { flex-direction: row-reverse; }
+.avatar {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+  margin-top: 2px;
+}
+.avatar.bot { background: linear-gradient(135deg, var(--gold), var(--gold-2)); }
+.avatar.user { background: var(--surface-2); border: 1px solid var(--border); }
+.bubble-wrap { max-width: 82%; display: flex; flex-direction: column; gap: 6px; }
+.msg-row.user .bubble-wrap { align-items: flex-end; }
+.bubble {
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg); padding: 0.9rem 1.1rem;
+  font-size: 0.89rem; line-height: 1.7; color: var(--ink);
+}
+.msg-row.user .bubble { background: var(--gold-soft); border-color: var(--gold); color: var(--ink); }
+.bubble p { margin-bottom: 0.6rem; }
+.bubble p:last-child { margin-bottom: 0; }
+
+.ans-block + .ans-block { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--border-soft); }
+.ans-label {
+  font-family: var(--mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-3); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 6px;
+}
+.ans-label.example { color: var(--teal); }
+.ans-label.sources { color: var(--gold); }
+.ans-label.readings { color: var(--ink-2); }
+.example-box { background: var(--teal-soft); border-left: 2px solid var(--teal); border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; line-height: 1.6; }
+.other-persp { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; color: var(--ink-2); line-height: 1.6; margin-top: 6px; }
+.other-persp b { color: var(--ink); }
+
+.source-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.source-chip {
+  font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-2);
+  cursor: pointer; transition: all var(--transition);
+}
+.source-chip:hover { border-color: var(--gold); color: var(--gold); }
+.readings-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.readings-list li { font-size: 0.79rem; color: var(--ink-2); padding-left: 14px; position: relative; }
+.readings-list li::before { content:'—'; position: absolute; left: 0; color: var(--ink-3); }
+
+.ai-tag { font-family: var(--mono); font-size: 0.62rem; color: var(--teal); border: 1px solid var(--teal); padding: 1px 7px; border-radius: 20px; }
+.offline-tag { font-family: var(--mono); font-size: 0.62rem; color: var(--ink-3); border: 1px solid var(--border); padding: 1px 7px; border-radius: 20px; }
+
+.typing-dots { display: flex; gap: 4px; padding: 4px 2px; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); animation: bounce 1.2s infinite ease-in-out; }
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%,60%,100%{ transform: translateY(0); opacity: 0.5; } 30%{ transform: translateY(-4px); opacity: 1; } }
+
+.fallback-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* ══════ COMPOSER ══════ */
+.composer-wrap { padding: 0.9rem 1.5rem 1.2rem; }
+.composer {
+  max-width: 720px; margin: 0 auto;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  display: flex; align-items: flex-end; gap: 8px; padding: 8px 8px 8px 16px;
+  transition: border-color var(--transition);
+}
+.composer:focus-within { border-color: var(--gold); }
+.composer textarea {
+  flex: 1; border: none; background: none; outline: none; resize: none;
+  font-size: 0.9rem; color: var(--ink); line-height: 1.5; max-height: 140px; padding: 8px 0;
+}
+.composer textarea::placeholder { color: var(--ink-3); }
+.send-btn {
+  width: 38px; height: 38px; border-radius: 10px; border: none; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #1a1408;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  font-size: 1rem; transition: all var(--transition);
+}
+.send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(212,168,67,0.35); }
+.send-btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
+.composer-hint { text-align: center; font-size: 0.7rem; color: var(--ink-3); margin-top: 8px; max-width: 720px; margin-left: auto; margin-right: auto; }
+
+/* ══════ MODALS ══════ */
+.modal-scrim {
+  position: fixed; inset: 0; background: rgba(6,8,12,0.6); backdrop-filter: blur(3px);
+  display: none; align-items: center; justify-content: center; z-index: 500; padding: 1.2rem;
+}
+.modal-scrim.open { display: flex; }
+.modal {
+  background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); animation: modalIn 0.25s cubic-bezier(0.2,0.8,0.2,1) both;
+}
+.modal.wide { max-width: 760px; }
+@keyframes modalIn { from { opacity:0; transform: translateY(10px) scale(0.98); } to { opacity:1; transform: translateY(0) scale(1); } }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.3rem 1.5rem 1rem; border-bottom: 1px solid var(--border-soft); }
+.modal-head h3 { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; }
+.modal-head p { font-size: 0.8rem; color: var(--ink-3); margin-top: 4px; }
+.modal-close { background: none; border: none; color: var(--ink-3); font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 4px; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 1.3rem 1.5rem; }
+.modal-foot { padding: 1rem 1.5rem 1.4rem; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--border-soft); }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
+.field .hint { font-size: 0.72rem; color: var(--ink-3); margin-top: 4px; line-height: 1.5; }
+.field input[type=text], .field input[type=password], .field textarea, .field select {
+  width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink); font-size: 0.87rem; outline: none; transition: border-color var(--transition);
+}
+.field textarea { resize: vertical; min-height: 90px; font-family: var(--mono); font-size: 0.8rem; line-height: 1.6; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--gold); }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: var(--radius-sm); border: 1px solid transparent;
+  cursor: pointer; font-size: 0.84rem; font-weight: 500; transition: all var(--transition);
+}
+.btn-primary { background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #1a1408; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(212,168,67,0.3); }
+.btn-ghost { background: none; border-color: var(--border); color: var(--ink-2); }
+.btn-ghost:hover { border-color: var(--ink-3); color: var(--ink); }
+.btn-danger { background: none; border-color: var(--red); color: var(--red); }
+.btn-danger:hover { background: var(--red-soft); }
+.btn-teal { background: var(--teal); color: #08201d; }
+.btn-teal:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(79,209,197,0.3); }
+.btn-sm { padding: 6px 12px; font-size: 0.76rem; }
+
+/* Admin panel */
+.admin-tabs { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+.admin-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; color: var(--ink-2); cursor: pointer; transition: all var(--transition); }
+.admin-tab.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); font-weight: 600; }
+.admin-pane { display: none; }
+.admin-pane.active { display: block; }
+.doc-manage-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm); margin-bottom: 6px; background: var(--surface);
+}
+.doc-manage-row .info { flex: 1; min-width: 0; }
+.doc-manage-row .name { font-size: 0.85rem; font-weight: 500; color: var(--ink); }
+.doc-manage-row .meta { font-size: 0.72rem; color: var(--ink-3); font-family: var(--mono); }
+.upload-drop {
+  border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 1rem;
+  text-align: center; font-size: 0.8rem; color: var(--ink-3); cursor: pointer; transition: all var(--transition);
+}
+.upload-drop:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+.admin-gate { text-align: center; padding: 1rem 0; }
+.chunk-preview-box { max-height: 240px; overflow-y: auto; background: var(--surface-2); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.76rem; color: var(--ink-2); font-family: var(--mono); white-space: pre-wrap; line-height: 1.6; }
+
+.toast {
+  position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 30px;
+  font-size: 0.82rem; z-index: 999; opacity: 0; transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1);
+  box-shadow: var(--shadow-lg); font-family: var(--mono);
+}
+:root[data-theme="light"] .toast { background: var(--ink); color: var(--bg); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.empty-note { text-align: center; color: var(--ink-3); font-size: 0.82rem; padding: 1.5rem 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar-scrim" id="sidebar-scrim" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-glyph">🎓</div>
+        <div class="brand-text">
+          <div class="k">Asistente de Estudio</div>
+          <div class="n">Fundamentos<br>Socioculturales</div>
+        </div>
+      </div>
+      <p class="brand-sub">Chatbot de la asignatura <b>Psicología Social</b>. Responde solo con base en el material cargado, con citas, ejemplos y lecturas.</p>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-h"><span>Documentos cargados</span></div>
+      <div class="docs-list" id="docs-list"></div>
+      <div class="kb-stat-row">
+        <div class="kb-stat"><div class="v" id="stat-docs">0</div><div class="l">Documentos</div></div>
+        <div class="kb-stat"><div class="v" id="stat-chunks">0</div><div class="l">Fragmentos</div></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-h"><span>Modo de respuesta</span></div>
+      <div class="mode-toggle-row">
+        <div>
+          <div class="mode-toggle-label">🤖 IA con tu llave</div>
+          <div class="mode-toggle-desc">Opcional. Usa tu propia llave de la API de Claude para respuestas más elaboradas, siempre basadas en el material.</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="ai-toggle" onchange="onAiToggle()"><span class="track"></span></label>
+      </div>
+      <div class="model-select-wrap" id="model-select-wrap">
+        <select class="model-select" id="model-select">
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — rápido y económico</option>
+          <option value="claude-sonnet-5">Claude Sonnet 5 — respuestas más elaboradas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="side-link-btn" onclick="openAdminGate()">⚙️ Modo profesor · administrar contenido</button>
+      <button class="side-link-btn" onclick="openExportModal()">⬇️ Descargar este chatbot (.html)</button>
+      <button class="side-link-btn" onclick="confirmClearChat()">🗑️ Borrar conversación</button>
+      <div class="theme-toggle-row">
+        <button class="theme-btn" id="theme-btn-dark" onclick="setTheme('dark')">🌙 Oscuro</button>
+        <button class="theme-btn" id="theme-btn-light" onclick="setTheme('light')">☀️ Claro</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+      <div class="topbar-title">
+        <h1>Pregúntale al curso</h1>
+        <p>Fundamentos Socioculturales de la Psicología · Docente: Sebastián Durán Becker</p>
+      </div>
+      <span class="mode-pill" id="mode-pill">modo offline</span>
+      <button class="icon-btn" title="Acerca de este chatbot" onclick="openAboutModal()">ℹ️</button>
+    </div>
+
+    <div class="chat-scroll" id="chat-scroll">
+      <div class="chat-inner" id="chat-inner">
+        <div class="welcome-card" id="welcome-card">
+          <div class="eyebrow">Bienvenida / Bienvenido</div>
+          <h2>¿Qué quieres repasar hoy?</h2>
+          <p>Este asistente responde <b style="color:var(--ink)">exclusivamente a partir del material de la asignatura</b> que tu docente cargó: glosario, banco de preguntas, casos prácticos, tablas comparativas y paradigmas. Cada respuesta incluye la fuente exacta dentro del curso.</p>
+          <p>Puedes preguntar por conceptos, autores, experimentos, diferencias entre paradigmas o pedir un caso de aplicación.</p>
+          <div class="suggest-grid" id="suggest-grid"></div>
+          <div class="note">💡 Las respuestas son concisas, con ejemplos simples y lecturas recomendadas. Si algo no está en el material cargado, el asistente te lo dirá en vez de inventar una respuesta.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea id="composer-input" rows="1" placeholder="Escribe tu pregunta sobre la materia…" onkeydown="onComposerKey(event)" oninput="autoGrow(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="composer-hint">Enter para enviar · Shift+Enter para salto de línea</div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════ MODAL: About ══════ -->
+<div class="modal-scrim" id="modal-about">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Acerca de este chatbot</h3><p>Cómo funciona y qué puede (y no puede) responder</p></div>
+      <button class="modal-close" onclick="closeModal('modal-about')">✕</button>
+    </div>
+    <div class="modal-body" style="font-size:0.86rem;line-height:1.75;color:var(--ink-2)">
+      <p style="margin-bottom:0.8rem"><b style="color:var(--ink)">Modo offline (por defecto):</b> busca en los documentos del curso los fragmentos más relevantes para tu pregunta y construye una respuesta a partir de ellos, siempre citando la fuente. No usa internet ni inteligencia artificial generativa — es rápido, privado y funciona sin conexión.</p>
+      <p style="margin-bottom:0.8rem"><b style="color:var(--ink)">Modo IA (opcional):</b> si activas el interruptor y pegas tu propia llave de API de Anthropic (Claude), el asistente redacta una respuesta más natural, pero igual restringida al contenido recuperado del curso. Tu llave se guarda solo en este navegador y nunca se comparte con nadie más que con Anthropic.</p>
+      <p style="margin-bottom:0.8rem"><b style="color:var(--ink)">Modo profesor:</b> permite cargar nuevos documentos (pegando texto, subiendo .txt/.md o PDF), editarlos y exportar una nueva versión de este mismo archivo HTML ya actualizada, lista para repartir a los estudiantes.</p>
+      <p>Este archivo es 100% autocontenido: se puede descargar y abrir directamente en cualquier navegador, sin instalar nada.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('modal-about')">Entendido</button></div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: AI Key ══════ -->
+<div class="modal-scrim" id="modal-aikey">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>🤖 Activar modo IA</h3><p>Con tu propia llave de la API de Claude (Anthropic)</p></div>
+      <button class="modal-close" onclick="closeModal('modal-aikey'); document.getElementById('ai-toggle').checked = aiEnabled;">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.83rem;color:var(--ink-2);line-height:1.65;margin-bottom:1rem">
+        Esta función llama directamente desde tu navegador a la API de Anthropic usando <b>tu propia llave</b>. Se guarda únicamente en el <code>localStorage</code> de este navegador — nunca se envía a tu docente ni a terceros. Los costos de uso corren por tu cuenta (respuestas cortas cuestan fracciones de centavo).
+      </p>
+      <div class="field">
+        <label>Llave de API (comienza con sk-ant-...)</label>
+        <input type="password" id="api-key-input" placeholder="sk-ant-...">
+        <div class="hint">Puedes obtener una llave en <span style="color:var(--gold)">console.anthropic.com</span> → API Keys. Si no tienes una, puedes seguir usando el modo offline sin costo.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-aikey'); document.getElementById('ai-toggle').checked = aiEnabled;">Cancelar</button>
+      <button class="btn btn-teal" onclick="saveApiKey()">Guardar y activar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: Source viewer ══════ -->
+<div class="modal-scrim" id="modal-source">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="source-doc-title">Fuente</h3><p id="source-section-title"></p></div>
+      <button class="modal-close" onclick="closeModal('modal-source')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="chunk-preview-box" id="source-body-text"></div>
+      <div id="source-readings-wrap" style="margin-top:1rem"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal('modal-source')">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: Export ══════ -->
+<div class="modal-scrim" id="modal-export">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>⬇️ Descargar chatbot</h3><p>Genera un archivo .html autocontenido con el contenido actual</p></div>
+      <button class="modal-close" onclick="closeModal('modal-export')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:var(--ink-2);line-height:1.7;margin-bottom:1rem">Se descargará un único archivo <code>.html</code> con todos los documentos actuales (incluyendo cualquier cambio hecho en modo profesor). Los estudiantes pueden abrirlo directamente con doble clic, sin instalar nada ni necesitar internet para el modo offline.</p>
+      <div class="field-row">
+        <div class="field" style="flex:2">
+          <label>Nombre del archivo</label>
+          <input type="text" id="export-filename" value="chatbot-fundamentos-socioculturales.html">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-export')">Cancelar</button>
+      <button class="btn btn-primary" onclick="doExport()">Descargar .html</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: Admin gate ══════ -->
+<div class="modal-scrim" id="modal-admin-gate">
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>⚙️ Modo profesor</h3><p>Acceso para administrar los documentos del curso</p></div>
+      <button class="modal-close" onclick="closeModal('modal-admin-gate')">✕</button>
+    </div>
+    <div class="modal-body admin-gate">
+      <p style="font-size:0.83rem;color:var(--ink-2);margin-bottom:1rem;line-height:1.6">Ingresa la clave de edición. Esto es solo una barrera de uso, no una medida de seguridad real (el archivo es 100% local) — puedes cambiar la clave editando la constante <code>ADMIN_PASSCODE</code> en el HTML.</p>
+      <div class="field"><input type="password" id="admin-passcode-input" placeholder="Clave de edición" onkeydown="if(event.key==='Enter')checkAdminPasscode()"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-gate')">Cancelar</button>
+      <button class="btn btn-primary" onclick="checkAdminPasscode()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: Admin panel ══════ -->
+<div class="modal-scrim" id="modal-admin">
+  <div class="modal wide">
+    <div class="modal-head">
+      <div><h3>📚 Administrar documentos del curso</h3><p>Agrega, revisa y exporta el material que alimenta al chatbot</p></div>
+      <button class="modal-close" onclick="closeModal('modal-admin')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="list" onclick="switchAdminTab('list')">Documentos actuales</button>
+        <button class="admin-tab" data-tab="add" onclick="switchAdminTab('add')">+ Agregar documento</button>
+      </div>
+
+      <div class="admin-pane active" id="admin-pane-list">
+        <div id="admin-docs-list"></div>
+        <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="openExportModal()">⬇️ Exportar HTML actualizado</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmResetKB()">↺ Restaurar contenido original</button>
+        </div>
+      </div>
+
+      <div class="admin-pane" id="admin-pane-add">
+        <div class="field">
+          <label>Título del documento</label>
+          <input type="text" id="new-doc-title" placeholder="Ej: Apunte de clase 4 — Representaciones Sociales">
+        </div>
+        <div class="field">
+          <label>Contenido (pega el texto aquí)</label>
+          <textarea id="new-doc-text" placeholder="Pega aquí el texto del documento. Sepáralo en párrafos: cada párrafo (separado por línea en blanco) se convertirá en un fragmento consultable."></textarea>
+          <div class="hint">También puedes subir un archivo de texto, markdown o PDF:</div>
+          <div class="upload-drop" id="upload-drop" onclick="document.getElementById('file-input').click()">📄 Haz clic para subir un archivo (.txt, .md, .pdf)</div>
+          <input type="file" id="file-input" accept=".txt,.md,.pdf" style="display:none" onchange="onFileSelected(event)">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Ejemplo simple (opcional, aplica a todo el documento)</label>
+            <input type="text" id="new-doc-example" placeholder="Un ejemplo cotidiano que ilustre este contenido">
+          </div>
+          <div class="field">
+            <label>Lecturas recomendadas (opcional, separadas por ;)</label>
+            <input type="text" id="new-doc-readings" placeholder="Autor, A. (Año). Título.">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm" onclick="clearAddForm()">Limpiar</button>
+          <button class="btn btn-primary btn-sm" onclick="addDocument()">+ Agregar al chatbot</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="kb-data-baked">[{"id":"c1","doc":"Glosario de Conceptos Clave","section":"Psicología Social","body":"Psicología Social — Definición central. Disciplina científica que estudia cómo el pensamiento, el sentimiento y la conducta de los individuos son influenciados por la presencia real, imaginada o implícita de otras personas.","example":"No estudia al individuo aislado ni a la sociedad abstracta: estudia el encuentro entre ambos.","readings":[],"tags":["Psicología Social","Definición central"]},{"id":"c2","doc":"Glosario de Conceptos Clave","section":"Obediencia a la autoridad","body":"Obediencia a la autoridad — Milgram (1963). Tendencia a obedecer órdenes de una figura de autoridad legítima, incluso cuando dichas órdenes contradicen los propios valores morales del sujeto.","example":"El 65% de los participantes de Milgram aplicó descargas hasta el nivel máximo solo porque 'alguien con autoridad' se los pedía.","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*."],"tags":["Obediencia a la autoridad","Milgram (1963)"]},{"id":"c3","doc":"Glosario de Conceptos Clave","section":"Conformidad social","body":"Conformidad social — Asch (1951). Ajuste del comportamiento o las creencias de una persona para coincidir con las normas o expectativas del grupo, incluso en ausencia de presión explícita.","example":"En el experimento de Asch, participantes negaban lo que veían con sus propios ojos para no diferir del grupo.","readings":["Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*."],"tags":["Conformidad social","Asch (1951)"]},{"id":"c4","doc":"Glosario de Conceptos Clave","section":"Efecto Pigmalión","body":"Efecto Pigmalión — Rosenthal & Jacobson. Fenómeno por el cual las expectativas de una persona sobre otra influyen activamente en el desempeño real de esa persona. Las expectativas se convierten en profecías autocumplidas.","example":"Un profesor que espera que un estudiante fracase tiende a comportarse de formas que aumentan la probabilidad de ese fracaso.","readings":["Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*."],"tags":["Efecto Pigmalión","Rosenthal & Jacobson"]},{"id":"c5","doc":"Glosario de Conceptos Clave","section":"Construcción social de la realidad","body":"Construcción social de la realidad — Berger & Luckmann / Rosenhan. La 'realidad' no es un hecho objetivo: es construida y definida colectivamente a través de procesos sociales, institucionales y culturales.","example":"El estudio de Rosenhan: personas sanas fingieron síntomas y fueron diagnosticadas. La 'normalidad' depende de quién diagnostica y cuándo.","readings":["Berger, P. & Luckmann, T. (1966). *La construcción social de la realidad*.","Rosenhan, D. (1973). \"On Being Sane in Insane Places\". *Science*."],"tags":["Construcción social de la realidad","Berger & Luckmann / Rosenhan"]},{"id":"c6","doc":"Glosario de Conceptos Clave","section":"Crisis de la Psicología Social (años 70)","body":"Crisis de la Psicología Social (años 70) — Historia de la disciplina. Período de cuestionamiento profundo de los fundamentos metodológicos, teóricos y éticos de la PS. Causas internas (falta de replicabilidad, multiplicidad interpretativa) y externas (Vietnam, movimientos sociales, cuestionamiento de la neutralidad científica).","example":"'La crisis no destruyó la disciplina: la obligó a preguntarse para qué y para quién investiga.'","readings":[],"tags":["Crisis de la Psicología Social (años 70)","Historia de la disciplina"]},{"id":"c7","doc":"Glosario de Conceptos Clave","section":"Tradición norteamericana de la PS","body":"Tradición norteamericana de la PS — Origen histórico. Surgida en laboratorios de posguerra. Enfoque experimental e individualista: estudia cómo el individuo responde a estímulos sociales controlados. Figuras: Milgram, Asch, Zimbardo.","example":"Crítica: ¿se pueden generalizar resultados obtenidos con estudiantes blancos estadounidenses al resto de la humanidad?","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*.","Zimbardo, P. (2007). *El efecto Lucifer: el porqué de la maldad*."],"tags":["Tradición norteamericana de la PS","Origen histórico"]},{"id":"c8","doc":"Glosario de Conceptos Clave","section":"Tradición europea de la PS","body":"Tradición europea de la PS — Moscovici y otros. Surge como respuesta crítica al reduccionismo experimental norteamericano. Propone incluir historia, cultura, relaciones de poder y contexto social en el análisis. Serge Moscovici es figura central.","example":"Teoría de las Representaciones Sociales: cómo los grupos construyen colectivamente el conocimiento del mundo.","readings":["Moscovici, S. (1961). *La Psychanalyse, son image et son public*."],"tags":["Tradición europea de la PS","Moscovici y otros"]},{"id":"c9","doc":"Glosario de Conceptos Clave","section":"Psicología Social Latinoamericana","body":"Psicología Social Latinoamericana — Martín-Baró y otros. Se desarrolla en respuesta a las realidades de desigualdad, violencia política y exclusión en América Latina. Pregunta central: '¿por qué las cosas son como son y a quién le conviene que sigan así?'","example":"Martín-Baró en El Salvador: propone una psicología al servicio de los oprimidos, comprometida con la transformación social.","readings":["Martín-Baró, I. (1998). *Psicología de la Liberación*."],"tags":["Psicología Social Latinoamericana","Martín-Baró y otros"]},{"id":"c10","doc":"Glosario de Conceptos Clave","section":"Conductismo Social","body":"Conductismo Social — Paradigma / Watson, Skinner. Explica la conducta social como el resultado del aprendizaje por condicionamiento clásico y operante. El ser humano responde a estímulos del entorno social; los comportamientos se refuerzan o extinguen según sus consecuencias.","example":"Obediencia en Milgram: desde el conductismo, los participantes habían aprendido que obedecer a la autoridad es recompensado.","readings":["Watson, J. B. (1913). \"Psychology as the Behaviorist Views It\". *Psychological Review*.","Skinner, B. F. (1953). *Science and Human Behavior*."],"tags":["Conductismo Social","Paradigma / Watson, Skinner"]},{"id":"c11","doc":"Glosario de Conceptos Clave","section":"Psicoanálisis Social","body":"Psicoanálisis Social — Paradigma / Freud, Fromm. Aplica los conceptos psicoanalíticos (inconsciente, pulsiones, mecanismos de defensa) al análisis de fenómenos sociales: masas, liderazgo, conformismo, autoritarismo.","example":"El seguimiento ciego de un líder se explica por la proyección en él de la figura paterna y la necesidad de pertenencia.","readings":["Fromm, E. (1941). *El miedo a la libertad*.","Freud, S. (1921). *Psicología de las masas y análisis del yo*."],"tags":["Psicoanálisis Social","Paradigma / Freud, Fromm"]},{"id":"c12","doc":"Glosario de Conceptos Clave","section":"Sociocognitivismo","body":"Sociocognitivismo — Paradigma / Bandura, Festinger. Enfatiza los procesos cognitivos como mediadores entre el estímulo social y la conducta. La cognición (percepción, atribución, creencias) moldea cómo interpretamos y respondemos al mundo social.","example":"Disonancia cognitiva (Festinger): malestar cuando las creencias y conductas se contradicen, que nos lleva a cambiar alguna de las dos.","readings":["Festinger, L. (1957). *A Theory of Cognitive Dissonance*.","Bandura, A. (1977). *Social Learning Theory*."],"tags":["Sociocognitivismo","Paradigma / Bandura, Festinger"]},{"id":"c13","doc":"Glosario de Conceptos Clave","section":"Teoría de Rol","body":"Teoría de Rol — Paradigma / Goffman, Mead. La conducta social se organiza en torno a roles (conjuntos de expectativas ligadas a posiciones sociales). Las personas actúan según los guiones de sus roles y los ajustan según el contexto.","example":"En el experimento de Zimbardo, estudiantes universitarios adoptaron rápidamente roles de 'guardia' y 'prisionero', comportándose según esos guiones.","readings":["Goffman, E. (1959). *La presentación de la persona en la vida cotidiana*.","Mead, G. H. (1934). *Mind, Self and Society*."],"tags":["Teoría de Rol","Paradigma / Goffman, Mead"]},{"id":"c14","doc":"Glosario de Conceptos Clave","section":"Marxismo en la PS","body":"Marxismo en la PS — Paradigma. Analiza la conducta social desde las estructuras de poder, la ideología, la lucha de clases y las relaciones de producción. La conciencia social está determinada por las condiciones materiales de existencia.","example":"Pregunta marxista ante Milgram: ¿qué estructuras de poder normalizaron la obediencia ciega? ¿A quién beneficia una sociedad que obedece sin cuestionar?","readings":["Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Marxismo en la PS","Paradigma"]},{"id":"c15","doc":"Glosario de Conceptos Clave","section":"Humanismo en la PS","body":"Humanismo en la PS — Paradigma / Maslow, Rogers. Enfatiza la libertad, la responsabilidad, la autorrealización y la dignidad humana. Critica el reduccionismo conductista y el determinismo psicoanalítico.","example":"Ante Milgram, el humanismo pregunta: ¿por qué los participantes renunciaron a su autonomía moral? ¿Qué condiciones impiden la autorrealización ética?","readings":["Maslow, A. (1954). *Motivation and Personality*.","Rogers, C. (1961). *On Becoming a Person*."],"tags":["Humanismo en la PS","Paradigma / Maslow, Rogers"]},{"id":"c16","doc":"Glosario de Conceptos Clave","section":"Kurt Lewin y el origen de la PS","body":"Kurt Lewin y el origen de la PS — Historia de la disciplina. Físico y psicólogo refugiado de la Alemania nazi. Entendió que el contexto social no es telón de fondo: es el escenario completo. Fundó la tradición de la dinámica de grupos y la investigación-acción.","example":"Fórmula: Conducta = f(Persona × Ambiente). El comportamiento no puede entenderse sin considerar el campo psicológico total.","readings":["Lewin, K. (1951). *Field Theory in Social Science*."],"tags":["Kurt Lewin y el origen de la PS","Historia de la disciplina"]},{"id":"c17","doc":"Glosario de Conceptos Clave","section":"Objeto-sujeto de la PS","body":"Objeto-sujeto de la PS — Ibáñez, 2004. La PS es única: el investigador es parte del fenómeno que estudia. No hay separación neta entre sujeto y objeto. Esto implica reflexividad: el psicólogo social también está atravesado por los mecanismos que estudia.","example":"Al estudiar los prejuicios, el investigador debe confrontar sus propios prejuicios. La neutralidad total es una ilusión.","readings":["Ibáñez, T. (2004). *Introducción a la Psicología Social*."],"tags":["Objeto-sujeto de la PS","Ibáñez, 2004"]},{"id":"c18","doc":"Glosario de Conceptos Clave","section":"Diferencia PS con Sociología","body":"Diferencia PS con Sociología — Posición disciplinar. La sociología estudia estructuras sociales, instituciones y grupos a gran escala. La PS estudia cómo esas estructuras afectan la mente, conducta y experiencia del individuo concreto. La PS habita el espacio micro-macro.","example":"La sociología estudia la desigualdad como sistema; la PS estudia cómo la desigualdad afecta la autoestima, las expectativas y la conducta de las personas.","readings":[],"tags":["Diferencia PS con Sociología","Posición disciplinar"]},{"id":"c19","doc":"Glosario de Conceptos Clave","section":"Diferencia PS con Psicología Clínica","body":"Diferencia PS con Psicología Clínica — Posición disciplinar. La clínica se centra en el individuo, el diagnóstico y el tratamiento. La PS estudia al individuo en relación y cómo el contexto social lo constituye. La PS no busca curar: busca comprender y explicar.","example":"La clínica pregunta: '¿qué le pasa a esta persona?' La PS pregunta: '¿cómo el entorno social produce lo que le pasa a esta persona?'","readings":[],"tags":["Diferencia PS con Psicología Clínica","Posición disciplinar"]},{"id":"c20","doc":"Glosario de Conceptos Clave","section":"Pluralismo teórico en la PS","body":"Pluralismo teórico en la PS — Característica de la disciplina. La PS no tiene un paradigma único dominante. Distintas orientaciones teóricas (conductismo, psicoanálisis, sociocognitivismo, marxismo, humanismo) ofrecen explicaciones complementarias o en tensión del mismo fenómeno.","example":"El experimento de Milgram puede explicarse desde el conductismo (refuerzo), el psicoanálisis (autoridad paterna), el marxismo (estructuras de poder) y el humanismo (renuncia a la autonomía).","readings":["Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Pluralismo teórico en la PS","Característica de la disciplina"]},{"id":"c21","doc":"Glosario de Conceptos Clave","section":"Identidad social","body":"Identidad social — Tajfel & Turner. Parte del autoconcepto que se deriva de la pertenencia a grupos sociales. Las personas categorizan el mundo en 'endogrupo' (nosotros) y 'exogrupo' (ellos), favoreciendo al propio grupo.","example":"El favoritismo hacia el propio grupo puede generar discriminación hacia otros incluso sin conflicto de intereses real.","readings":["Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Identidad social","Tajfel & Turner"]},{"id":"c22","doc":"Glosario de Conceptos Clave","section":"Influencia social","body":"Influencia social — Concepto central de la PS. Proceso por el cual la presencia, acciones o expectativas de otros modifican el pensamiento, las actitudes o la conducta de un individuo. Puede ser explícita (presión directa) o implícita (normas, expectativas).","example":"La donación de sangre en grupo: nadie dijo 'tienes que donar', pero la presencia del grupo y la norma de solidaridad operaron silenciosamente.","readings":[],"tags":["Influencia social","Concepto central de la PS"]},{"id":"c23","doc":"Banco de Preguntas y Explicaciones","section":"Según la definición clásica, la Psicología Social estudia:","body":"Pregunta: Según la definición clásica, la Psicología Social estudia: La respuesta correcta es: \"Cómo el pensamiento, sentimiento y conducta del individuo son influenciados por la presencia real, imaginada o implícita de otros\". La definición canónica de Allport (1954) es fundamental: la PS estudia al individuo SIEMPRE en relación. Ni al individuo aislado (eso es la clínica) ni a la sociedad abstracta (eso es la sociología), sino el encuentro entre ambos.","example":"","readings":[],"tags":["Memorización"]},{"id":"c24","doc":"Banco de Preguntas y Explicaciones","section":"El experimento de Milgram demostró principalmente que:","body":"Pregunta: El experimento de Milgram demostró principalmente que: La respuesta correcta es: \"La mayoría de personas comunes puede obedecer a una figura de autoridad incluso en contra de sus valores morales\". El hallazgo más perturbador de Milgram es que el 65% de personas 'normales' aplicó descargas hasta niveles letales. Esto no es un rasgo de personalidad: es el poder del contexto social y la autoridad. La situación puede más que la persona.","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*."],"tags":["Comprensión"]},{"id":"c25","doc":"Banco de Preguntas y Explicaciones","section":"¿Cuál fue la causa INTERNA de la crisis de la Psicología Social en los…","body":"Pregunta: ¿Cuál fue la causa INTERNA de la crisis de la Psicología Social en los años 70? La respuesta correcta es: \"Hallazgos que no podían replicarse ni generalizarse, y múltiples interpretaciones para un mismo fenómeno\". Las causas internas de la crisis incluyen: falta de replicabilidad de hallazgos, proliferación de teorías para los mismos fenómenos, y problemas con conceptos y técnicas establecidas. Las causas externas fueron la guerra de Vietnam, los movimientos sociales y el cuestionamiento de la neutralidad científica.","example":"","readings":[],"tags":["Memorización"]},{"id":"c26","doc":"Banco de Preguntas y Explicaciones","section":"La tradición norteamericana de la PS se diferencia de la europea princ…","body":"Pregunta: La tradición norteamericana de la PS se diferencia de la europea principalmente porque: La respuesta correcta es: \"La norteamericana es experimental e individualista; la europea incluye historia, cultura y relaciones de poder\". La tradición norteamericana nació en laboratorios de posguerra con un enfoque experimental y atomista. La tradición europea (Moscovici, Tajfel) fue una respuesta crítica que incorpora el contexto histórico, cultural e ideológico. Ambas siguen vigentes en tensión productiva.","example":"","readings":["Moscovici, S. (1961). *La Psychanalyse, son image et son public*.","Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Comprensión"]},{"id":"c27","doc":"Banco de Preguntas y Explicaciones","section":"Desde el paradigma del CONDUCTISMO SOCIAL, ¿cómo se explicaría la obed…","body":"Pregunta: Desde el paradigma del CONDUCTISMO SOCIAL, ¿cómo se explicaría la obediencia en el experimento de Milgram? La respuesta correcta es: \"Por el condicionamiento previo: la obediencia a la autoridad ha sido reforzada positivamente a lo largo de la vida\". El conductismo explica la conducta como resultado del aprendizaje por refuerzo. Los participantes habían sido condicionados desde niños a que obedecer figuras de autoridad (padres, profesores, jefes) produce consecuencias positivas. Ese historial de refuerzo se activó en el laboratorio.","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*."],"tags":["Aplicación"]},{"id":"c28","doc":"Banco de Preguntas y Explicaciones","section":"El PSICOANÁLISIS SOCIAL explicaría la obediencia masiva a un líder aut…","body":"Pregunta: El PSICOANÁLISIS SOCIAL explicaría la obediencia masiva a un líder autoritario principalmente por: La respuesta correcta es: \"La proyección de la figura paterna en el líder y la necesidad inconsciente de pertenencia y protección\". El psicoanálisis social (Freud en 'Psicología de las masas') explica el seguimiento al líder por mecanismos inconscientes: proyección de la imago paterna, identificación narcisista, y la necesidad profunda de un 'yo ideal' externo que nos proteja de la angustia. Fromm añade el 'miedo a la libertad'.","example":"","readings":["Fromm, E. (1941). *El miedo a la libertad*.","Freud, S. (1921). *Psicología de las masas y análisis del yo*."],"tags":["Aplicación"]},{"id":"c29","doc":"Banco de Preguntas y Explicaciones","section":"¿Cuál es la pregunta central que distingue a la Psicología Social Lati…","body":"Pregunta: ¿Cuál es la pregunta central que distingue a la Psicología Social Latinoamericana de las tradiciones norteamericana y europea? La respuesta correcta es: \"¿Por qué las cosas son como son y a quién le conviene que sigan así?\". La PS latinoamericana, impulsada por Martín-Baró y otros, va más allá de describir o explicar los fenómenos: pregunta por las estructuras de poder que los producen y las razones ideológicas por las cuales se naturalizan. Es una psicología comprometida con la transformación social.","example":"","readings":["Martín-Baró, I. (1998). *Psicología de la Liberación*."],"tags":["Análisis"]},{"id":"c30","doc":"Banco de Preguntas y Explicaciones","section":"El 'objeto-sujeto' de la Psicología Social implica que:","body":"Pregunta: El 'objeto-sujeto' de la Psicología Social implica que: La respuesta correcta es: \"El investigador es parte del fenómeno que estudia, lo que requiere reflexividad crítica sobre la propia posición\". A diferencia de las ciencias naturales, en la PS no hay separación neta entre observador y observado. El investigador tiene género, clase, cultura, historia — y eso afecta lo que ve y cómo lo interpreta. Ibáñez enfatiza que esta reflexividad no es un déficit sino una característica constitutiva de la disciplina.","example":"","readings":["Ibáñez, T. (2004). *Introducción a la Psicología Social*."],"tags":["Comprensión"]},{"id":"c31","doc":"Banco de Preguntas y Explicaciones","section":"El EFECTO PIGMALIÓN en contextos educativos demuestra que:","body":"Pregunta: El EFECTO PIGMALIÓN en contextos educativos demuestra que: La respuesta correcta es: \"Las expectativas del docente sobre sus estudiantes influyen activamente en el rendimiento real de éstos\". Rosenthal y Jacobson demostraron que cuando los docentes creen que ciertos estudiantes tienen 'alto potencial' (aunque sea aleatoriamente asignado), efectivamente mejoran su rendimiento. Las expectativas generan comportamientos diferenciales en el docente que producen resultados distintos. La realidad social es autoconstruida.","example":"","readings":["Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*."],"tags":["Comprensión"]},{"id":"c32","doc":"Banco de Preguntas y Explicaciones","section":"¿Cuál de las siguientes afirmaciones describe mejor el PLURALISMO TEÓR…","body":"Pregunta: ¿Cuál de las siguientes afirmaciones describe mejor el PLURALISMO TEÓRICO de la Psicología Social? La respuesta correcta es: \"La PS posee múltiples orientaciones teóricas que ofrecen explicaciones complementarias o en tensión del mismo fenómeno\". El pluralismo no es una debilidad sino una característica de la PS como ciencia humana. Un mismo fenómeno (como la obediencia) puede entenderse desde el conductismo, el psicoanálisis, la teoría de rol o el marxismo, cada uno iluminando aspectos distintos. No hay una 'verdad única'.","example":"","readings":["Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Comprensión"]},{"id":"c33","doc":"Banco de Preguntas y Explicaciones","section":"La TEORÍA DE ROL explicaría lo ocurrido en el Experimento de la Prisió…","body":"Pregunta: La TEORÍA DE ROL explicaría lo ocurrido en el Experimento de la Prisión de Stanford (Zimbardo) como: La respuesta correcta es: \"La adopción de guiones de rol ('guardia' vs 'prisionero') que moldearon rápidamente conductas e identidades\". Zimbardo asignó roles al azar y en menos de 48 horas los participantes actuaban según el guión cultural de esos roles. Los 'guardias' se volvieron abusivos; los 'prisioneros' se sometieron. El rol no describe la conducta: la produce. Esto ilustra el poder situacional sobre la personalidad.","example":"","readings":["Zimbardo, P. (2007). *El efecto Lucifer: el porqué de la maldad*."],"tags":["Aplicación"]},{"id":"c34","doc":"Banco de Preguntas y Explicaciones","section":"El MARXISMO en Psicología Social preguntaría ante el experimento de Mi…","body":"Pregunta: El MARXISMO en Psicología Social preguntaría ante el experimento de Milgram: La respuesta correcta es: \"¿Qué estructuras de poder produjeron sujetos dispuestos a obedecer, y a quién beneficia esa disposición?\". El marxismo no pregunta solo por el individuo sino por las condiciones materiales e ideológicas que lo producen. Una sociedad jerárquica necesita sujetos obedientes. La pregunta marxista desnaturaliza la obediencia: no es una tendencia humana universal sino el producto de relaciones sociales de poder específicas.","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Análisis"]},{"id":"c35","doc":"Banco de Preguntas y Explicaciones","section":"¿Por qué Kurt Lewin es considerado una figura fundacional de la Psicol…","body":"Pregunta: ¿Por qué Kurt Lewin es considerado una figura fundacional de la Psicología Social? La respuesta correcta es: \"Fue el primero en proponer que conducta = f(Persona × Ambiente), integrando individuo y contexto social, y fundó la dinámica de grupos\". Lewin, refugiado de la Alemania nazi, entendió visceralmente que el contexto social (el campo psicológico) es determinante de la conducta. Su fórmula C=f(P,A) es fundacional: ni la persona ni el ambiente por separado, sino su interacción dinámica. También fundó la investigación-acción.","example":"","readings":["Lewin, K. (1951). *Field Theory in Social Science*."],"tags":["Memorización"]},{"id":"c36","doc":"Banco de Preguntas y Explicaciones","section":"La CONSTRUCCIÓN SOCIAL DE LA REALIDAD implica que:","body":"Pregunta: La CONSTRUCCIÓN SOCIAL DE LA REALIDAD implica que: La respuesta correcta es: \"Las definiciones colectivas de la realidad tienen consecuencias reales sobre la conducta de las personas\". El estudio de Rosenhan es paradigmático: una vez que las personas son etiquetadas como 'enfermas mentales', toda su conducta se reinterpreta bajo esa etiqueta. La construcción social genera efectos concretos. Como dijo Thomas: 'si las personas definen las situaciones como reales, son reales en sus consecuencias'.","example":"","readings":["Rosenhan, D. (1973). \"On Being Sane in Insane Places\". *Science*."],"tags":["Comprensión"]},{"id":"c37","doc":"Banco de Preguntas y Explicaciones","section":"¿Cuál es la principal crítica que la tradición europea hace a la tradi…","body":"Pregunta: ¿Cuál es la principal crítica que la tradición europea hace a la tradición norteamericana de la PS? La respuesta correcta es: \"Que sus resultados de laboratorio, obtenidos con poblaciones homogéneas, no pueden generalizarse y omiten el contexto histórico-cultural\". La crítica europea es metodológica y epistemológica: los experimentos de laboratorio con estudiantes universitarios blancos occidentales producen resultados que se presentan como universales pero son culturalmente situados. Moscovici y Tajfel propusieron una PS que considere la historia, la cultura y las ideologías.","example":"","readings":["Moscovici, S. (1961). *La Psychanalyse, son image et son public*.","Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Análisis"]},{"id":"c38","doc":"Banco de Preguntas y Explicaciones","section":"La DISONANCIA COGNITIVA (Festinger), desde el paradigma sociocognitivi…","body":"Pregunta: La DISONANCIA COGNITIVA (Festinger), desde el paradigma sociocognitivista, explica que: La respuesta correcta es: \"Cuando existe contradicción entre creencias y conductas, se genera un malestar que motiva cambios para restablecer la coherencia interna\". La disonancia cognitiva es uno de los conceptos más influyentes de la PS: cuando nuestras creencias ('soy buena persona') contradicen nuestras conductas ('apliqué descargas eléctricas'), experimentamos tensión psicológica. Para reducirla, cambiamos la creencia, la conducta, o añadimos cogniciones justificadoras.","example":"","readings":["Festinger, L. (1957). *A Theory of Cognitive Dissonance*."],"tags":["Comprensión"]},{"id":"c39","doc":"Banco de Preguntas y Explicaciones","section":"¿Cómo se diferencia la Psicología Social de la Sociología?","body":"Pregunta: ¿Cómo se diferencia la Psicología Social de la Sociología? La respuesta correcta es: \"La PS estudia cómo las estructuras sociales afectan al individuo concreto; la sociología estudia las estructuras en sí mismas, a nivel macro\". La PS habita el espacio intermedio micro-macro: le interesan los procesos psicológicos individuales pero siempre en relación con lo social. La sociología estudia instituciones, estructuras y tendencias sin necesariamente entrar en los procesos psicológicos individuales. La PS es el puente entre la clínica y la sociología.","example":"","readings":[],"tags":["Comprensión"]},{"id":"c40","doc":"Banco de Preguntas y Explicaciones","section":"Ignacio Martín-Baró desde la PS latinoamericana propone que la psicolo…","body":"Pregunta: Ignacio Martín-Baró desde la PS latinoamericana propone que la psicología debe: La respuesta correcta es: \"Partir desde las necesidades de los sectores oprimidos y comprometerse con la transformación de las estructuras injustas\". Martín-Baró, trabajando en El Salvador durante la guerra civil, propone que la PS latinoamericana no puede ser neutral ante la pobreza, la violencia y la exclusión. La pregunta '¿para quién investiga la psicología?' es política y ética. Su propuesta conecta directamente con la Psicología de la Liberación.","example":"","readings":["Martín-Baró, I. (1998). *Psicología de la Liberación*."],"tags":["Análisis"]},{"id":"c41","doc":"Banco de Preguntas y Explicaciones","section":"En el experimento de Asch sobre conformidad, los participantes negaban…","body":"Pregunta: En el experimento de Asch sobre conformidad, los participantes negaban lo que veían con sus propios ojos porque: La respuesta correcta es: \"La presión social del grupo los llevaba a dudar de su propia percepción y ajustarse a la respuesta mayoritaria\". Asch demostró el poder de la presión normativa: ante una mayoría que da una respuesta obviamente incorrecta, una proporción significativa de personas se conforma. No es que no vean bien: es que la presión del grupo genera duda y el deseo de pertenencia supera la evidencia perceptual. La realidad social puede más que la realidad física.","example":"","readings":["Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*."],"tags":["Comprensión"]},{"id":"c42","doc":"Banco de Preguntas y Explicaciones","section":"El HUMANISMO en PS, ante el experimento de Milgram, enfatizaría:","body":"Pregunta: El HUMANISMO en PS, ante el experimento de Milgram, enfatizaría: La respuesta correcta es: \"Que la falta de autorrealización y el miedo a ejercer la libertad moral explican la obediencia ciega\". El humanismo (Maslow, Rogers) pondría el foco en la renuncia a la autonomía y la responsabilidad moral. Desde esta perspectiva, la obediencia ciega en Milgram revela una falla en la autorrealización: personas que no han desarrollado su capacidad de autodeterminación y delegan la responsabilidad ética en la autoridad.","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Maslow, A. (1954). *Motivation and Personality*.","Rogers, C. (1961). *On Becoming a Person*."],"tags":["Aplicación"]},{"id":"c43","doc":"Banco de Preguntas y Explicaciones","section":"¿Qué hace ÚNICO al objeto-sujeto de la PS respecto a otras ciencias?","body":"Pregunta: ¿Qué hace ÚNICO al objeto-sujeto de la PS respecto a otras ciencias? La respuesta correcta es: \"Que el propio investigador forma parte del fenómeno estudiado, haciendo imposible la separación total entre observador y observado\". En física, el observador puede (en principio) mantenerse separado del objeto. En PS, el investigador tiene género, clase, historia, prejuicios que inevitablemente afectan qué estudia y cómo lo interpreta. Esta reflexividad es una característica constitutiva, no un defecto. La PS lo asume y trabaja con ello.","example":"","readings":[],"tags":["Análisis"]},{"id":"c44","doc":"Banco de Preguntas y Explicaciones","section":"La frase de Sebastián Durán en clases: 'La identidad personal está pro…","body":"Pregunta: La frase de Sebastián Durán en clases: 'La identidad personal está profundamente tejida por hilos que no elegimos' refleja principalmente: La respuesta correcta es: \"La construcción social de la identidad: familia, cultura, lenguaje y expectativas llegan antes que nuestra propia conciencia de quiénes somos\". La frase captura el núcleo de la PS: aquello que sentimos más íntimo y propio —nuestro nombre, gustos, valores, relatos familiares— está profundamente constituido por lo social que nos precede. Esto no niega la agencia, pero sí complejiza el mito del individuo autónomo y autofundante.","example":"","readings":[],"tags":["Aplicación"]},{"id":"c45","doc":"Banco de Preguntas y Explicaciones","section":"¿Cuál de las siguientes describe mejor la diferencia entre la PS y la …","body":"Pregunta: ¿Cuál de las siguientes describe mejor la diferencia entre la PS y la Psicología Clínica? La respuesta correcta es: \"La clínica se pregunta '¿qué le pasa a esta persona?'; la PS se pregunta '¿cómo el contexto social produce lo que le pasa a esta persona?'\". La distinción es epistemológica y de unidad de análisis: la clínica trabaja con el individuo en busca de diagnóstico y tratamiento; la PS trabaja con el individuo en relación, buscando comprender los mecanismos sociales que constituyen la experiencia. Son disciplinas complementarias, no opuestas.","example":"","readings":[],"tags":["Comprensión"]},{"id":"c46","doc":"Banco de Preguntas y Explicaciones","section":"¿Qué implicancia tiene la 'crisis de replicabilidad' dentro de la cris…","body":"Pregunta: ¿Qué implicancia tiene la 'crisis de replicabilidad' dentro de la crisis de los años 70 de la PS? La respuesta correcta es: \"Que hallazgos considerados firmes no podían reproducirse en contextos distintos, cuestionando la validez universal de los resultados\". La crisis de replicabilidad cuestionó un supuesto básico del método científico: que un hallazgo verdadero debe reproducirse en distintos contextos. Si los resultados cambian según la cultura, el momento histórico o la composición de la muestra, ¿qué tan universales son? Esto abrió el debate sobre la validez ecológica y cultural de la investigación.","example":"","readings":[],"tags":["Análisis"]},{"id":"c47","doc":"Banco de Preguntas y Explicaciones","section":"El ejercicio 'Yo soy… ¿quién?' de la primera clase (donde se marquen c…","body":"Pregunta: El ejercicio 'Yo soy… ¿quién?' de la primera clase (donde se marquen con cruz las palabras afectadas por lo social) tiene como objetivo principal: La respuesta correcta es: \"Demostrar experiencialmente que lo que llamamos 'identidad personal' está profundamente constituido por factores sociales que no elegimos\". El ejercicio es una confrontación vivencial con la idea central de la PS: aquello que sentimos más 'nuestro' (nombre, gustos, relatos de identidad) fue construido por otros antes de que pudiéramos elegirlo. Funciona porque produce incomodidad real, que es exactamente el objeto de estudio de la disciplina.","example":"","readings":[],"tags":["Aplicación"]},{"id":"c48","doc":"Casos Prácticos y Análisis","section":"El aula que fracasa — ¿Qué fenómeno psicosocial central ilustra este caso y cómo o…","body":"Caso \"El aula que fracasa\" (Efecto Pigmalión · Construcción social). Escenario: En un liceo de Valparaíso, la profesora Claudia recibe un curso catalogado como 'el peor de la generación'. Desde el primer día, su trato es distante: baja el nivel de las evaluaciones, no llama a los estudiantes por su nombre, y en reuniones de profesores dice que 'no tiene sentido esforzarse con ellos'. Al final del año, el curso tiene las peores calificaciones del establecimiento. Un inspector externo revisa los datos y descubre que en 3° Medio — con otro profesor — ese mismo grupo había tenido rendimiento promedio. Pregunta: ¿Qué fenómeno psicosocial central ilustra este caso y cómo opera? Respuesta modelo: El caso ilustra el Efecto Pigmalión (Rosenthal & Jacobson): las expectativas negativas de la profesora se convierten en profecía autocumplida. Opera así: Claudia cree que el curso es 'malo' → ajusta su conducta (menos exigencia, trato frío, pocas oportunidades) → los estudiantes internalizan esa evaluación y se comportan en consecuencia → el rendimiento baja, confirmando la expectativa inicial. Es un círculo de retroalimentación social.","example":"","readings":["Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*."],"tags":["Efecto Pigmalión","Conductismo","Sociocognitivismo","Autoeficacia","PS Latinoamericana"]},{"id":"c49","doc":"Casos Prácticos y Análisis","section":"El aula que fracasa — ¿Cómo explicarían este caso el conductismo y el sociocogniti…","body":"Caso \"El aula que fracasa\" (Efecto Pigmalión · Construcción social). Escenario: En un liceo de Valparaíso, la profesora Claudia recibe un curso catalogado como 'el peor de la generación'. Desde el primer día, su trato es distante: baja el nivel de las evaluaciones, no llama a los estudiantes por su nombre, y en reuniones de profesores dice que 'no tiene sentido esforzarse con ellos'. Al final del año, el curso tiene las peores calificaciones del establecimiento. Un inspector externo revisa los datos y descubre que en 3° Medio — con otro profesor — ese mismo grupo había tenido rendimiento promedio. Pregunta: ¿Cómo explicarían este caso el conductismo y el sociocognitivismo respectivamente? Respuesta modelo: Conductismo: La profesora no ofrece reforzadores positivos (reconocimiento, desafíos, retroalimentación constructiva), por lo que las conductas académicas se extinguen. Los estudiantes aprenden que estudiar no produce consecuencias positivas en ese contexto. Sociocognitivismo: Las expectativas de la profesora afectan los esquemas cognitivos de los estudiantes sobre sí mismos ('soy malo en esto'), reduciendo la autoeficacia (Bandura) y la motivación intrínseca. La cognición social mediadora explica por qué el mismo estímulo (la dificultad académica) produce resultados tan distintos según el contexto relacional.","example":"","readings":["Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*.","Bandura, A. (1977). *Social Learning Theory*."],"tags":["Efecto Pigmalión","Conductismo","Sociocognitivismo","Autoeficacia","PS Latinoamericana"]},{"id":"c50","doc":"Casos Prácticos y Análisis","section":"El aula que fracasa — ¿Qué preguntaría la PS latinoamericana (Martín-Baró) ante es…","body":"Caso \"El aula que fracasa\" (Efecto Pigmalión · Construcción social). Escenario: En un liceo de Valparaíso, la profesora Claudia recibe un curso catalogado como 'el peor de la generación'. Desde el primer día, su trato es distante: baja el nivel de las evaluaciones, no llama a los estudiantes por su nombre, y en reuniones de profesores dice que 'no tiene sentido esforzarse con ellos'. Al final del año, el curso tiene las peores calificaciones del establecimiento. Un inspector externo revisa los datos y descubre que en 3° Medio — con otro profesor — ese mismo grupo había tenido rendimiento promedio. Pregunta: ¿Qué preguntaría la PS latinoamericana (Martín-Baró) ante esta situación? Respuesta modelo: Martín-Baró preguntaría: ¿a quién beneficia que este curso sea catalogado como 'el peor'? ¿Qué estructura socioeconómica hace que ciertos estudiantes lleguen ya marcados por el sistema educativo? La PS latinoamericana buscaría las condiciones estructurales que producen el fracaso escolar: pobreza, falta de recursos, discriminación de clase. No culparía al individuo (la profesora o los estudiantes) sino al sistema que normaliza la desigualdad educativa.","example":"","readings":["Martín-Baró, I. (1998). *Psicología de la Liberación*.","Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*."],"tags":["Efecto Pigmalión","Conductismo","Sociocognitivismo","Autoeficacia","PS Latinoamericana"]},{"id":"c51","doc":"Casos Prácticos y Análisis","section":"El grupo que todos obedecieron — ¿Qué mecanismos psicosociales operaron en Rodrigo y en el gr…","body":"Caso \"El grupo que todos obedecieron\" (Obediencia · Conformidad · Crisis de la PS). Escenario: En una empresa multinacional de Santiago, todos los gerentes sabían que el director financiero estaba falsificando reportes. Ninguno habló. En las reuniones, cuando el director presentaba los números, todos asentían. Uno de los gerentes, Rodrigo, llegó a dudar de su propia lectura de las cifras: 'si todos están de acuerdo, quizás soy yo el que se equivoca'. Cuando el fraude salió a la luz, todos los gerentes dijeron: 'yo seguía órdenes' o 'pensé que los demás sabían algo que yo no'. Pregunta: ¿Qué mecanismos psicosociales operaron en Rodrigo y en el grupo? Menciona al menos dos. Respuesta modelo: 1) Conformidad (Asch): Rodrigo llegó a dudar de su propia percepción ante el consenso del grupo. El poder normativo del grupo puede superar la evidencia objetiva. 2) Obediencia a la autoridad (Milgram): 'yo seguía órdenes' es la frase clásica de Milgram. La presencia de una figura de autoridad (el director) inhibió la responsabilidad moral individual. 3) Difusión de responsabilidad: en grupo, cada individuo asume que otro actuará o que la responsabilidad está distribuida. 4) Pensamiento grupal (groupthink): el grupo desarrolla ilusión de unanimidad y presiona a no disentir.","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*.","Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Obediencia","Conformidad","Marxismo","Crisis PS","Difusión de responsabilidad"]},{"id":"c52","doc":"Casos Prácticos y Análisis","section":"El grupo que todos obedecieron — ¿Cómo explicaría este caso el paradigma marxista?","body":"Caso \"El grupo que todos obedecieron\" (Obediencia · Conformidad · Crisis de la PS). Escenario: En una empresa multinacional de Santiago, todos los gerentes sabían que el director financiero estaba falsificando reportes. Ninguno habló. En las reuniones, cuando el director presentaba los números, todos asentían. Uno de los gerentes, Rodrigo, llegó a dudar de su propia lectura de las cifras: 'si todos están de acuerdo, quizás soy yo el que se equivoca'. Cuando el fraude salió a la luz, todos los gerentes dijeron: 'yo seguía órdenes' o 'pensé que los demás sabían algo que yo no'. Pregunta: ¿Cómo explicaría este caso el paradigma marxista? Respuesta modelo: El marxismo señalaría que los gerentes no solo obedecían a una persona: obedecían a una estructura de poder que hace del silencio la conducta racional en ese contexto. La jerarquía corporativa reproduce relaciones de producción donde la disidencia tiene costos concretos (despido, exclusión). La pregunta marxista: ¿qué condiciones materiales hacen que sea más 'racional' callarse ante el fraude que denunciarlo? La ideología corporativa naturaliza la obediencia como 'profesionalismo'.","example":"","readings":["Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Obediencia","Conformidad","Marxismo","Crisis PS","Difusión de responsabilidad"]},{"id":"c53","doc":"Casos Prácticos y Análisis","section":"El grupo que todos obedecieron — ¿Por qué este caso es relevante para la crisis de la PS de l…","body":"Caso \"El grupo que todos obedecieron\" (Obediencia · Conformidad · Crisis de la PS). Escenario: En una empresa multinacional de Santiago, todos los gerentes sabían que el director financiero estaba falsificando reportes. Ninguno habló. En las reuniones, cuando el director presentaba los números, todos asentían. Uno de los gerentes, Rodrigo, llegó a dudar de su propia lectura de las cifras: 'si todos están de acuerdo, quizás soy yo el que se equivoca'. Cuando el fraude salió a la luz, todos los gerentes dijeron: 'yo seguía órdenes' o 'pensé que los demás sabían algo que yo no'. Pregunta: ¿Por qué este caso es relevante para la crisis de la PS de los años 70? Respuesta modelo: La crisis de la PS cuestionó para qué y para quién investiga la disciplina. Casos como este muestran que los hallazgos de laboratorio (Milgram, Asch) tienen consecuencias reales en el mundo: el fraude corporativo, las atrocidades institucionales, la normalización de lo injusto. La PS no puede mantenerse 'neutral' ante fenómenos que causan daño real. Esto conecta directamente con la pregunta de la tradición latinoamericana: ¿a quién sirve una psicología que describe la obediencia sin cuestionarla?","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*.","Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Obediencia","Conformidad","Marxismo","Crisis PS","Difusión de responsabilidad"]},{"id":"c54","doc":"Casos Prácticos y Análisis","section":"Yo soy... ¿quién decides? — ¿Cómo analiza este caso desde la Teoría de la Identidad Soci…","body":"Caso \"Yo soy... ¿quién decides?\" (Identidad social · Construcción social · Pluralismo teórico). Escenario: Valentina tiene 19 años, estudia psicología y es la primera de su familia en llegar a la universidad. Sus compañeros de clase son en su mayoría de colegios particulares pagados. En las primeras semanas siente que habla 'diferente', que sus referencias culturales no encajan y que sus profesores la perciben como 'menos preparada'. Empieza a hablar menos en clases, a dudar de sus opiniones y a imitar el vocabulario de sus compañeros. Cuando su familia le pregunta cómo está, dice: 'bien, solo que no sé muy bien quién soy'. Pregunta: ¿Cómo analiza este caso desde la Teoría de la Identidad Social (Tajfel)? Respuesta modelo: Tajfel explica que Valentina experimenta tensión de identidad social: su endogrupo de origen (familia, barrio, colegio) y el nuevo endogrupo universitario tienen estatus diferente. Para reducir la amenaza a su autoestima, usa estrategias: movilidad social individual (imitar el vocabulario del grupo de alto estatus) o asimilación. El problema es que asimilarse implica renunciar parcialmente a la identidad de origen, generando la desorientación que expresa: 'no sé quién soy'.","example":"","readings":["Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Identidad social","Tajfel","Construcción social","PS Latinoamericana","Teoría de Rol","Conductismo"]},{"id":"c55","doc":"Casos Prácticos y Análisis","section":"Yo soy... ¿quién decides? — ¿Desde qué tradición de la PS (norteamericana, europea o lat…","body":"Caso \"Yo soy... ¿quién decides?\" (Identidad social · Construcción social · Pluralismo teórico). Escenario: Valentina tiene 19 años, estudia psicología y es la primera de su familia en llegar a la universidad. Sus compañeros de clase son en su mayoría de colegios particulares pagados. En las primeras semanas siente que habla 'diferente', que sus referencias culturales no encajan y que sus profesores la perciben como 'menos preparada'. Empieza a hablar menos en clases, a dudar de sus opiniones y a imitar el vocabulario de sus compañeros. Cuando su familia le pregunta cómo está, dice: 'bien, solo que no sé muy bien quién soy'. Pregunta: ¿Desde qué tradición de la PS (norteamericana, europea o latinoamericana) se puede analizar este caso de forma más rica? ¿Por qué? Respuesta modelo: La tradición latinoamericana permite el análisis más rico porque interroga las condiciones estructurales: Valentina no solo enfrenta un problema de identidad individual, sino el efecto psicológico de la desigualdad de clase en el sistema educativo. La PS norteamericana describiría los mecanismos (conformidad, autoestima), la europea añadiría el rol de las representaciones sociales, pero solo la latinoamericana pregunta: ¿por qué el sistema universitario produce que estudiantes de primera generación sientan que no pertenecen? ¿A quién beneficia esa sensación?","example":"","readings":["Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Identidad social","Tajfel","Construcción social","PS Latinoamericana","Teoría de Rol","Conductismo"]},{"id":"c56","doc":"Casos Prácticos y Análisis","section":"Yo soy... ¿quién decides? — Aplica al menos dos paradigmas distintos para explicar por q…","body":"Caso \"Yo soy... ¿quién decides?\" (Identidad social · Construcción social · Pluralismo teórico). Escenario: Valentina tiene 19 años, estudia psicología y es la primera de su familia en llegar a la universidad. Sus compañeros de clase son en su mayoría de colegios particulares pagados. En las primeras semanas siente que habla 'diferente', que sus referencias culturales no encajan y que sus profesores la perciben como 'menos preparada'. Empieza a hablar menos en clases, a dudar de sus opiniones y a imitar el vocabulario de sus compañeros. Cuando su familia le pregunta cómo está, dice: 'bien, solo que no sé muy bien quién soy'. Pregunta: Aplica al menos dos paradigmas distintos para explicar por qué Valentina empieza a hablar menos en clases. Respuesta modelo: Conductismo: hablar en clases y ser percibida como 'diferente' tuvo consecuencias negativas (miradas, silencios, correcciones sutiles). Su conducta participativa se extinguió por falta de refuerzo positivo. Sociocognitivismo: Valentina desarrolló esquemas cognitivos sobre sí misma ('mi opinión vale menos') que actúan como filtros. La baja autoeficacia (Bandura) reduce la conducta de participación. Teoría de Rol: en el rol de 'estudiante universitaria de elite', Valentina no reconoce el guión que se espera de ella, generando inhibición. El rol no fue socializado en su familia de origen.","example":"","readings":["Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Bandura, A. (1977). *Social Learning Theory*.","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Identidad social","Tajfel","Construcción social","PS Latinoamericana","Teoría de Rol","Conductismo"]},{"id":"c57","doc":"Tabla Comparativa: Tradiciones de la Psicología Social","section":"Origen histórico","body":"Comparación de tradiciones respecto a \"Origen histórico\". Tradición norteamericana: Laboratorios de posguerra, EE.UU., años 40-50 Tradición europea: Respuesta crítica europea, años 60-70 (Moscovici, Tajfel) Tradición latinoamericana: Respuesta a realidades de exclusión y violencia, años 70-80 (Martín-Baró)","example":"","readings":["Moscovici, S. (1961). *La Psychanalyse, son image et son public*.","Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Martín-Baró, I. (1998). *Psicología de la Liberación*."],"tags":["tradiciones","Origen histórico"]},{"id":"c58","doc":"Tabla Comparativa: Tradiciones de la Psicología Social","section":"Enfoque central","body":"Comparación de tradiciones respecto a \"Enfoque central\". Tradición norteamericana: Experimental, individualista: cómo el individuo responde a estímulos sociales controlados Tradición europea: Incluye historia, cultura, lenguaje e ideología en el análisis social Tradición latinoamericana: Estructuras de poder, compromiso ético-político, transformación social","example":"","readings":[],"tags":["tradiciones","Enfoque central"]},{"id":"c59","doc":"Tabla Comparativa: Tradiciones de la Psicología Social","section":"Pregunta central","body":"Comparación de tradiciones respecto a \"Pregunta central\". Tradición norteamericana: ¿Cómo reacciona el individuo ante el contexto social? Tradición europea: ¿Cómo construyen los grupos colectivamente el conocimiento del mundo? Tradición latinoamericana: ¿Por qué las cosas son como son y a quién le conviene que sigan así?","example":"","readings":[],"tags":["tradiciones","Pregunta central"]},{"id":"c60","doc":"Tabla Comparativa: Tradiciones de la Psicología Social","section":"Figura emblemática","body":"Comparación de tradiciones respecto a \"Figura emblemática\". Tradición norteamericana: Milgram, Asch, Zimbardo Tradición europea: Serge Moscovici, Henri Tajfel Tradición latinoamericana: Ignacio Martín-Baró, Maritza Montero","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*.","Zimbardo, P. (2007). *El efecto Lucifer: el porqué de la maldad*."],"tags":["tradiciones","Figura emblemática"]},{"id":"c61","doc":"Tabla Comparativa: Tradiciones de la Psicología Social","section":"Crítica principal","body":"Comparación de tradiciones respecto a \"Crítica principal\". Tradición norteamericana: Resultados de laboratorio no generalizables; ignora contexto histórico-cultural Tradición europea: Menos operacionalizable; a veces poco rigurosa metodológicamente Tradición latinoamericana: Riesgo de perder rigor científico por exceso de compromiso político","example":"","readings":[],"tags":["tradiciones","Crítica principal"]},{"id":"c62","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Conductismo Social","body":"Paradigma Conductismo Social. Foco: Aprendizaje, refuerzo, condicionamiento Método: Experimental, observable Crítica principal: Ignora procesos mentales internos y el contexto histórico","example":"","readings":[],"tags":["Conductismo Social"]},{"id":"c63","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Psicoanálisis Social","body":"Paradigma Psicoanálisis Social. Foco: Inconsciente, pulsiones, mecanismos de defensa en grupos Método: Interpretativo, clínico Crítica principal: Difícil de someter a prueba empírica; androcéntrico","example":"","readings":[],"tags":["Psicoanálisis Social"]},{"id":"c64","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Sociocognitivismo","body":"Paradigma Sociocognitivismo. Foco: Cognición social: atribución, esquemas, actitudes Método: Experimental-cognitivo Crítica principal: Riesgo de individualismo: ignora dimensión estructural y cultural","example":"","readings":[],"tags":["Sociocognitivismo"]},{"id":"c65","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Teoría de Rol","body":"Paradigma Teoría de Rol. Foco: Roles, expectativas, guiones sociales Método: Observacional, etnográfico Crítica principal: Puede subestimar la agencia individual frente a los roles","example":"","readings":[],"tags":["Teoría de Rol"]},{"id":"c66","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Marxismo","body":"Paradigma Marxismo. Foco: Poder, clase, ideología, estructuras de producción Método: Histórico-crítico, análisis estructural Crítica principal: Riesgo de reduccionismo económico; dificultad para captar lo psicológico","example":"","readings":["Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Marxismo"]},{"id":"c67","doc":"Tabla Comparativa: Paradigmas de la Psicología Social","section":"Humanismo","body":"Paradigma Humanismo. Foco: Libertad, autorrealización, dignidad, responsabilidad Método: Fenomenológico, cualitativo Crítica principal: Optimismo ingenuo sobre la libertad; ignora condicionamientos estructurales","example":"","readings":[],"tags":["Humanismo"]},{"id":"c68","doc":"Paradigmas en Detalle","section":"Conductismo Social","body":"Conductismo Social (Watson · Skinner · Bandura). Explica la conducta social mediante el aprendizaje por condicionamiento y refuerzo. Pregunta central: ¿Qué reforzadores produjeron esta conducta? Milgram desde aquí: Los participantes aprendieron desde niños que obedecer a la autoridad produce consecuencias positivas. Ese condicionamiento se activó en el laboratorio. Concepto clave: Refuerzo, condicionamiento operante, aprendizaje social (Bandura: modelamiento). Limitación: Ignora los procesos cognitivos internos y el contexto histórico-cultural.","example":"Los participantes aprendieron desde niños que obedecer a la autoridad produce consecuencias positivas. Ese condicionamiento se activó en el laboratorio.","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Bandura, A. (1977). *Social Learning Theory*.","Watson, J. B. (1913). \"Psychology as the Behaviorist Views It\". *Psychological Review*."],"tags":["Conductismo Social","Watson","Skinner","Bandura"]},{"id":"c69","doc":"Paradigmas en Detalle","section":"Psicoanálisis Social","body":"Psicoanálisis Social (Freud · Fromm · Adorno). Aplica conceptos psicoanalíticos al análisis de grupos, masas y autoritarismo. Pregunta central: ¿Qué dinámicas inconscientes explican esta conducta grupal? Milgram desde aquí: Proyección de la imago paterna en el experimentador. Necesidad inconsciente de pertenencia y protección que inhibe la autonomía moral. Concepto clave: Inconsciente colectivo, regresión, identificación con el líder, miedo a la libertad (Fromm). Limitación: Difícil de falsificar empíricamente. Androcentrismo en los modelos originales.","example":"Proyección de la imago paterna en el experimentador. Necesidad inconsciente de pertenencia y protección que inhibe la autonomía moral.","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Fromm, E. (1941). *El miedo a la libertad*.","Freud, S. (1921). *Psicología de las masas y análisis del yo*."],"tags":["Psicoanálisis Social","Freud","Fromm","Adorno"]},{"id":"c70","doc":"Paradigmas en Detalle","section":"Sociocognitivismo","body":"Sociocognitivismo (Festinger · Bandura · Tajfel). Los procesos cognitivos median entre el estímulo social y la conducta. Pregunta central: ¿Qué cogniciones (creencias, esquemas, atribuciones) explican esta conducta? Milgram desde aquí: Disonancia cognitiva: los participantes deben reconciliar 'soy buena persona' con 'apliqué descargas'. Atribución de responsabilidad al experimentador. Concepto clave: Disonancia cognitiva, autoeficacia, esquemas sociales, atribución causal. Limitación: Riesgo de individualismo cognitivo: puede ignorar la dimensión estructural e histórica.","example":"Disonancia cognitiva: los participantes deben reconciliar 'soy buena persona' con 'apliqué descargas'. Atribución de responsabilidad al experimentador.","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Festinger, L. (1957). *A Theory of Cognitive Dissonance*."],"tags":["Sociocognitivismo","Festinger","Bandura","Tajfel"]},{"id":"c71","doc":"Paradigmas en Detalle","section":"Teoría de Rol","body":"Teoría de Rol (Mead · Goffman · Zimbardo). La conducta social se organiza según roles y expectativas ligadas a posiciones sociales. Pregunta central: ¿Qué rol está desempeñando esta persona y qué guión cultural sigue? Zimbardo desde aquí: Estudiantes adoptaron roles de 'guardia' y 'prisionero' en horas. El rol produce la conducta, no al revés. Concepto clave: Rol social, guión, dramaturgismo (Goffman: 'la vida como teatro'), identidad de rol. Limitación: Puede subestimar la agencia individual; ¿hasta qué punto somos más que nuestros roles?","example":"Estudiantes adoptaron roles de 'guardia' y 'prisionero' en horas. El rol produce la conducta, no al revés.","readings":["Zimbardo, P. (2007). *El efecto Lucifer: el porqué de la maldad*.","Goffman, E. (1959). *La presentación de la persona en la vida cotidiana*.","Mead, G. H. (1934). *Mind, Self and Society*."],"tags":["Teoría de Rol","Mead","Goffman","Zimbardo"]},{"id":"c72","doc":"Paradigmas en Detalle","section":"Marxismo","body":"Marxismo (Marx · Gramsci · Martín-Baró). La conducta social refleja estructuras de poder, ideología y relaciones de producción. Pregunta central: ¿Qué estructuras de poder producen esta conducta y a quién beneficia? Milgram desde aquí: La obediencia no es humana universal: es producida por sociedades jerárquicas que necesitan sujetos que obedezcan. La ideología naturaliza esta disposición. Concepto clave: Ideología, conciencia de clase, alienación, hegemonía (Gramsci), des-ideologización (Martín-Baró). Limitación: Riesgo de reduccionismo económico; dificultad para captar la subjetividad sin reducirla a epifenómeno.","example":"La obediencia no es humana universal: es producida por sociedades jerárquicas que necesitan sujetos que obedezcan. La ideología naturaliza esta disposición.","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Martín-Baró, I. (1998). *Psicología de la Liberación*.","Marx, K. (1859). *Contribución a la crítica de la economía política* (Prólogo)."],"tags":["Marxismo","Marx","Gramsci","Martín-Baró"]},{"id":"c73","doc":"Paradigmas en Detalle","section":"Humanismo","body":"Humanismo (Maslow · Rogers · Fromm). Énfasis en la libertad, responsabilidad, autorrealización y dignidad humana. Pregunta central: ¿Qué impide la autorrealización y el ejercicio pleno de la libertad moral? Milgram desde aquí: Los participantes renunciaron a su autonomía moral. El humanismo pregunta: ¿qué condiciones sociales impiden el desarrollo de personas capaces de decir 'no' a la autoridad injusta? Concepto clave: Autorrealización, jerarquía de necesidades, autenticidad, libertad y responsabilidad existencial. Limitación: Optimismo sobre la libertad que puede ignorar los condicionamientos estructurales reales.","example":"Los participantes renunciaron a su autonomía moral. El humanismo pregunta: ¿qué condiciones sociales impiden el desarrollo de personas capaces de decir 'no' a la autoridad injusta?","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*.","Fromm, E. (1941). *El miedo a la libertad*.","Maslow, A. (1954). *Motivation and Personality*."],"tags":["Humanismo","Maslow","Rogers","Fromm"]},{"id":"c74","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Milgram","body":"Milgram: Experimento de obediencia a la autoridad","example":"","readings":["Milgram, S. (1974). *Obedience to Authority: An Experimental View*."],"tags":["Milgram"]},{"id":"c75","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Asch","body":"Asch: Conformidad: negar lo que ves para seguir al grupo","example":"","readings":["Asch, S. (1955). \"Opinions and Social Pressure\". *Scientific American*."],"tags":["Asch"]},{"id":"c76","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Kurt Lewin","body":"Kurt Lewin: Conducta = f(Persona × Ambiente)","example":"","readings":["Lewin, K. (1951). *Field Theory in Social Science*."],"tags":["Kurt Lewin"]},{"id":"c77","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Moscovici","body":"Moscovici: Representaciones Sociales; tradición europea crítica","example":"","readings":["Moscovici, S. (1961). *La Psychanalyse, son image et son public*."],"tags":["Moscovici"]},{"id":"c78","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Martín-Baró","body":"Martín-Baró: PS latinoamericana comprometida con los oprimidos","example":"","readings":["Martín-Baró, I. (1998). *Psicología de la Liberación*."],"tags":["Martín-Baró"]},{"id":"c79","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Conductismo Social","body":"Conductismo Social: Obediencia como resultado del condicionamiento y el refuerzo","example":"","readings":[],"tags":["Conductismo Social"]},{"id":"c80","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Psicoanálisis Social","body":"Psicoanálisis Social: Liderazgo autoritario explicado por la proyección de la figura paterna","example":"","readings":[],"tags":["Psicoanálisis Social"]},{"id":"c81","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Sociocognitivismo","body":"Sociocognitivismo: Disonancia cognitiva: malestar por contradicción entre creencias y conductas","example":"","readings":[],"tags":["Sociocognitivismo"]},{"id":"c82","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Teoría de Rol","body":"Teoría de Rol: Zimbardo: adopción de guiones de guardia/prisionero que moldean identidad","example":"","readings":["Zimbardo, P. (2007). *El efecto Lucifer: el porqué de la maldad*."],"tags":["Teoría de Rol"]},{"id":"c83","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Humanismo en PS","body":"Humanismo en PS: Obediencia ciega como renuncia a la libertad y la autonomía moral","example":"","readings":[],"tags":["Humanismo en PS"]},{"id":"c84","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Crisis de la PS (años 70)","body":"Crisis de la PS (años 70): Cuestionamiento metodológico, ético y político de la disciplina","example":"","readings":[],"tags":["Crisis de la PS (años 70)"]},{"id":"c85","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Efecto Pigmalión","body":"Efecto Pigmalión: Las expectativas del docente moldean el rendimiento real del estudiante","example":"","readings":["Rosenthal, R. & Jacobson, L. (1968). *Pygmalion in the Classroom*."],"tags":["Efecto Pigmalión"]},{"id":"c86","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Construcción social de la realidad","body":"Construcción social de la realidad: Rosenhan: la 'normalidad' depende de quién diagnostica y cuándo","example":"","readings":["Rosenhan, D. (1973). \"On Being Sane in Insane Places\". *Science*."],"tags":["Construcción social de la realidad"]},{"id":"c87","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Identidad social (Tajfel)","body":"Identidad social (Tajfel): Autoconcepto basado en pertenencia al grupo: endogrupo vs. exogrupo","example":"","readings":["Tajfel, H. & Turner, J. (1979). \"An Integrative Theory of Intergroup Conflict\".","Tajfel, H. (1981). *Human Groups and Social Categories*."],"tags":["Identidad social (Tajfel)"]},{"id":"c88","doc":"Relaciones Rápidas: Autores, Conceptos y Paradigmas","section":"Objeto-sujeto de la PS","body":"Objeto-sujeto de la PS: El investigador es parte del fenómeno: reflexividad obligatoria","example":"","readings":[],"tags":["Objeto-sujeto de la PS"]}]</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════
+const ADMIN_PASSCODE = 'ER1-2026';
+const ANTHROPIC_API_VERSION = '2023-06-01';
+
+const STOPWORDS = new Set(['de','la','que','el','en','y','a','los','del','se','las','por','un','para','con','no','una','su','al','lo','como','mas','más','o','este','sí','porque','esta','entre','cuando','muy','sin','sobre','también','me','hasta','hay','donde','quien','desde','todo','nos','durante','todos','uno','les','ni','contra','otros','ese','eso','ante','ellos','e','esto','mí','antes','algunos','qué','unos','yo','otro','otras','otra','él','tanto','esa','estos','mucho','quienes','nada','muchos','cual','poco','ella','estar','estas','algunas','algo','nosotros','mi','mis','tú','te','ti','tu','tus','ellas','esos','esas','es','soy','eres','somos','sois','son','fui','fue','fuimos','fueron','ser','sido','siendo','tengo','tiene','tenemos','tienen','tenía','cómo','cual','cuales','pero','sus','ya','le']);
+
+const STARTER_SUGGESTIONS = [
+  '¿Qué es la Psicología Social?',
+  '¿Qué demostró el experimento de Milgram?',
+  'Diferencia entre Psicología Social y Sociología',
+  '¿Qué es la disonancia cognitiva?',
+  'Compara la tradición norteamericana y la latinoamericana',
+  '¿Qué fue la crisis de la Psicología Social de los años 70?',
+];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let KB = [];
+let aiEnabled = false;
+let apiKey = '';
+let chatHistory = []; // {role, content}
+let adminUnlocked = false;
+
+function bakedKB() {
+  try { return JSON.parse(document.getElementById('kb-data-baked').textContent); } catch(e) { return []; }
+}
+
+function loadKB() {
+  const stored = localStorage.getItem('er1_kb_override');
+  if (stored) {
+    try { return JSON.parse(stored); } catch(e) { /* fall through */ }
+  }
+  return bakedKB();
+}
+
+function persistKB() {
+  localStorage.setItem('er1_kb_override', JSON.stringify(KB));
+}
+
+// ══════════════════════════════════════════════════════════════
+// SEARCH ENGINE (BM25-lite, 100% offline)
+// ══════════════════════════════════════════════════════════════
+function normalize(str) {
+  return (str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+function tokenize(str) {
+  return normalize(str).split(/[^a-z0-9ñ]+/).filter(t => t.length > 1 && !STOPWORDS.has(t));
+}
+
+let SEARCH_INDEX = null;
+function buildIndex() {
+  const docs = KB.map(c => {
+    const fullText = [c.body, c.example, c.section, c.doc, (c.tags||[]).join(' ')].join(' ');
+    const tokens = tokenize(fullText);
+    const tf = {};
+    for (const t of tokens) tf[t] = (tf[t] || 0) + 1;
+    return { tf, len: tokens.length };
+  });
+  const df = {};
+  for (const d of docs) for (const term in d.tf) df[term] = (df[term] || 0) + 1;
+  const N = docs.length || 1;
+  const avgLen = docs.reduce((s,d) => s + d.len, 0) / N || 1;
+  SEARCH_INDEX = { docs, df, N, avgLen };
+}
+
+function searchKB(query, topN) {
+  topN = topN || 4;
+  if (!SEARCH_INDEX || SEARCH_INDEX.docs.length !== KB.length) buildIndex();
+  const qTokens = [...new Set(tokenize(query))];
+  if (qTokens.length === 0) return [];
+  const k1 = 1.5, b = 0.75;
+  const { docs, df, N, avgLen } = SEARCH_INDEX;
+  const scores = KB.map((chunk, i) => {
+    const d = docs[i];
+    let score = 0;
+    for (const term of qTokens) {
+      const tf = d.tf[term] || 0;
+      if (tf === 0) continue;
+      const docFreq = df[term] || 0;
+      const idf = Math.log(1 + (N - docFreq + 0.5) / (docFreq + 0.5));
+      const denom = tf + k1 * (1 - b + b * (d.len / avgLen));
+      score += idf * ((tf * (k1 + 1)) / denom);
+    }
+    // small boost for exact section/title token match
+    const sectionTokens = new Set(tokenize(chunk.section));
+    for (const term of qTokens) if (sectionTokens.has(term)) score *= 1.18;
+    return { chunk, score };
+  });
+  return scores.filter(s => s.score > 0.05).sort((a,b) => b.score - a.score).slice(0, topN);
+}
+
+// ══════════════════════════════════════════════════════════════
+// KB MANAGEMENT / RENDER SIDEBAR
+// ══════════════════════════════════════════════════════════════
+function docSummary() {
+  const map = new Map();
+  for (const c of KB) map.set(c.doc, (map.get(c.doc) || 0) + 1);
+  return [...map.entries()];
+}
+function renderSidebarDocs() {
+  const list = document.getElementById('docs-list');
+  const docs = docSummary();
+  list.innerHTML = docs.map(([name, count]) =>
+    `<div class="doc-row"><span class="dot"></span><span class="name" title="${escapeHtml(name)}">${escapeHtml(name)}</span><span class="count">${count}</span></div>`
+  ).join('') || '<div class="empty-note">Sin documentos</div>';
+  document.getElementById('stat-docs').textContent = docs.length;
+  document.getElementById('stat-chunks').textContent = KB.length;
+}
+function escapeHtml(s) {
+  return (s == null ? '' : String(s)).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHAT RENDERING
+// ══════════════════════════════════════════════════════════════
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+function onComposerKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function scrollChatToBottom() {
+  const scroll = document.getElementById('chat-scroll');
+  requestAnimationFrame(() => { scroll.scrollTop = scroll.scrollHeight; });
+}
+function renderSuggestions() {
+  const grid = document.getElementById('suggest-grid');
+  grid.innerHTML = STARTER_SUGGESTIONS.map(s => `<button class="suggest-chip" onclick="askSuggested(this)">${escapeHtml(s)}</button>`).join('');
+}
+function askSuggested(btn) {
+  document.getElementById('composer-input').value = btn.textContent;
+  sendMessage();
+}
+
+function addUserBubble(text) {
+  const inner = document.getElementById('chat-inner');
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `<div class="avatar user">🙂</div><div class="bubble-wrap"><div class="bubble">${escapeHtml(text)}</div></div>`;
+  inner.appendChild(row);
+  scrollChatToBottom();
+}
+
+function addTypingIndicator() {
+  const inner = document.getElementById('chat-inner');
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.id = 'typing-row';
+  row.innerHTML = `<div class="avatar bot">🎓</div><div class="bubble-wrap"><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  inner.appendChild(row);
+  scrollChatToBottom();
+}
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-row');
+  if (el) el.remove();
+}
+
+function renderReadingsHtml(readings) {
+  if (!readings || !readings.length) return '';
+  return `<div class="ans-block"><div class="ans-label readings">📖 Para profundizar</div><ul class="readings-list">${readings.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul></div>`;
+}
+function renderSourcesHtml(matches) {
+  return `<div class="ans-block"><div class="ans-label sources">📚 Fuentes en el curso</div><div class="source-chip-row">${matches.map((m,i) => `<span class="source-chip" onclick="showSource('${m.chunk.id}')">${escapeHtml(m.chunk.doc)} · ${escapeHtml(m.chunk.section)}</span>`).join('')}</div></div>`;
+}
+
+function addBotBubbleOffline(matches, query) {
+  const inner = document.getElementById('chat-inner');
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+
+  if (!matches.length) {
+    const topics = [...new Set(KB.map(c => c.doc))].slice(0, 6);
+    row.innerHTML = `<div class="avatar bot">🎓</div><div class="bubble-wrap">
+      <div class="bubble">
+        <p>No encontré nada relacionado con esa pregunta en el material cargado del curso. Prueba reformularla, o consulta alguno de estos temas disponibles:</p>
+        <div class="fallback-chip-row">${topics.map(t => `<span class="source-chip" onclick="askTopic('${escapeHtml(t).replace(/'/g,"\\'")}')">${escapeHtml(t)}</span>`).join('')}</div>
+      </div>
+      <span class="offline-tag">modo offline</span>
+    </div>`;
+    inner.appendChild(row);
+    scrollChatToBottom();
+    return;
+  }
+
+  const top = matches[0].chunk;
+  const others = matches.slice(1).filter(m => m.score > matches[0].score * 0.45 && m.chunk.doc !== top.doc);
+  let html = `<div class="ans-block"><p>${escapeHtml(top.body)}</p></div>`;
+  if (top.example) {
+    html += `<div class="ans-block"><div class="ans-label example">💡 Ejemplo simple</div><div class="example-box">${escapeHtml(top.example)}</div></div>`;
+  }
+  if (others.length) {
+    html += `<div class="ans-block"><div class="ans-label">🔀 Otras miradas relacionadas</div>` +
+      others.slice(0,2).map(m => `<div class="other-persp"><b>${escapeHtml(m.chunk.section)}:</b> ${escapeHtml(m.chunk.body.slice(0,170))}${m.chunk.body.length>170?'…':''}</div>`).join('') +
+      `</div>`;
+  }
+  const allReadings = [...new Set(matches.slice(0,2).flatMap(m => m.chunk.readings || []))].slice(0,4);
+  html += renderReadingsHtml(allReadings);
+  html += renderSourcesHtml(matches);
+
+  row.innerHTML = `<div class="avatar bot">🎓</div><div class="bubble-wrap"><div class="bubble">${html}</div><span class="offline-tag">modo offline</span></div>`;
+  inner.appendChild(row);
+  scrollChatToBottom();
+}
+
+function askTopic(topic) {
+  document.getElementById('composer-input').value = '¿Qué contiene ' + topic + '?';
+  sendMessage();
+}
+
+function addBotBubbleAI(text, matches) {
+  const inner = document.getElementById('chat-inner');
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  const paragraphs = text.split(/\n{2,}/).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+  let html = paragraphs;
+  if (matches.length) html += renderSourcesHtml(matches);
+  row.innerHTML = `<div class="avatar bot">🎓</div><div class="bubble-wrap"><div class="bubble">${html}</div><span class="ai-tag">✨ modo IA</span></div>`;
+  inner.appendChild(row);
+  scrollChatToBottom();
+}
+function addBotError(msg) {
+  const inner = document.getElementById('chat-inner');
+  const row = document.createElement('div');
+  row.className = 'msg-row bot';
+  row.innerHTML = `<div class="avatar bot">🎓</div><div class="bubble-wrap"><div class="bubble"><p>⚠️ ${escapeHtml(msg)}</p></div></div>`;
+  inner.appendChild(row);
+  scrollChatToBottom();
+}
+
+function showSource(chunkId) {
+  const chunk = KB.find(c => c.id === chunkId);
+  if (!chunk) return;
+  document.getElementById('source-doc-title').textContent = chunk.doc;
+  document.getElementById('source-section-title').textContent = chunk.section;
+  document.getElementById('source-body-text').textContent = chunk.body + (chunk.example ? '\n\nEjemplo: ' + chunk.example : '');
+  document.getElementById('source-readings-wrap').innerHTML = renderReadingsHtml(chunk.readings);
+  openModal('modal-source');
+}
+
+// ══════════════════════════════════════════════════════════════
+// SEND MESSAGE
+// ══════════════════════════════════════════════════════════════
+async function sendMessage() {
+  const input = document.getElementById('composer-input');
+  const text = input.value.trim();
+  if (!text) return;
+  document.getElementById('welcome-card')?.remove();
+  addUserBubble(text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  autoGrow(input);
+  document.getElementById('send-btn').disabled = true;
+
+  const matches = searchKB(text, 4);
+
+  if (aiEnabled && apiKey) {
+    addTypingIndicator();
+    try {
+      const answer = await callClaude(text, matches);
+      removeTypingIndicator();
+      addBotBubbleAI(answer, matches);
+      chatHistory.push({ role: 'assistant', content: answer });
+    } catch (err) {
+      removeTypingIndicator();
+      addBotError('No pude obtener respuesta de la IA (' + err.message + '). Puedes revisar tu llave o desactivar el modo IA para seguir en modo offline.');
+    }
+  } else {
+    setTimeout(() => {
+      addBotBubbleOffline(matches, text);
+    }, 260);
+  }
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ══════════════════════════════════════════════════════════════
+// AI MODE (Claude API, direct from browser, student's own key)
+// ══════════════════════════════════════════════════════════════
+function onAiToggle() {
+  const toggle = document.getElementById('ai-toggle');
+  if (toggle.checked) {
+    if (apiKey) {
+      aiEnabled = true;
+      updateModePill();
+    } else {
+      openModal('modal-aikey');
+    }
+  } else {
+    aiEnabled = false;
+    updateModePill();
+  }
+  document.getElementById('model-select-wrap').classList.toggle('show', toggle.checked);
+}
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) { showToast('Ingresa una llave válida'); return; }
+  apiKey = val;
+  localStorage.setItem('er1_api_key', val);
+  aiEnabled = true;
+  document.getElementById('ai-toggle').checked = true;
+  document.getElementById('model-select-wrap').classList.add('show');
+  updateModePill();
+  closeModal('modal-aikey');
+  showToast('Modo IA activado');
+}
+function updateModePill() {
+  const pill = document.getElementById('mode-pill');
+  pill.textContent = aiEnabled ? '✨ modo IA' : 'modo offline';
+  pill.classList.toggle('ai-on', aiEnabled);
+}
+
+async function callClaude(question, matches) {
+  const model = document.getElementById('model-select').value;
+  const context = matches.map(m => `[Fuente: ${m.chunk.doc} — ${m.chunk.section}]\n${m.chunk.body}${m.chunk.example ? '\nEjemplo: ' + m.chunk.example : ''}`).join('\n\n');
+  const system = `Eres un asistente de estudio para la asignatura universitaria "Fundamentos Socioculturales de la Psicología" (Psicología Social). Responde SIEMPRE en español, de forma concisa (máximo 3-4 párrafos cortos o una lista breve), con un tono cercano y pedagógico. Basa tu respuesta ÚNICAMENTE en el CONTEXTO DEL CURSO entregado a continuación; no agregues teorías, autores o datos que no estén en ese contexto. Si el contexto no contiene información suficiente para responder, dilo explícitamente y sugiere reformular la pregunta, en vez de inventar contenido. Cuando sea útil, incluye un ejemplo simple y cotidiano, y cierra mencionando brevemente a qué fragmento del curso corresponde tu respuesta (ya se mostrarán las fuentes exactas aparte, así que no hace falta citarlas en detalle).\n\nCONTEXTO DEL CURSO:\n${context || '(sin fragmentos relevantes encontrados)'}`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': ANTHROPIC_API_VERSION,
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 700,
+      system,
+      messages: [{ role: 'user', content: question }],
+    }),
+  });
+  if (!resp.ok) {
+    const errBody = await resp.text().catch(() => '');
+    throw new Error(`HTTP ${resp.status} ${errBody.slice(0,140)}`);
+  }
+  const data = await resp.json();
+  return (data.content || []).map(b => b.text || '').join('\n').trim() || '(respuesta vacía)';
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN PANEL
+// ══════════════════════════════════════════════════════════════
+function openAdminGate() {
+  if (adminUnlocked) { openAdminPanel(); return; }
+  document.getElementById('admin-passcode-input').value = '';
+  openModal('modal-admin-gate');
+}
+function checkAdminPasscode() {
+  const val = document.getElementById('admin-passcode-input').value;
+  if (val === ADMIN_PASSCODE) {
+    adminUnlocked = true;
+    closeModal('modal-admin-gate');
+    openAdminPanel();
+  } else {
+    showToast('Clave incorrecta');
+  }
+}
+function openAdminPanel() {
+  renderAdminDocsList();
+  switchAdminTab('list');
+  openModal('modal-admin');
+}
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('admin-pane-list').classList.toggle('active', tab === 'list');
+  document.getElementById('admin-pane-add').classList.toggle('active', tab === 'add');
+}
+function renderAdminDocsList() {
+  const docs = docSummary();
+  const wrap = document.getElementById('admin-docs-list');
+  wrap.innerHTML = docs.map(([name, count]) => `
+    <div class="doc-manage-row">
+      <div class="info"><div class="name">${escapeHtml(name)}</div><div class="meta">${count} fragmento${count===1?'':'s'}</div></div>
+      <button class="btn btn-danger btn-sm" onclick="deleteDocument('${escapeHtml(name).replace(/'/g,"\\'")}')">Eliminar</button>
+    </div>`).join('') || '<div class="empty-note">Sin documentos cargados</div>';
+}
+function deleteDocument(name) {
+  if (!confirm('¿Eliminar el documento "' + name + '" y todos sus fragmentos del chatbot?')) return;
+  KB = KB.filter(c => c.doc !== name);
+  persistKB();
+  buildIndex();
+  renderSidebarDocs();
+  renderAdminDocsList();
+  showToast('Documento eliminado');
+}
+function confirmResetKB() {
+  if (!confirm('¿Restaurar el contenido original del curso? Se perderán los documentos agregados en este navegador.')) return;
+  localStorage.removeItem('er1_kb_override');
+  KB = bakedKB();
+  buildIndex();
+  renderSidebarDocs();
+  renderAdminDocsList();
+  showToast('Contenido original restaurado');
+}
+function clearAddForm() {
+  document.getElementById('new-doc-title').value = '';
+  document.getElementById('new-doc-text').value = '';
+  document.getElementById('new-doc-example').value = '';
+  document.getElementById('new-doc-readings').value = '';
+  document.getElementById('file-input').value = '';
+}
+function chunkText(raw, maxLen) {
+  maxLen = maxLen || 700;
+  const paras = raw.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+  const chunks = [];
+  let buf = '';
+  for (const p of paras) {
+    if (buf && (buf + '\n\n' + p).length > maxLen) { chunks.push(buf.trim()); buf = p; }
+    else { buf = buf ? buf + '\n\n' + p : p; }
+  }
+  if (buf) chunks.push(buf.trim());
+  return chunks;
+}
+function addDocument() {
+  const title = document.getElementById('new-doc-title').value.trim();
+  const text = document.getElementById('new-doc-text').value.trim();
+  const example = document.getElementById('new-doc-example').value.trim();
+  const readingsRaw = document.getElementById('new-doc-readings').value.trim();
+  if (!title || !text) { showToast('Falta el título o el contenido'); return; }
+  const readings = readingsRaw ? readingsRaw.split(';').map(s => s.trim()).filter(Boolean) : [];
+  const pieces = chunkText(text);
+  let n = KB.length + 1;
+  for (const piece of pieces) {
+    KB.push({
+      id: 'u' + (n++) + '_' + Date.now(),
+      doc: title,
+      section: piece.slice(0, 50).replace(/\s+/g, ' ') + (piece.length > 50 ? '…' : ''),
+      body: piece,
+      example: example,
+      readings: readings,
+      tags: [],
+    });
+  }
+  persistKB();
+  buildIndex();
+  renderSidebarDocs();
+  renderAdminDocsList();
+  clearAddForm();
+  switchAdminTab('list');
+  showToast(`Documento agregado (${pieces.length} fragmentos)`);
+}
+
+async function onFileSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!document.getElementById('new-doc-title').value.trim()) {
+    document.getElementById('new-doc-title').value = file.name.replace(/\.[^.]+$/, '');
+  }
+  if (file.name.toLowerCase().endsWith('.pdf')) {
+    showToast('Leyendo PDF…');
+    try {
+      const text = await extractPdfText(file);
+      document.getElementById('new-doc-text').value = text;
+      showToast('PDF cargado');
+    } catch (err) {
+      showToast('No se pudo leer el PDF (¿sin conexión?). Pega el texto manualmente.');
+    }
+  } else {
+    const text = await file.text();
+    document.getElementById('new-doc-text').value = text;
+  }
+}
+let pdfjsLoaded = false;
+async function loadPdfJs() {
+  if (pdfjsLoaded && window.pdfjsLib) return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js';
+    s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  pdfjsLoaded = true;
+}
+async function extractPdfText(file) {
+  await loadPdfJs();
+  const buf = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n\n';
+  }
+  return text.trim();
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════
+function openExportModal() { openModal('modal-export'); }
+function doExport() {
+  const filename = document.getElementById('export-filename').value.trim() || 'chatbot-fundamentos-socioculturales.html';
+  const clone = document.documentElement.cloneNode(true);
+  const dataScript = clone.querySelector('#kb-data-baked');
+  if (dataScript) dataScript.textContent = JSON.stringify(KB);
+  const chatInner = clone.querySelector('#chat-inner');
+  if (chatInner) {
+    chatInner.innerHTML = clone.querySelector('#welcome-card') ? chatInner.innerHTML : '';
+  }
+  clone.querySelectorAll('.modal-scrim').forEach(el => el.classList.remove('open'));
+  clone.querySelectorAll('.sidebar.open').forEach(el => el.classList.remove('open'));
+  const apiInput = clone.querySelector('#api-key-input');
+  if (apiInput) apiInput.value = '';
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  closeModal('modal-export');
+  showToast('Descargando…');
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI HELPERS: modals, theme, sidebar, toast
+// ══════════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openAboutModal() { openModal('modal-about'); }
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-scrim').classList.add('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-scrim').classList.remove('show'); }
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('er1_theme', t);
+  document.getElementById('theme-btn-dark').classList.toggle('active', t === 'dark');
+  document.getElementById('theme-btn-light').classList.toggle('active', t === 'light');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(() => t.classList.remove('show'), 2400);
+}
+function confirmClearChat() {
+  if (!confirm('¿Borrar toda la conversación actual?')) return;
+  document.getElementById('chat-inner').innerHTML = `<div class="welcome-card" id="welcome-card">
+    <div class="eyebrow">Bienvenida / Bienvenido</div>
+    <h2>¿Qué quieres repasar hoy?</h2>
+    <p>Este asistente responde <b style="color:var(--ink)">exclusivamente a partir del material de la asignatura</b> que tu docente cargó: glosario, banco de preguntas, casos prácticos, tablas comparativas y paradigmas. Cada respuesta incluye la fuente exacta dentro del curso.</p>
+    <p>Puedes preguntar por conceptos, autores, experimentos, diferencias entre paradigmas o pedir un caso de aplicación.</p>
+    <div class="suggest-grid" id="suggest-grid"></div>
+    <div class="note">💡 Las respuestas son concisas, con ejemplos simples y lecturas recomendadas. Si algo no está en el material cargado, el asistente te lo dirá en vez de inventar una respuesta.</div>
+  </div>`;
+  renderSuggestions();
+  chatHistory = [];
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function init() {
+  const savedTheme = localStorage.getItem('er1_theme') || 'dark';
+  setTheme(savedTheme);
+
+  KB = loadKB();
+  buildIndex();
+  renderSidebarDocs();
+  renderSuggestions();
+
+  const savedKey = localStorage.getItem('er1_api_key');
+  if (savedKey) { apiKey = savedKey; }
+
+  document.querySelectorAll('.modal-scrim').forEach(scrim => {
+    scrim.addEventListener('click', (e) => { if (e.target === scrim) scrim.classList.remove('open'); });
+  });
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

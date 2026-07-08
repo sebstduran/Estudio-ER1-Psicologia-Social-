@@ -448,7 +448,7 @@ a { color: var(--gold); }
         </div>
         <button class="modal-close sidebar-close" onclick="closeSidebar()" title="Cerrar menú">✕</button>
       </div>
-      <p class="brand-sub">Chatbot de la asignatura <b>Psicología Social</b>. Responde solo con base en el material cargado, con citas, ejemplos y lecturas.</p>
+      <p class="brand-sub">Chatbot de la asignatura <b>Fundamentos Socioculturales de la Psicología</b>. Responde solo con base en el material cargado, con citas, ejemplos y lecturas.</p>
     </div>
 
     <div class="sidebar-section">
@@ -687,10 +687,10 @@ const STOPWORDS = new Set(['de','la','que','el','en','y','a','los','del','se','l
 const STARTER_SUGGESTIONS = [
   '¿Qué es la Psicología Social?',
   '¿Qué demostró el experimento de Milgram?',
-  'Diferencia entre Psicología Social y Sociología',
+  '¿Qué es la "vivencia" según Vygotski?',
+  '¿Qué es el sistema sexo/género de Gayle Rubin?',
   '¿Qué es la disonancia cognitiva?',
   'Compara la tradición norteamericana y la latinoamericana',
-  '¿Qué fue la crisis de la Psicología Social de los años 70?',
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -993,7 +993,7 @@ function updateModePill() {
 async function callClaude(question, matches) {
   const model = document.getElementById('model-select').value;
   const context = matches.map(m => `[Fuente: ${m.chunk.doc} — ${m.chunk.section}]\n${m.chunk.body}${m.chunk.example ? '\nEjemplo: ' + m.chunk.example : ''}`).join('\n\n');
-  const system = `Eres un asistente de estudio para la asignatura universitaria "Fundamentos Socioculturales de la Psicología" (Psicología Social). Responde SIEMPRE en español, de forma concisa (máximo 3-4 párrafos cortos o una lista breve), con un tono cercano y pedagógico. Basa tu respuesta ÚNICAMENTE en el CONTEXTO DEL CURSO entregado a continuación; no agregues teorías, autores o datos que no estén en ese contexto. Si el contexto no contiene información suficiente para responder, dilo explícitamente y sugiere reformular la pregunta, en vez de inventar contenido. Cuando sea útil, incluye un ejemplo simple y cotidiano, y cierra mencionando brevemente a qué fragmento del curso corresponde tu respuesta (ya se mostrarán las fuentes exactas aparte, así que no hace falta citarlas en detalle).\n\nCONTEXTO DEL CURSO:\n${context || '(sin fragmentos relevantes encontrados)'}`;
+  const system = `Eres un asistente de estudio para la asignatura universitaria "Fundamentos Socioculturales de la Psicología". Responde SIEMPRE en español, de forma concisa (máximo 3-4 párrafos cortos o una lista breve), con un tono cercano y pedagógico. Basa tu respuesta ÚNICAMENTE en el CONTEXTO DEL CURSO entregado a continuación; no agregues teorías, autores o datos que no estén en ese contexto. Si el contexto no contiene información suficiente para responder, dilo explícitamente y sugiere reformular la pregunta, en vez de inventar contenido. Cuando sea útil, incluye un ejemplo simple y cotidiano, y cierra mencionando brevemente a qué fragmento del curso corresponde tu respuesta (ya se mostrarán las fuentes exactas aparte, así que no hace falta citarlas en detalle).\n\nCONTEXTO DEL CURSO:\n${context || '(sin fragmentos relevantes encontrados)'}`;
 
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

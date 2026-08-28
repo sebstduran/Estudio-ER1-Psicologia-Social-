@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Alterna a modo oscuro cuando <html> tiene la clase "dark" (ver ThemeToggle). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f5f3;
+  --surface: #ffffff;
+  --surface-muted: #f1eeea;
+  --border: #e4dfd8;
+  --foreground: #211a17;
+  --muted: #6b6058;
+
+  --ua: #8a1515;
+  --ua-strong: #6d1010;
+  --ua-tint: #fbeceb;
+
+  --logrado: #2f7a4f;
+  --logrado-tint: #e7f3ec;
+  --proceso: #b8790f;
+  --proceso-tint: #faf1e0;
+  --incipiente: #b3352c;
+  --incipiente-tint: #fbeae8;
+}
+
+.dark {
+  --background: #16130f;
+  --surface: #201c17;
+  --surface-muted: #2a2520;
+  --border: #3a332b;
+  --foreground: #f2ede7;
+  --muted: #a89f95;
+
+  --ua: #d3574f;
+  --ua-strong: #e8746b;
+  --ua-tint: #3a1c1a;
+
+  --logrado: #6cc492;
+  --logrado-tint: #1c2f24;
+  --proceso: #e0ac52;
+  --proceso-tint: #322715;
+  --incipiente: #e6867d;
+  --incipiente-tint: #3a201d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+
+  --color-ua: var(--ua);
+  --color-ua-strong: var(--ua-strong);
+  --color-ua-tint: var(--ua-tint);
+
+  --color-logrado: var(--logrado);
+  --color-logrado-tint: var(--logrado-tint);
+  --color-proceso: var(--proceso);
+  --color-proceso-tint: var(--proceso-tint);
+  --color-incipiente: var(--incipiente);
+  --color-incipiente-tint: var(--incipiente-tint);
+
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}

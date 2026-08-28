@@ -1,0 +1,245 @@
+// Schema de datos del Instrumento CCAA — EPG
+// Ver AGENTS.md del proyecto para contexto institucional.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Identidad ───────────────────────────────────────────────
+
+model Coordinador {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String
+  createdAt    DateTime @default(now())
+
+  niveles Nivel[]
+}
+
+// ─── Catálogo institucional (fijo, no depende del coordinador) ─
+
+// Los 7 componentes de la Estrategia Pedagógica Global.
+model ComponenteEPG {
+  id          String @id @default(cuid())
+  orden       Int    @unique
+  nombre      String
+  descripcion String
+
+  competencias Competencia[]
+}
+
+// ─── Configurar ──────────────────────────────────────────────
+
+enum CicloTipo {
+  INICIAL
+  INTERMEDIO
+  FINAL
+}
+
+enum Modalidad {
+  DIURNO // 4 reuniones CCAA por trimestre
+  VESPERTINO_TECH // 3 reuniones CCAA por trimestre
+}
+
+// Una instancia concreta: un nivel, de un coordinador, en un trimestre.
+model Nivel {
+  id                  String    @id @default(cuid())
+  nombre              String
+  cicloTipo           CicloTipo
+  modalidad           Modalidad
+  trimestre           String // ej. "2026-T3"
+  reunionActualNumero Int       @default(1)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  coordinadorId String
+  coordinador   Coordinador @relation(fields: [coordinadorId], references: [id], onDelete: Cascade)
+
+  competencias Competencia[]
+  asignaturas  Asignatura[]
+  docentes     Docente[]
+  reuniones    Reunion[]
+
+  @@index([coordinadorId])
+}
+
+// Competencia de ciclo, propia de un Nivel (se clona desde la plantilla
+// del Ciclo Inicial, o se define a mano para Intermedio/Final).
+model Competencia {
+  id          String @id @default(cuid())
+  codigo      String // ej. "1.1"
+  nombre      String // ej. "Fundamentar"
+  descriptor  String
+  orden       Int
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  componenteEpgId String
+  componenteEpg   ComponenteEPG @relation(fields: [componenteEpgId], references: [id])
+
+  indicadores Indicador[]
+  mapeos      MapeoAsignaturaCompetencia[]
+  evaluaciones Evaluacion[]
+
+  @@unique([nivelId, codigo])
+  @@index([nivelId])
+}
+
+// 3 evidencias observables por competencia.
+model Indicador {
+  id     String @id @default(cuid())
+  texto  String
+  orden  Int
+
+  competenciaId String
+  competencia   Competencia @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
+
+  evaluaciones Evaluacion[]
+
+  @@index([competenciaId])
+}
+
+model Asignatura {
+  id     String @id @default(cuid())
+  nombre String
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  mapeos            MapeoAsignaturaCompetencia[]
+  docenteAsignaturas DocenteAsignatura[]
+  evaluaciones      Evaluacion[]
+
+  @@index([nivelId])
+}
+
+enum TipoMapeo {
+  DIRECTA
+  TRANSVERSAL
+}
+
+// Ausencia de fila = "sin relación". Solo existe fila cuando hay tributación.
+model MapeoAsignaturaCompetencia {
+  id   String    @id @default(cuid())
+  tipo TipoMapeo
+
+  asignaturaId  String
+  asignatura    Asignatura  @relation(fields: [asignaturaId], references: [id], onDelete: Cascade)
+  competenciaId String
+  competencia   Competencia @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
+
+  @@unique([asignaturaId, competenciaId])
+  @@index([competenciaId])
+}
+
+// ─── Evaluar ─────────────────────────────────────────────────
+
+model Docente {
+  id     String @id @default(cuid())
+  nombre String
+  email  String
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  asignaturas  DocenteAsignatura[]
+  evaluaciones Evaluacion[]
+
+  @@unique([nivelId, email])
+  @@index([nivelId])
+}
+
+model DocenteAsignatura {
+  id String @id @default(cuid())
+
+  docenteId    String
+  docente      Docente    @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+  asignaturaId String
+  asignatura   Asignatura @relation(fields: [asignaturaId], references: [id], onDelete: Cascade)
+
+  @@unique([docenteId, asignaturaId])
+}
+
+enum FaseReunion {
+  BASE // R1: línea base
+  SEGUIMIENTO // reuniones intermedias
+  CIERRE // última reunión de la modalidad: cierre comparativo
+}
+
+enum EstadoReunion {
+  PLANIFICADA
+  EN_CURSO
+  CERRADA
+}
+
+model Reunion {
+  id     String        @id @default(cuid())
+  numero Int
+  fase   FaseReunion
+  fecha  DateTime?
+  estado EstadoReunion @default(PLANIFICADA)
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  evaluaciones Evaluacion[]
+  actas        Acta[]
+
+  @@unique([nivelId, numero])
+  @@index([nivelId])
+}
+
+enum NivelLogro {
+  LOGRADO
+  EN_PROCESO
+  INCIPIENTE
+}
+
+// Un voto: un docente, para una asignatura, sobre un indicador, en una reunión.
+model Evaluacion {
+  id         String     @id @default(cuid())
+  nivelLogro NivelLogro
+  comentario String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  reunionId String
+  reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  docenteId String
+  docente   Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+
+  asignaturaId String
+  asignatura   Asignatura @relation(fields: [asignaturaId], references: [id], onDelete: Cascade)
+
+  indicadorId String
+  indicador   Indicador @relation(fields: [indicadorId], references: [id], onDelete: Cascade)
+
+  competenciaId String
+  competencia   Competencia @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
+
+  // Un docente vota una sola vez por indicador+asignatura+reunión; puede editar su voto.
+  @@unique([reunionId, docenteId, asignaturaId, indicadorId])
+  @@index([reunionId])
+  @@index([competenciaId])
+}
+
+model Acta {
+  id           String   @id @default(cuid())
+  nombreArchivo String
+  url          String
+  subidoPor    String
+  createdAt    DateTime @default(now())
+
+  reunionId String
+  reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  @@index([reunionId])
+}

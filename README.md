@@ -7,6 +7,9 @@ y lo traduce en decisiones de Estrategia Pedagógica Global (EPG).
 Ver `AGENTS.md` (contexto institucional) y el hilo de diseño para el detalle
 completo del modelo de datos y los milestones.
 
+El prototipo original en un solo archivo HTML quedó guardado en
+`prototipo-original/index.html`.
+
 ## Requisitos
 
 - Node.js 20+
@@ -43,8 +46,8 @@ Esto crea el coordinador `demo@ua.cl` / `demo1234` con un nivel de ejemplo
 ## Desplegar en Vercel
 
 1. En [vercel.com](https://vercel.com) → **Add New → Project** → importa este
-   repositorio y selecciona la rama con el instrumento. Como el proyecto vive
-   en `app-ccaa/`, en "Root Directory" indica `app-ccaa`.
+   repositorio. La app vive en la raíz del repositorio y en la rama `main`, así
+   que no hay que tocar "Root Directory" ni "Production Branch".
 2. Pestaña **Storage** del proyecto → **Create Database** → Postgres (Neon).
    Vercel deja la variable `DATABASE_URL` (o `POSTGRES_URL`, según la
    integración) ya conectada al proyecto — si el nombre no calza exactamente

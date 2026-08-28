@@ -26,7 +26,7 @@ export function CompetenciaForm({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-4 rounded-lg border border-border p-4">
+    <form action={formAction} className="flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Código" hint="Ej. 2.1">
           <input className={inputClass} name="codigo" required />

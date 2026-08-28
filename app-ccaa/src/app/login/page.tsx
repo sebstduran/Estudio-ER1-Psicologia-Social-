@@ -9,15 +9,16 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(iniciarSesion, undefined);
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 px-6 py-16">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Ingresar</h1>
-        <p className="mt-1 text-sm text-muted">
-          Acceso para coordinadores de CCAA.
-        </p>
+    <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
+      <div className="text-center">
+        <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-ua font-serif text-lg font-semibold text-white">
+          E
+        </span>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight">Ingresar</h1>
+        <p className="mt-1.5 text-sm text-muted">Acceso para coordinadores de CCAA.</p>
       </div>
 
-      <Card>
+      <Card className="animate-fade-in">
         <form action={formAction} className="flex flex-col gap-4">
           <Field label="Correo institucional">
             <input
@@ -42,7 +43,7 @@ export default function LoginPage() {
             <p className="text-sm text-incipiente">{state.error}</p>
           )}
 
-          <Button type="submit" disabled={pending} className="mt-2">
+          <Button type="submit" disabled={pending} className="mt-2 w-full">
             {pending ? "Ingresando…" : "Ingresar"}
           </Button>
         </form>
@@ -50,7 +51,7 @@ export default function LoginPage() {
 
       <p className="text-center text-sm text-muted">
         ¿No tienes cuenta?{" "}
-        <Link href="/registro" className="text-ua hover:underline">
+        <Link href="/registro" className="font-medium text-ua hover:underline">
           Crear cuenta de coordinador
         </Link>
       </p>

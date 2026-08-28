@@ -6,27 +6,38 @@ export async function SiteHeader() {
   const session = await auth();
 
   return (
-    <header className="border-b border-border bg-surface">
+    <header className="sticky top-0 z-50 border-b border-border bg-surface/85 backdrop-blur-md">
+      <div className="h-[3px] w-full bg-gradient-to-r from-ua via-ua-soft to-ua" />
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="text-lg font-semibold tracking-tight text-ua">CCAA</span>
-          <span className="text-sm text-muted">Instrumento de competencias · EPG</span>
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ua font-serif text-sm font-semibold text-white shadow-[0_2px_8px_-2px_rgba(138,21,21,0.5)] transition-transform group-hover:scale-105">
+            E
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="font-serif text-[0.95rem] font-semibold tracking-tight text-foreground">
+              CCAA
+            </span>
+            <span className="text-[0.68rem] text-muted-2">Instrumento de competencias · EPG</span>
+          </span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {session?.user && (
-            <nav className="flex items-center gap-4 text-sm text-muted">
-              <Link href="/niveles" className="hover:text-foreground transition-colors">
+            <nav className="flex items-center gap-5 text-sm">
+              <Link
+                href="/niveles"
+                className="text-muted transition-colors hover:text-foreground"
+              >
                 Mis niveles
               </Link>
-              <span className="hidden sm:inline">{session.user.name}</span>
+              <span className="hidden text-muted-2 sm:inline">{session.user.name}</span>
               <form
                 action={async () => {
                   "use server";
                   await signOut({ redirectTo: "/login" });
                 }}
               >
-                <button className="hover:text-ua transition-colors">Salir</button>
+                <button className="text-muted transition-colors hover:text-ua">Salir</button>
               </form>
             </nav>
           )}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { Card } from "@/components/ui";
+import { Card, SectionLabel } from "@/components/ui";
 import { NuevoNivelForm } from "./nuevo-nivel-form";
 
 const CICLO_LABEL = {
@@ -25,38 +25,38 @@ export default async function NivelesPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Mis niveles</h1>
-          <p className="mt-1 text-sm text-muted">
-            Cada nivel es una instancia del instrumento: un ciclo, una modalidad, un trimestre.
-          </p>
-        </div>
+    <div className="mx-auto max-w-5xl px-6 py-12">
+      <div className="mb-10">
+        <h1 className="font-serif text-3xl font-semibold tracking-tight">Mis niveles</h1>
+        <p className="mt-1.5 text-[0.95rem] text-muted">
+          Cada nivel es una instancia del instrumento: un ciclo, una modalidad, un trimestre.
+        </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+      <div className="grid gap-8 md:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-4">
           {niveles.length === 0 && (
             <Card className="text-sm text-muted">
               Todavía no tienes niveles configurados. Crea el primero con el formulario.
             </Card>
           )}
-          {niveles.map((nivel) => (
-            <Link key={nivel.id} href={`/niveles/${nivel.id}`}>
-              <Card className="transition-colors hover:border-ua">
-                <div className="flex items-center justify-between">
+          {niveles.map((nivel, i) => (
+            <Link key={nivel.id} href={`/niveles/${nivel.id}`} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
+              <Card interactive>
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-medium">{nivel.nombre}</h2>
+                    <h2 className="font-serif text-lg font-medium">{nivel.nombre}</h2>
                     <p className="mt-1 text-sm text-muted">
                       {CICLO_LABEL[nivel.cicloTipo]} · {MODALIDAD_LABEL[nivel.modalidad]} ·{" "}
                       {nivel.trimestre}
                     </p>
                   </div>
-                  <div className="text-right text-xs text-muted">
+                  <div className="shrink-0 text-right text-xs text-muted-2">
                     <p>{nivel._count.asignaturas} asignaturas</p>
                     <p>{nivel._count.competencias} competencias</p>
-                    <p className="mt-1 text-ua">Reunión {nivel.reunionActualNumero}</p>
+                    <p className="mt-1.5 inline-block rounded-full bg-ua-tint px-2 py-0.5 font-medium text-ua">
+                      Reunión {nivel.reunionActualNumero}
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -65,9 +65,7 @@ export default async function NivelesPage() {
         </div>
 
         <Card className="h-fit">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
-            Nuevo nivel
-          </h2>
+          <SectionLabel>Nuevo nivel</SectionLabel>
           <NuevoNivelForm />
         </Card>
       </div>

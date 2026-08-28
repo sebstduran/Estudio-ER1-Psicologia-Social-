@@ -34,7 +34,7 @@ export function NuevoNivelForm() {
 
       {state?.error && <p className="text-sm text-incipiente">{state.error}</p>}
 
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Creando…" : "Crear nivel"}
       </Button>
     </form>

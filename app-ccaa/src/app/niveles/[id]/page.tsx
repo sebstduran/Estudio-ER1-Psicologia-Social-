@@ -77,6 +77,9 @@ export default async function NivelDetallePage({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <Link href={`/niveles/${nivel.id}/resultados`}>
+            <Button variant="secondary">Ver resultados</Button>
+          </Link>
           <Link href={`/evaluar/${nivel.id}`} target="_blank">
             <Button variant="secondary">Abrir enlace para docentes ↗</Button>
           </Link>

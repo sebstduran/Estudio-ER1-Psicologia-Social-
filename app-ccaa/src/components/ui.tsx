@@ -166,6 +166,90 @@ export function RubricaControl({
   );
 }
 
+type ConteoLogro = { LOGRADO: number; EN_PROCESO: number; INCIPIENTE: number };
+
+// Orden de lectura izquierda→derecha: incipiente → en proceso → logrado,
+// como una barra de progreso que "se llena" hacia el logro.
+const SEGMENTOS_LOGRO = [
+  { key: "INCIPIENTE", cls: "bg-incipiente" },
+  { key: "EN_PROCESO", cls: "bg-proceso" },
+  { key: "LOGRADO", cls: "bg-logrado" },
+] as const;
+
+export function LogroStackedBar({
+  counts,
+  thin,
+}: {
+  counts: ConteoLogro;
+  thin?: boolean;
+}) {
+  const total = counts.LOGRADO + counts.EN_PROCESO + counts.INCIPIENTE;
+  if (total === 0) {
+    return (
+      <div
+        className={cx(
+          "w-full rounded-full bg-surface-muted",
+          thin ? "h-1.5" : "h-2.5"
+        )}
+      />
+    );
+  }
+  return (
+    <div
+      className={cx(
+        "flex w-full gap-0.5 overflow-hidden rounded-full",
+        thin ? "h-1.5" : "h-2.5"
+      )}
+      role="img"
+      aria-label={`Logrado ${counts.LOGRADO}, en proceso ${counts.EN_PROCESO}, incipiente ${counts.INCIPIENTE}`}
+    >
+      {SEGMENTOS_LOGRO.filter((s) => counts[s.key] > 0).map((s) => (
+        <div
+          key={s.key}
+          title={`${s.key.replace("_", " ").toLowerCase()}: ${counts[s.key]}`}
+          className={cx("h-full first:rounded-l-full last:rounded-r-full", s.cls)}
+          style={{ width: `${(counts[s.key] / total) * 100}%` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function LogroLegend() {
+  const items = [
+    { cls: "bg-incipiente", label: "Incipiente" },
+    { cls: "bg-proceso", label: "En proceso" },
+    { cls: "bg-logrado", label: "Logrado" },
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      {items.map((it) => (
+        <span key={it.label} className="inline-flex items-center gap-1.5 text-xs text-muted">
+          <span className={cx("h-2 w-2 rounded-full", it.cls)} />
+          {it.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export function DeltaBadge({ delta }: { delta: number }) {
+  if (Math.abs(delta) < 1) {
+    return <span className="inline-flex items-center gap-1 text-xs text-muted">→ Sin cambio</span>;
+  }
+  const up = delta > 0;
+  return (
+    <span
+      className={cx(
+        "inline-flex items-center gap-1 text-xs font-medium",
+        up ? "text-logrado" : "text-incipiente"
+      )}
+    >
+      {up ? "↑" : "↓"} {Math.round(Math.abs(delta))} pts · {up ? "avance" : "retroceso"}
+    </span>
+  );
+}
+
 export function TipoMapeoBadge({
   tipo,
 }: {

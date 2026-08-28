@@ -20,11 +20,13 @@
   --ua-tint: #fbeceb;
   --ua-tint-strong: #f5d9d6;
 
+  /* Paleta de estado (logro): fija entre temas, solo cambia el tinte de fondo.
+     Validada con el validador de paletas: separación CVD y contraste OK. */
   --logrado: #2f7a4f;
   --logrado-tint: #eaf5ef;
   --proceso: #b8790f;
   --proceso-tint: #fbf1e0;
-  --incipiente: #b3352c;
+  --incipiente: #c1303c;
   --incipiente-tint: #fbeae8;
 
   --shadow-color: 34 26 23;
@@ -47,11 +49,11 @@
   --ua-tint: #35201d;
   --ua-tint-strong: #422924;
 
-  --logrado: #74c896;
+  --logrado: #2f7a4f;
   --logrado-tint: #1d2f24;
-  --proceso: #e2ac57;
+  --proceso: #b8790f;
   --proceso-tint: #332815;
-  --incipiente: #e88b81;
+  --incipiente: #c1303c;
   --incipiente-tint: #3c211d;
 
   --shadow-color: 0 0 0;

@@ -4,12 +4,23 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
-// Guarda el archivo en /public/uploads (simplificación para el prototipo).
-// En producción esto debería subir a un blob store (Vercel Blob, S3, etc.)
-// ya que el disco local no persiste entre despliegues serverless.
+// En Vercel el disco es de solo lectura (salvo /tmp, que no es servible), así
+// que ahí subimos a Vercel Blob. En desarrollo local, sin BLOB_READ_WRITE_TOKEN,
+// caemos a /public/uploads para no depender de una cuenta de Vercel.
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "actas");
+
+async function guardarArchivo(nombreSeguro: string, bytes: Buffer): Promise<string> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`actas/${nombreSeguro}`, bytes, { access: "public" });
+    return blob.url;
+  }
+  await mkdir(UPLOAD_DIR, { recursive: true });
+  await writeFile(path.join(UPLOAD_DIR, nombreSeguro), bytes);
+  return `/uploads/actas/${nombreSeguro}`;
+}
 
 export async function subirActa(
   nivelId: string,
@@ -28,20 +39,13 @@ export async function subirActa(
     redirect(`${volver}&error=${encodeURIComponent("El archivo no puede superar 15 MB.")}`);
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
   const extension = path.extname(archivo.name) || "";
   const nombreSeguro = `${reunionId}-${Date.now()}${extension}`;
   const bytes = Buffer.from(await archivo.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, nombreSeguro), bytes);
+  const url = await guardarArchivo(nombreSeguro, bytes);
 
   await prisma.acta.create({
-    data: {
-      reunionId,
-      nombreArchivo: archivo.name,
-      url: `/uploads/actas/${nombreSeguro}`,
-      subidoPor,
-    },
+    data: { reunionId, nombreArchivo: archivo.name, url, subidoPor },
   });
 
   revalidatePath(`/evaluar/${nivelId}`);

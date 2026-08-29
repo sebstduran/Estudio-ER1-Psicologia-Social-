@@ -212,6 +212,7 @@
     <nav class="hidden items-center gap-7 text-sm text-soft lg:flex">
       <a href="#componentes" class="transition-colors hover:text-ink">Componentes</a>
       <a href="#proceso" class="transition-colors hover:text-ink">Cómo funciona</a>
+      <a href="#recomendaciones" class="transition-colors hover:text-ink">Recomendaciones</a>
       <a href="#aplicacion" class="transition-colors hover:text-ink">La aplicación</a>
       <a href="#preguntas" class="transition-colors hover:text-ink">Preguntas</a>
     </nav>
@@ -243,13 +244,14 @@
       <p class="rule-label mb-6">Carrera de Psicología · Universidad Autónoma de Chile</p>
 
       <h1 class="font-serif text-[2.6rem] font-semibold leading-[1.06] tracking-[-0.015em] sm:text-6xl">
-        Cada reunión de CCAA debería terminar en una <em class="not-italic text-ua">decisión</em>, no en un acta.
+        Sabe qué hay que fortalecer, y qué hacer al <em class="not-italic text-ua">respecto</em>.
       </h1>
 
       <p class="mt-7 max-w-[52ch] text-[1.06rem] leading-relaxed text-soft">
-        El Instrumento CCAA reúne el juicio de tus docentes indicador por indicador, conserva cada
-        aplicación del trimestre y calcula solo el avance entre la línea base y el cierre. Lo que antes
-        se reconstruía de memoria queda como evidencia para sustentar la Estrategia Pedagógica Global.
+        El Instrumento CCAA reúne el juicio de tus docentes indicador por indicador, ordena las
+        competencias del nivel de la más urgente a la menos, y propone qué decisión de Estrategia
+        Pedagógica Global activar y qué hacer en cada asignatura para que las y los estudiantes
+        alcancen el estándar.
       </p>
 
       <div class="mt-9 flex flex-wrap items-center gap-3">
@@ -281,46 +283,50 @@
 
     <!-- El instrumento midiendo: comparación línea base vs. cierre -->
     <figure class="rounded-2xl border border-rule bg-surface p-7 shadow-[0_2px_4px_rgb(var(--shadow)/0.03),0_24px_48px_-24px_rgb(var(--shadow)/0.16)]">
-      <figcaption class="mb-6 flex items-baseline justify-between gap-3 border-b border-rule pb-4">
-        <span class="rule-label !text-ua">3.1 · Evaluar</span>
-        <span class="rule-label">Nivel 1 · 2026-T3</span>
+      <figcaption class="mb-5 flex items-baseline justify-between gap-3 border-b border-rule pb-4">
+        <span class="rule-label !text-ua">Qué fortalecer</span>
+        <span class="rule-label">Nivel 1 · R4</span>
       </figcaption>
 
-      <div class="space-y-6" id="instrumento">
-        <div>
-          <div class="mb-2 flex items-baseline justify-between text-sm">
-            <span class="text-soft">R1 · Línea base</span>
-            <span class="font-mono text-xs tabular-nums text-faint" data-cifra="base">0%</span>
+      <ul class="flex flex-col gap-4" id="instrumento">
+        <li>
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="truncate text-sm"><span class="font-mono text-xs text-faint">3.1</span> Evaluar</span>
+            <span class="flex shrink-0 items-baseline gap-2.5">
+              <span class="rounded-full bg-incipiente-tint px-2 py-0.5 text-[0.65rem] font-medium text-incipiente">Crítico</span>
+              <span class="w-7 text-right font-mono text-xs tabular-nums text-muted" data-cifra="25">0</span>
+            </span>
           </div>
-          <div class="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-sunken" role="img"
-               aria-label="Línea base: mayoría incipiente, logro 25 por ciento">
-            <div class="seg rounded-l-full bg-incipiente" data-w="60" style="width:0%"></div>
-            <div class="seg bg-proceso" data-w="30" style="width:0%"></div>
-            <div class="seg rounded-r-full bg-logrado" data-w="10" style="width:0%"></div>
+          <div class="mt-2 flex h-1.5 gap-0.5 overflow-hidden rounded-full bg-sunken"><div class="seg rounded-l-full bg-incipiente" data-w="50" style="width:0%"></div><div class="seg rounded-r-full bg-proceso" data-w="50" style="width:0%"></div></div>
+        </li>
+        <li>
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="truncate text-sm"><span class="font-mono text-xs text-faint">1.1</span> Fundamentar</span>
+            <span class="flex shrink-0 items-baseline gap-2.5">
+              <span class="rounded-full bg-proceso-tint px-2 py-0.5 text-[0.65rem] font-medium text-proceso">En riesgo</span>
+              <span class="w-7 text-right font-mono text-xs tabular-nums text-muted" data-cifra="50">0</span>
+            </span>
           </div>
-        </div>
+          <div class="mt-2 flex h-1.5 gap-0.5 overflow-hidden rounded-full bg-sunken"><div class="seg rounded-l-full bg-incipiente" data-w="50" style="width:0%"></div><div class="seg rounded-r-full bg-logrado" data-w="50" style="width:0%"></div></div>
+        </li>
+        <li>
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="truncate text-sm"><span class="font-mono text-xs text-faint">4.1</span> Analizar</span>
+            <span class="flex shrink-0 items-baseline gap-2.5">
+              <span class="rounded-full bg-logrado-tint px-2 py-0.5 text-[0.65rem] font-medium text-logrado">Consolidado</span>
+              <span class="w-7 text-right font-mono text-xs tabular-nums text-muted" data-cifra="100">0</span>
+            </span>
+          </div>
+          <div class="mt-2 flex h-1.5 gap-0.5 overflow-hidden rounded-full bg-sunken"><div class="seg rounded-l-full rounded-r-full bg-logrado" data-w="100" style="width:0%"></div></div>
+        </li>
+      </ul>
 
-        <div>
-          <div class="mb-2 flex items-baseline justify-between text-sm">
-            <span class="text-soft">R4 · Cierre</span>
-            <span class="font-mono text-xs tabular-nums text-faint" data-cifra="cierre">0%</span>
-          </div>
-          <div class="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-sunken" role="img"
-               aria-label="Cierre: mayoría logrado, logro 75 por ciento">
-            <div class="seg rounded-l-full bg-incipiente" data-w="10" style="width:0%"></div>
-            <div class="seg bg-proceso" data-w="30" style="width:0%"></div>
-            <div class="seg rounded-r-full bg-logrado" data-w="60" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-6 flex items-center justify-between border-t border-rule pt-5">
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span class="inline-flex items-center gap-1.5 text-xs text-soft"><span class="h-2 w-2 rounded-full bg-incipiente"></span>Incipiente</span>
-          <span class="inline-flex items-center gap-1.5 text-xs text-soft"><span class="h-2 w-2 rounded-full bg-proceso"></span>En proceso</span>
-          <span class="inline-flex items-center gap-1.5 text-xs text-soft"><span class="h-2 w-2 rounded-full bg-logrado"></span>Logrado</span>
-        </div>
-        <span class="font-mono text-xs font-medium tabular-nums text-logrado">↑ 50 pts</span>
+      <div class="mt-6 rounded-xl bg-sunken p-4 opacity-0 transition-opacity duration-700" id="decision">
+        <p class="rule-label mb-1.5">Decisión EPG · Instrumentos de evaluación</p>
+        <p class="text-sm leading-relaxed">
+          Rediseñar en conjunto la pauta de la unidad, partiendo por el criterio que los
+          docentes marcaron como incipiente.
+        </p>
       </div>
     </figure>
   </section>
@@ -400,15 +406,58 @@
         <h3 class="font-serif text-2xl font-semibold">Sintetizar</h3>
         <p class="mt-1 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-faint">Coordinador</p>
         <p class="mt-4 text-[0.95rem] leading-relaxed text-soft">
-          Los votos de todos los docentes se agregan por evidencia y por competencia. Varias personas
-          pueden evaluar la misma asignatura y el instrumento los consolida.
+          Los votos se agregan por evidencia y por competencia, y cada una queda clasificada como
+          crítica, en riesgo o consolidada. Ves de inmediato cuál atacar primero y cuál es la
+          evidencia concreta que está fallando.
         </p>
         <p class="mt-4 text-[0.95rem] leading-relaxed text-soft">
-          La comparación entre línea base y cierre se calcula sola, con el delta de avance o retroceso
-          de cada competencia.
+          Desde ahí, un informe traduce el diagnóstico en decisiones. La comparación entre línea base
+          y cierre se calcula sola.
         </p>
       </li>
     </ol>
+  </section>
+
+  <!-- ══════════════ RECOMENDACIONES ══════════════ -->
+  <section id="recomendaciones" class="border-y border-rule bg-sunken">
+    <div class="mx-auto max-w-6xl scroll-mt-20 px-6 py-20 lg:py-28">
+      <div class="mb-14 max-w-2xl">
+        <p class="rule-label reveal mb-4">Las recomendaciones</p>
+        <h2 class="reveal font-serif text-4xl font-semibold leading-[1.1] tracking-[-0.01em] sm:text-5xl">
+          Del diagnóstico al plan de trabajo.
+        </h2>
+        <p class="reveal mt-5 text-[1.02rem] leading-relaxed text-soft">
+          Saber que una competencia está al 25% no resuelve nada por sí solo. El instrumento cruza
+          el juicio de tus docentes, los comentarios que escribieron y el marco de la EPG, y te
+          propone por dónde empezar.
+        </p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <article class="reveal rounded-2xl border border-rule bg-surface p-7">
+          <h3 class="font-serif text-lg font-semibold leading-snug">Diagnóstico por competencia</h3>
+          <p class="mt-2.5 text-[0.9rem] leading-relaxed text-soft">Qué está ocurriendo según el juicio docente, citando el indicador que falla y los comentarios que dejaron en la rúbrica.</p>
+        </article>
+        <article class="reveal rounded-2xl border border-rule bg-surface p-7">
+          <h3 class="font-serif text-lg font-semibold leading-snug">La decisión EPG que corresponde</h3>
+          <p class="mt-2.5 text-[0.9rem] leading-relaxed text-soft">Nombrada con su componente: no “hay que mejorar la evaluación”, sino qué acordar y sobre qué componente de la Estrategia Pedagógica Global.</p>
+        </article>
+        <article class="reveal rounded-2xl border border-rule bg-surface p-7">
+          <h3 class="font-serif text-lg font-semibold leading-snug">Acciones para que logren la competencia</h3>
+          <p class="mt-2.5 text-[0.9rem] leading-relaxed text-soft">Concretas y verificables: qué se hace, en qué momento de la asignatura y cómo se comprueba el avance.</p>
+        </article>
+        <article class="reveal rounded-2xl border border-rule bg-surface p-7">
+          <h3 class="font-serif text-lg font-semibold leading-snug">Qué hace cada asignatura</h3>
+          <p class="mt-2.5 text-[0.9rem] leading-relaxed text-soft">Diferenciando a las que tributan de forma directa de las que lo hacen transversalmente.</p>
+        </article>
+      </div>
+
+      <p class="reveal mt-8 max-w-2xl text-sm leading-relaxed text-faint">
+        Las recomendaciones se generan con inteligencia artificial a partir de los datos de tu propio
+        nivel. Son un punto de partida para la conversación de la CCAA, no un reemplazo del criterio
+        del equipo: quien decide sigue siendo la comunidad académica.
+      </p>
+    </div>
   </section>
 
   <!-- ══════════════ COMPONENTES EPG ══════════════ -->
@@ -666,6 +715,8 @@
      "Ambos evalúan y el instrumento agrega los dos juicios. La distribución que se muestra por evidencia refleja todos los votos registrados, no el de una sola persona."],
     ["¿Se pueden guardar las actas de las sesiones?",
      "Sí. Cada reunión admite adjuntar las actas como evidencia documental, y quedan asociadas a esa reunión concreta junto con las evaluaciones de esa misma instancia."],
+    ["¿Cómo funcionan las recomendaciones automáticas?",
+     "Generan un informe que cruza el juicio de tus docentes, los comentarios que escribieron en la rúbrica y el marco de la EPG. Entrega, por competencia, el diagnóstico, la decisión EPG que corresponde activar, acciones concretas para las y los estudiantes y qué debería hacer cada asignatura. Lo revisas y lo ajustas con la CCAA antes de acordarlo: la decisión sigue siendo del equipo."],
     ["¿Cuánto toma dejarlo listo?",
      "La configuración de un nivel —asignaturas, docentes y el mapeo de qué competencia tributa cada asignatura— toma una sesión de trabajo. Después de eso, cada reunión solo requiere que los docentes completen la rúbrica."],
   ];
@@ -698,19 +749,17 @@
     document.querySelectorAll(".reveal").forEach(function (el) { observador.observe(el); });
   })();
 
-  // ---- El instrumento del hero: anima la medición al entrar en pantalla ----
+  // ---- El instrumento del hero: mide y luego propone la decisión ----
   (function () {
     const panel = document.getElementById("instrumento");
-    const cifras = { base: 25, cierre: 75 };
+    const decision = document.getElementById("decision");
     let corrido = false;
 
     function contar(el, hasta) {
       const inicio = performance.now();
-      const duracion = 900;
       (function paso(ahora) {
-        const t = Math.min((ahora - inicio) / duracion, 1);
-        const suave = 1 - Math.pow(1 - t, 3);
-        el.textContent = Math.round(hasta * suave) + "%";
+        const t = Math.min((ahora - inicio) / 900, 1);
+        el.textContent = Math.round(hasta * (1 - Math.pow(1 - t, 3)));
         if (t < 1) requestAnimationFrame(paso);
       })(inicio);
     }
@@ -719,20 +768,23 @@
       if (corrido) return;
       corrido = true;
       panel.querySelectorAll(".seg").forEach(function (seg, i) {
-        setTimeout(function () { seg.style.width = seg.dataset.w + "%"; }, 120 + i * 90);
+        setTimeout(function () { seg.style.width = seg.dataset.w + "%"; }, 120 + i * 80);
       });
-      setTimeout(function () {
-        contar(panel.querySelector('[data-cifra="base"]'), cifras.base);
-      }, 300);
-      setTimeout(function () {
-        contar(panel.querySelector('[data-cifra="cierre"]'), cifras.cierre);
-      }, 700);
+      panel.querySelectorAll("[data-cifra]").forEach(function (el, i) {
+        setTimeout(function () { contar(el, Number(el.dataset.cifra)); }, 250 + i * 160);
+      });
+      // La decisión aparece después de la medición: primero se sabe qué falla.
+      setTimeout(function () { decision.style.opacity = "1"; }, 1500);
+    }
+
+    function alTiro() {
+      panel.querySelectorAll(".seg").forEach(function (s) { s.style.width = s.dataset.w + "%"; });
+      panel.querySelectorAll("[data-cifra]").forEach(function (el) { el.textContent = el.dataset.cifra; });
+      decision.style.opacity = "1";
     }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      panel.querySelectorAll(".seg").forEach(function (s) { s.style.width = s.dataset.w + "%"; });
-      panel.querySelector('[data-cifra="base"]').textContent = cifras.base + "%";
-      panel.querySelector('[data-cifra="cierre"]').textContent = cifras.cierre + "%";
+      alTiro();
     } else {
       new IntersectionObserver(function (e, o) {
         if (e[0].isIntersecting) { medir(); o.disconnect(); }
@@ -745,7 +797,7 @@
     const PIES = {
       configurar: "Configurar · el coordinador mapea qué competencia tributa cada asignatura.",
       evaluar: "Evaluar · el docente ve solo sus competencias y califica cada indicador.",
-      resultados: "Sintetizar · distribución de logro y comparación entre línea base y cierre.",
+      resultados: "Sintetizar · las competencias ordenadas por urgencia, con la evidencia que falla.",
     };
     const pestanas = document.querySelectorAll(".tab");
     const capturas = document.querySelectorAll(".shot");

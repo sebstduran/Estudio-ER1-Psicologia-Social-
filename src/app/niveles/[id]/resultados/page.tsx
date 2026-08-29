@@ -142,6 +142,31 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
   return (
     <div className="flex flex-col gap-6">
       <Card className="border-l-[3px] border-l-ua">
+        {informe.veredicto && (
+          <div className="mb-5 border-b border-border pb-5">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
+              ¿El nivel está cumpliendo con sus competencias?
+            </p>
+            <p
+              className={`mt-2 font-serif text-2xl font-semibold ${
+                informe.veredicto.cumple === "SI"
+                  ? "text-logrado"
+                  : informe.veredicto.cumple === "NO"
+                    ? "text-incipiente"
+                    : "text-proceso"
+              }`}
+            >
+              {informe.veredicto.cumple === "SI"
+                ? "Sí, en lo evaluado."
+                : informe.veredicto.cumple === "NO"
+                  ? "No todavía."
+                  : "Parcialmente."}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              {informe.veredicto.fundamento}
+            </p>
+          </div>
+        )}
         <Eyebrow>Síntesis</Eyebrow>
         <p className="mt-2.5 text-[1.05rem] leading-relaxed">{informe.sintesis}</p>
 
@@ -186,11 +211,16 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
               <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
                 Para que las y los estudiantes logren la competencia
               </p>
-              <ul className="flex flex-col gap-2.5">
+              <ul className="flex flex-col gap-4">
                 {c.accionesParaEstudiantes.map((a, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm leading-relaxed">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-ua" />
-                    {a}
+                  <li key={i} className="rounded-xl border border-border p-4">
+                    <span className="inline-block rounded-full bg-ua-tint px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-wide text-ua">
+                      {a.tecnica}
+                    </span>
+                    <p className="mt-2.5 text-sm leading-relaxed">{a.accion}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-2">
+                      Por qué: {a.porQue}
+                    </p>
                   </li>
                 ))}
               </ul>

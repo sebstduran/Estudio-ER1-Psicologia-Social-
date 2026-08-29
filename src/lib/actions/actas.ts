@@ -22,6 +22,35 @@ async function guardarArchivo(nombreSeguro: string, bytes: Buffer): Promise<stri
   return `/uploads/actas/${nombreSeguro}`;
 }
 
+/** Subida desde la pantalla de configuración del coordinador. */
+export async function subirActaCoordinador(
+  nivelId: string,
+  reunionId: string,
+  subidoPor: string,
+  formData: FormData
+) {
+  const volver = `/niveles/${nivelId}`;
+
+  const archivo = formData.get("archivo");
+  if (!(archivo instanceof File) || archivo.size === 0) {
+    redirect(`${volver}?error=${encodeURIComponent("Selecciona un archivo.")}`);
+  }
+  if (archivo.size > 15 * 1024 * 1024) {
+    redirect(`${volver}?error=${encodeURIComponent("El archivo no puede superar 15 MB.")}`);
+  }
+
+  const extension = path.extname(archivo.name) || "";
+  const nombreSeguro = `${reunionId}-${Date.now()}${extension}`;
+  const url = await guardarArchivo(nombreSeguro, Buffer.from(await archivo.arrayBuffer()));
+
+  await prisma.acta.create({
+    data: { reunionId, nombreArchivo: archivo.name, url, subidoPor },
+  });
+
+  revalidatePath(volver);
+  redirect(`${volver}?acta=1`);
+}
+
 export async function subirActa(
   nivelId: string,
   reunionId: string,

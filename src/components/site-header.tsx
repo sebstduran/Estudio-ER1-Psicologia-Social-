@@ -10,8 +10,8 @@ export async function SiteHeader() {
       <div className="h-[3px] w-full bg-gradient-to-r from-ua via-ua-soft to-ua" />
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="group flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ua font-serif text-sm font-semibold text-white shadow-[0_2px_8px_-2px_rgba(138,21,21,0.5)] transition-transform group-hover:scale-105">
-            E
+          <span className="flex h-8 w-9 items-center justify-center rounded-lg bg-ua font-serif text-xs tracking-wide font-semibold text-white shadow-[0_2px_8px_-2px_rgba(138,21,21,0.5)] transition-transform group-hover:scale-105">
+            UA
           </span>
           <span className="flex flex-col leading-none">
             <span className="font-serif text-[0.95rem] font-semibold tracking-tight text-foreground">

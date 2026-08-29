@@ -10,6 +10,17 @@ export type RecomendacionAsignatura = {
   accion: string;
 };
 
+export type AccionPedagogica = {
+  tecnica: string;
+  accion: string;
+  porQue: string;
+};
+
+export type Veredicto = {
+  cumple: "SI" | "PARCIAL" | "NO";
+  fundamento: string;
+};
+
 export type CompetenciaInforme = {
   codigo: string;
   nombre: string;
@@ -17,11 +28,12 @@ export type CompetenciaInforme = {
   diagnostico: string;
   evidenciaCritica: string;
   decisionEpg: { componente: string; decision: string };
-  accionesParaEstudiantes: string[];
+  accionesParaEstudiantes: AccionPedagogica[];
   recomendacionesPorAsignatura: RecomendacionAsignatura[];
 };
 
 export type TipoInforme = {
+  veredicto: Veredicto;
   sintesis: string;
   prioridades: string[];
   competencias: CompetenciaInforme[];
@@ -33,8 +45,28 @@ export type TipoInforme = {
 const ESQUEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["sintesis", "prioridades", "competencias", "alertasHito"],
+  required: ["veredicto", "sintesis", "prioridades", "competencias", "alertasHito"],
   properties: {
+    veredicto: {
+      type: "object",
+      additionalProperties: false,
+      required: ["cumple", "fundamento"],
+      description:
+        "Dictamen sobre si el nivel está cumpliendo con las competencias que le corresponden.",
+      properties: {
+        cumple: {
+          type: "string",
+          enum: ["SI", "PARCIAL", "NO"],
+          description:
+            "SI cuando prácticamente todas las competencias evaluadas están consolidadas; NO cuando hay competencias críticas; PARCIAL en el resto.",
+        },
+        fundamento: {
+          type: "string",
+          description:
+            "Una o dos frases que justifiquen el dictamen con las cifras concretas del nivel.",
+        },
+      },
+    },
     sintesis: {
       type: "string",
       description:
@@ -91,8 +123,29 @@ const ESQUEMA = {
           accionesParaEstudiantes: {
             type: "array",
             description:
-              "Acciones pedagógicas concretas y observables para que las y los estudiantes alcancen la competencia. Nada genérico.",
-            items: { type: "string" },
+              "Entre 2 y 4 acciones pedagógicas fundadas en evidencia para que las y los estudiantes alcancen la competencia.",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["tecnica", "accion", "porQue"],
+              properties: {
+                tecnica: {
+                  type: "string",
+                  description:
+                    "Nombre de la técnica o metodología empleada, por ejemplo: aula invertida, práctica de recuperación, instrucción entre pares, ejemplos resueltos, práctica espaciada e intercalada, aprendizaje basado en problemas, evaluación formativa con criterios de éxito, andamiaje con desvanecimiento progresivo, autoexplicación metacognitiva.",
+                },
+                accion: {
+                  type: "string",
+                  description:
+                    "Cómo se implementa en esta asignatura y en este nivel: qué hace el docente, qué hacen las y los estudiantes, en qué momento y cómo se verifica el avance.",
+                },
+                porQue: {
+                  type: "string",
+                  description:
+                    "Por qué esta técnica ataca precisamente la evidencia que está fallando. Una frase.",
+                },
+              },
+            },
           },
           recomendacionesPorAsignatura: {
             type: "array",
@@ -122,32 +175,51 @@ const ESQUEMA = {
 
 const SISTEMA = `Eres asesor pedagógico de una Comunidad Académica (CCAA) de la carrera de
 Psicología de la Universidad Autónoma de Chile. Acompañas a quien coordina un nivel a
-convertir el juicio de sus docentes en decisiones de Estrategia Pedagógica Global (EPG).
+responder dos preguntas: si el nivel está cumpliendo con las competencias que le
+corresponden, y qué hacer para que las y los estudiantes las alcancen.
 
-La EPG se sustenta en siete componentes:
-1. Elementos curriculares — tributación de los RA con el perfil de ciclo y egreso
-2. Balance de carga evaluativo — distribución de evaluaciones en el trimestre
-3. Estrategias metodológicas — metodologías activo-participativas y sus momentos
-4. Instrumentos de evaluación — diseño, validación e implementación colaborativa
-5. Planificación integrada — planificación conjunta intra e inter-asignatura
-6. Derivación al SAAC — derivación y seguimiento de estudiantes derivados
-7. Seguimiento de resultados — seguimiento y análisis de resultados académicos
+Tu especialidad es el diseño instruccional fundado en evidencia. Conoces y aplicas:
+
+- Aula invertida: el primer contacto con el contenido ocurre fuera de clase y el tiempo
+  presencial se usa para práctica con retroalimentación. Sirve cuando la clase se está
+  yendo en cubrir contenido y no queda tiempo para que practiquen.
+- Práctica de recuperación: recordar activamente en vez de releer. Sirve cuando
+  reconocen el contenido pero no logran usarlo sin apoyo.
+- Práctica espaciada e intercalada: distribuir en el tiempo y mezclar tipos de
+  problema. Sirve cuando rinden bien en la unidad y lo pierden después.
+- Instrucción entre pares: votación individual, discusión en pares, revotación. Sirve
+  cuando hay concepciones erróneas persistentes y compartidas.
+- Ejemplos resueltos y gestión de la carga cognitiva: modelar el procedimiento completo
+  antes de exigir producción autónoma. Sirve cuando la tarea es compleja y se pierden.
+- Andamiaje con desvanecimiento progresivo: apoyos que se retiran a medida que avanzan.
+- Aprendizaje basado en problemas y método de casos: pertinente para competencias de
+  análisis, evaluación e intervención.
+- Evaluación formativa con criterios de éxito explícitos y rúbricas compartidas de
+  antemano. Sirve cuando el desempeño es dispar porque no saben qué se espera.
+- Autoexplicación y metacognición: pedir que expliquen su razonamiento.
+- Alineamiento constructivo: resultado de aprendizaje, actividad y evaluación apuntando
+  a lo mismo. Sirve cuando se enseña una cosa y se evalúa otra.
 
 Cómo trabajas:
 
+- Empiezas por dictaminar si el nivel está cumpliendo con sus competencias, fundado en
+  las cifras concretas. No suavizas un resultado malo.
+- Eliges la técnica en función de la evidencia que está fallando, no por moda. Cada
+  acción nombra la técnica, dice cómo se implementa en esa asignatura concreta y explica
+  en una frase por qué ataca ese problema en particular. Una técnica mal elegida para el
+  problema es peor que ninguna: si los datos no justifican una metodología nueva, propón
+  ajustar la que ya existe.
+- Los comentarios que los docentes escribieron en la rúbrica son tu mejor pista sobre la
+  causa. Úsalos: si un docente dice que llegan sin la lectura hecha, eso apunta a aula
+  invertida o a control de lectura, no a más contenido en clase.
 - Escribes para una reunión de trabajo, no para un informe de acreditación. Frases
-  directas, sin relleno institucional ni adjetivos de catálogo.
-- Cada afirmación se apoya en los datos que recibes. Si algo no está en los datos, no
-  lo afirmas. Cuando la evidencia es escasa (pocos votos, un solo docente), lo dices en
-  vez de sobreinterpretar.
-- Las acciones para estudiantes son concretas y observables: qué se hace, en qué
-  momento de la asignatura y cómo se verifica el avance. "Reforzar la comprensión" no
-  sirve; "incorporar un taller de análisis de casos en la semana 5, con pauta de
-  cotejo de los tres criterios del indicador" sí.
-- Las recomendaciones por asignatura respetan la tributación: a una asignatura que
-  tributa de forma transversal no le pides lo mismo que a una directa.
-- No inventas nombres de asignaturas, docentes ni competencias: usas exactamente los
-  que aparecen en los datos.
+  directas, sin relleno institucional.
+- Cada afirmación se apoya en los datos que recibes. Cuando la evidencia es escasa
+  (pocos votos, un solo docente), lo dices en vez de sobreinterpretar.
+- Las recomendaciones por asignatura respetan la tributación: a una que tributa de forma
+  transversal no le pides lo mismo que a una directa.
+- No inventas nombres de asignaturas, docentes ni competencias: usas exactamente los que
+  aparecen en los datos.
 - Escribes en español de Chile, tratando de "tú" a quien coordina.`;
 
 function describirConteo(c: { LOGRADO: number; EN_PROCESO: number; INCIPIENTE: number }) {

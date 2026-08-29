@@ -272,6 +272,92 @@ export function franjaSeveridad(
   }[severidad];
 }
 
+/**
+ * Un paso del flujo de configuración. El estado lo decide el dato, no el
+ * usuario: lo ya resuelto se pliega, lo que toca ahora queda abierto y lo que
+ * viene después se muestra atenuado para que se sepa qué falta.
+ */
+export function Paso({
+  numero,
+  titulo,
+  descripcion,
+  estado,
+  resumen,
+  colapsar = false,
+  children,
+}: {
+  numero: number;
+  titulo: string;
+  descripcion?: string;
+  estado: "listo" | "actual" | "pendiente";
+  resumen?: React.ReactNode;
+  /**
+   * Un paso ya resuelto solo se pliega cuando toda la configuración está lista.
+   * Mientras se configura conviene dejarlo abierto: quien agrega una asignatura
+   * casi siempre va a agregar la siguiente, y plegarlo obligaría a reabrirlo.
+   */
+  colapsar?: boolean;
+  children?: React.ReactNode;
+}) {
+  const listo = estado === "listo";
+  const pendiente = estado === "pendiente";
+  const plegado = listo && colapsar;
+
+  return (
+    <section
+      className={cx(
+        "rounded-2xl border bg-surface p-6 transition-opacity",
+        estado === "actual"
+          ? "border-ua/40 shadow-[0_1px_2px_rgba(var(--shadow-color)/0.05),0_16px_32px_-16px_rgba(var(--shadow-color)/0.16)]"
+          : "border-border",
+        pendiente && "opacity-55"
+      )}
+      aria-current={estado === "actual" ? "step" : undefined}
+    >
+      <div className="flex items-start gap-4">
+        <span
+          className={cx(
+            "grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-medium",
+            listo
+              ? "bg-logrado-tint text-logrado"
+              : estado === "actual"
+                ? "bg-ua text-white"
+                : "bg-surface-muted text-muted-2"
+          )}
+        >
+          {listo ? "✓" : numero}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="font-serif text-xl font-medium">{titulo}</h2>
+            {listo && resumen && <span className="text-sm text-muted">{resumen}</span>}
+          </div>
+          {descripcion && !listo && (
+            <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-muted">{descripcion}</p>
+          )}
+
+          {children && (
+            <div className={cx(plegado ? "mt-4" : "mt-5")}>
+              {plegado ? (
+                <details className="group">
+                  <summary className="cursor-pointer list-none text-xs text-muted-2 transition-colors hover:text-foreground">
+                    <span className="group-open:hidden">Editar ▾</span>
+                    <span className="hidden group-open:inline">Ocultar ▴</span>
+                  </summary>
+                  <div className="mt-4">{children}</div>
+                </details>
+              ) : (
+                children
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function DeltaBadge({ delta }: { delta: number }) {
   if (Math.abs(delta) < 1) {
     return <span className="inline-flex items-center gap-1 text-xs text-muted">→ Sin cambio</span>;

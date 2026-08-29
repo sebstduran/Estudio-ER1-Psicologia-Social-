@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { Card, SectionLabel } from "@/components/ui";
-import { NuevoNivelForm } from "./nuevo-nivel-form";
+import { resumenNiveles, type ResumenNivel } from "@/lib/panel";
+import { Button, Card } from "@/components/ui";
+import { NuevoNivelPanel } from "./nuevo-nivel-panel";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
@@ -10,65 +10,199 @@ const CICLO_LABEL = {
   FINAL: "Ciclo Final",
 } as const;
 
-const MODALIDAD_LABEL = {
-  DIURNO: "Diurno · 4 reuniones",
-  VESPERTINO_TECH: "Vespertino/TECH · 3 reuniones",
+const MODALIDAD_LABEL = { DIURNO: "Diurno", VESPERTINO_TECH: "Vespertino/TECH" } as const;
+
+const FASE_LABEL = {
+  BASE: "línea base",
+  SEGUIMIENTO: "seguimiento",
+  CIERRE: "cierre",
 } as const;
 
-export default async function NivelesPage() {
-  const user = await requireCoordinador();
-
-  const niveles = await prisma.nivel.findMany({
-    where: { coordinadorId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { asignaturas: true, competencias: true } } },
-  });
+/** Reparto de severidad como una sola barra: la salud del nivel de un vistazo. */
+function BarraSalud({ s }: { s: ResumenNivel["severidades"] }) {
+  const total = s.CRITICO + s.EN_RIESGO + s.CONSOLIDADO + s.SIN_DATOS;
+  if (total === 0) return null;
+  const tramos = [
+    { n: s.CRITICO, cls: "bg-incipiente", label: "críticas" },
+    { n: s.EN_RIESGO, cls: "bg-proceso", label: "en riesgo" },
+    { n: s.CONSOLIDADO, cls: "bg-logrado", label: "consolidadas" },
+    { n: s.SIN_DATOS, cls: "bg-surface-muted", label: "sin evaluar" },
+  ].filter((t) => t.n > 0);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="mb-10">
-        <h1 className="font-serif text-3xl font-semibold tracking-tight">Mis niveles</h1>
-        <p className="mt-1.5 text-[0.95rem] text-muted">
-          Cada nivel es una instancia del instrumento: un ciclo, una modalidad, un trimestre.
-        </p>
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-[1fr_340px]">
-        <div className="flex flex-col gap-4">
-          {niveles.length === 0 && (
-            <Card className="text-sm text-muted">
-              Todavía no tienes niveles configurados. Crea el primero con el formulario.
-            </Card>
-          )}
-          {niveles.map((nivel, i) => (
-            <Link key={nivel.id} href={`/niveles/${nivel.id}`} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
-              <Card interactive>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="font-serif text-lg font-medium">{nivel.nombre}</h2>
-                    <p className="mt-1 text-sm text-muted">
-                      {CICLO_LABEL[nivel.cicloTipo]} · {MODALIDAD_LABEL[nivel.modalidad]} ·{" "}
-                      {nivel.trimestre}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right text-xs text-muted-2">
-                    <p>{nivel._count.asignaturas} asignaturas</p>
-                    <p>{nivel._count.competencias} competencias</p>
-                    <p className="mt-1.5 inline-block rounded-full bg-ua-tint px-2 py-0.5 font-medium text-ua">
-                      Reunión {nivel.reunionActualNumero}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        <Card className="h-fit">
-          <SectionLabel>Nuevo nivel</SectionLabel>
-          <NuevoNivelForm />
-        </Card>
-      </div>
+    <div
+      className="flex h-2 w-full gap-0.5 overflow-hidden rounded-full"
+      role="img"
+      aria-label={tramos.map((t) => `${t.n} ${t.label}`).join(", ")}
+    >
+      {tramos.map((t) => (
+        <div
+          key={t.label}
+          className={`h-full first:rounded-l-full last:rounded-r-full ${t.cls}`}
+          style={{ width: `${(t.n / total) * 100}%` }}
+        />
+      ))}
     </div>
   );
 }
+
+function TarjetaNivel({ n }: { n: ResumenNivel }) {
+  const enConfiguracion = n.pasoConfiguracion < 5;
+  const necesitanTrabajo = n.severidades.CRITICO + n.severidades.EN_RIESGO;
+
+  // El titular de la tarjeta responde "¿qué tengo que hacer con este nivel?".
+  const titular = enConfiguracion
+    ? { texto: `Configuración a medio camino · paso ${n.pasoConfiguracion} de 4`, tono: "text-muted" }
+    : !n.evaluado
+      ? { texto: "Esperando que los docentes evalúen", tono: "text-muted" }
+      : necesitanTrabajo > 0
+        ? {
+            texto: `${necesitanTrabajo} ${necesitanTrabajo === 1 ? "competencia necesita" : "competencias necesitan"} trabajo`,
+            tono: n.severidades.CRITICO > 0 ? "text-incipiente" : "text-proceso",
+          }
+        : { texto: "Todas las competencias evaluadas alcanzan el estándar", tono: "text-logrado" };
+
+  return (
+      <Card
+        className={`flex h-full flex-col transition-colors hover:border-border-strong ${n.severidades.CRITICO > 0 && n.evaluado ? "border-l-[3px] border-l-incipiente" : ""}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
+              {CICLO_LABEL[n.ciclo as keyof typeof CICLO_LABEL]} ·{" "}
+              {MODALIDAD_LABEL[n.modalidad as keyof typeof MODALIDAD_LABEL]} · {n.trimestre}
+            </p>
+            <h2 className="mt-1 truncate font-serif text-xl font-medium">
+              <Link
+                href={`/niveles/${n.id}`}
+                className="transition-colors hover:text-ua focus-visible:text-ua"
+              >
+                {n.nombre}
+              </Link>
+            </h2>
+          </div>
+          <span className="shrink-0 rounded-full bg-ua-tint px-2.5 py-1 font-mono text-[0.68rem] font-medium text-ua">
+            R{n.reunionNumero}
+            {n.reunionFase && (
+              <span className="ml-1 font-sans opacity-80">
+                {FASE_LABEL[n.reunionFase as keyof typeof FASE_LABEL]}
+              </span>
+            )}
+          </span>
+        </div>
+
+        <p className={`mt-3 text-sm font-medium ${titular.tono}`}>{titular.texto}</p>
+
+        <div className="mt-4">
+          {enConfiguracion ? (
+            <div className="flex gap-1.5" aria-label={`Paso ${n.pasoConfiguracion} de 4`}>
+              {[1, 2, 3, 4].map((p) => (
+                <span
+                  key={p}
+                  className={`h-2 flex-1 rounded-full ${p < n.pasoConfiguracion ? "bg-ua" : "bg-surface-muted"}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <BarraSalud s={n.severidades} />
+          )}
+        </div>
+
+        <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t border-border pt-4 text-xs">
+          <div>
+            <dt className="text-muted-2">Docentes</dt>
+            <dd className="mt-0.5 font-medium tabular-nums">
+              {n.evaluado ? `${n.docentesQueRespondieron} de ${n.docentes}` : n.docentes}
+              {n.evaluado && <span className="ml-1 font-normal text-muted-2">respondieron</span>}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-2">Asignaturas</dt>
+            <dd className="mt-0.5 font-medium tabular-nums">{n.asignaturas}</dd>
+          </div>
+          {n.acuerdosAbiertos > 0 && (
+            <div>
+              <dt className="text-muted-2">Acuerdos abiertos</dt>
+              <dd className="mt-0.5 font-medium tabular-nums text-proceso">{n.acuerdosAbiertos}</dd>
+            </div>
+          )}
+        </dl>
+
+        {/* Accesos directos: desde el panel se llega en un clic a lo que toca. */}
+        <div className="mt-5 flex flex-wrap gap-2 pt-1">
+          {enConfiguracion ? (
+            <Link href={`/niveles/${n.id}`}>
+              <Button size="sm">Continuar configuración</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href={`/niveles/${n.id}/resultados`}>
+                <Button size="sm" variant={n.evaluado ? "primary" : "secondary"}>
+                  {n.evaluado ? "Ver qué fortalecer" : "Ver estado"}
+                </Button>
+              </Link>
+              <Link href={`/niveles/${n.id}`}>
+                <Button size="sm" variant="ghost">
+                  Configurar
+                </Button>
+              </Link>
+            </>
+          )}
+        </div>
+      </Card>
+  );
+}
+
+export default async function NivelesPage() {
+  const user = await requireCoordinador();
+  const niveles = await resumenNiveles(user.id);
+
+  const conAtencion = niveles.filter(
+    (n) => n.pasoConfiguracion === 5 && n.evaluado && n.severidades.CRITICO > 0
+  ).length;
+  const acuerdosAbiertos = niveles.reduce((s, n) => s + n.acuerdosAbiertos, 0);
+
+  return (
+    <div className="mx-auto max-w-5xl px-6 py-12">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight">
+            {niveles.length === 0 ? `Hola, ${user.name?.split(" ")[0] ?? ""}` : "Mis niveles"}
+          </h1>
+          <p className="mt-1.5 text-[0.95rem] text-muted">
+            {niveles.length === 0
+              ? "Un nivel es una instancia del instrumento: un ciclo, una modalidad, un trimestre."
+              : conAtencion > 0
+                ? `${conAtencion} ${conAtencion === 1 ? "nivel tiene" : "niveles tienen"} competencias en estado crítico.`
+                : acuerdosAbiertos > 0
+                  ? `${acuerdosAbiertos} ${acuerdosAbiertos === 1 ? "acuerdo abierto" : "acuerdos abiertos"} en tus niveles.`
+                  : "Sin alertas activas."}
+          </p>
+        </div>
+        {niveles.length > 0 && <NuevoNivelPanel />}
+      </div>
+
+      {niveles.length === 0 ? (
+        <Card className="flex flex-col items-start gap-5 p-8">
+          <div className="max-w-prose">
+            <h2 className="font-serif text-xl font-medium">Crea tu primer nivel</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              Declara el ciclo y la modalidad, y el instrumento arma solo las reuniones del
+              trimestre: la primera queda como línea base y la última como cierre comparativo.
+              Si es Ciclo Inicial, además carga sus seis competencias con sus indicadores.
+            </p>
+          </div>
+          <NuevoNivelPanel abiertoPorDefecto />
+        </Card>
+      ) : (
+        <div className={`grid gap-4 ${niveles.length > 1 ? "sm:grid-cols-2" : ""}`}>
+          {niveles.map((n) => (
+            <TarjetaNivel key={n.id} n={n} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export const dynamic = "force-dynamic";

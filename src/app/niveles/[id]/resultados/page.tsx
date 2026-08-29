@@ -24,6 +24,7 @@ import {
 } from "@/components/ui";
 import { InformeBoton } from "./informe-boton";
 import { AcuerdoForm } from "./acuerdo-form";
+import { Indice } from "./indice";
 
 const FASE_LABEL = {
   BASE: "línea base",
@@ -43,8 +44,17 @@ function Puntaje({ score }: { score: number | null }) {
 
 /* ── Tarjeta de competencia, ordenada por urgencia ── */
 function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
+  // El peso visual sigue a la urgencia: una competencia crítica no puede verse
+  // igual que una consolidada con solo 3px de diferencia.
+  const enfasis =
+    c.severidad === "CRITICO"
+      ? "!bg-incipiente-tint/40 !border-incipiente/25 shadow-[0_1px_2px_rgba(var(--shadow-color)/0.04),0_16px_40px_-20px_rgba(var(--shadow-color)/0.20)]"
+      : c.severidad === "EN_RIESGO"
+        ? "!border-proceso/25"
+        : "";
+
   return (
-    <Card className={`${franjaSeveridad(c.severidad)} animate-fade-in`}>
+    <Card className={`${franjaSeveridad(c.severidad)} ${enfasis} animate-fade-in`}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -448,11 +458,13 @@ export default async function ResultadosPage({
   const contenido = informe?.estado === "LISTO" ? (informe.contenido as TipoInforme) : null;
 
   const conDatos = d.competencias.filter((c) => c.severidad !== "SIN_DATOS");
+  const atencion = conDatos.filter((c) => c.severidad !== "CONSOLIDADO");
+  const consolidadas = conDatos.filter((c) => c.severidad === "CONSOLIDADO");
   const sinDatos = d.competencias.filter((c) => c.severidad === "SIN_DATOS");
   const atender = d.resumen.criticas + d.resumen.enRiesgo;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
           <Eyebrow>Sintetizar</Eyebrow>
@@ -472,6 +484,8 @@ export default async function ResultadosPage({
         </Link>
       </div>
 
+      <div className="lg:grid lg:grid-cols-[1fr_190px] lg:items-start lg:gap-12">
+        <div className="min-w-0">
       {d.totalVotos === 0 ? (
         <Card className="text-sm leading-relaxed text-muted">
           Todavía no hay evaluaciones registradas en esta reunión. Comparte el enlace para
@@ -523,7 +537,9 @@ export default async function ResultadosPage({
             </div>
           </Card>
 
-          <PanelParticipacion gente={d.participacion} />
+          <div id="participacion" className="scroll-mt-24">
+            <PanelParticipacion gente={d.participacion} />
+          </div>
 
           {/* Acuerdos arrastrados: primer punto de tabla de la reunión */}
           {acuerdos.arrastrados.length > 0 && (
@@ -538,7 +554,7 @@ export default async function ResultadosPage({
           )}
 
           {/* Recomendaciones */}
-          <section className="mb-12">
+          <section id="recomendaciones" className="mb-12 scroll-mt-24">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <SectionLabel>Recomendaciones</SectionLabel>
             </div>
@@ -575,7 +591,7 @@ export default async function ResultadosPage({
           </section>
 
           {/* Acuerdos de esta reunión */}
-          <section className="mb-12">
+          <section id="acuerdos" className="mb-12 scroll-mt-24">
             <SectionLabel>Acuerdos de esta reunión</SectionLabel>
             <p className="-mt-2 mb-4 max-w-prose text-sm leading-relaxed text-muted">
               Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres
@@ -598,15 +614,45 @@ export default async function ResultadosPage({
           </section>
 
           {/* Evidencia */}
-          <section>
+          <section id="evidencia" className="scroll-mt-24">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <SectionLabel>La evidencia</SectionLabel>
               <LogroLegend />
             </div>
             <div className="flex flex-col gap-4">
-              {conDatos.map((c) => (
+              {atencion.map((c) => (
                 <TarjetaCompetencia key={c.id} c={c} />
               ))}
+
+              {/* Lo que ya alcanza el estándar no necesita ocupar media pantalla:
+                  se resume y queda disponible si se quiere revisar. */}
+              {consolidadas.length > 0 && (
+                <details className="group rounded-2xl border border-border bg-surface p-5">
+                  <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
+                    <span className="flex items-center gap-2.5 text-sm">
+                      <span className="h-2 w-2 rounded-full bg-logrado" aria-hidden="true" />
+                      <span className="font-medium">
+                        {consolidadas.length}{" "}
+                        {consolidadas.length === 1
+                          ? "competencia alcanza el estándar"
+                          : "competencias alcanzan el estándar"}
+                      </span>
+                      <span className="text-muted-2">
+                        {consolidadas.map((c) => c.codigo).join(" · ")}
+                      </span>
+                    </span>
+                    <span className="text-xs text-muted-2">
+                      <span className="group-open:hidden">Ver ▾</span>
+                      <span className="hidden group-open:inline">Ocultar ▴</span>
+                    </span>
+                  </summary>
+                  <div className="mt-5 flex flex-col gap-4">
+                    {consolidadas.map((c) => (
+                      <TarjetaCompetencia key={c.id} c={c} />
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
 
             {sinDatos.length > 0 && (
@@ -619,6 +665,19 @@ export default async function ResultadosPage({
           </section>
         </>
       )}
+        </div>
+
+        {d.totalVotos > 0 && (
+          <Indice
+            secciones={[
+              { id: "participacion", texto: "Participación" },
+              { id: "recomendaciones", texto: "Recomendaciones" },
+              { id: "acuerdos", texto: "Acuerdos", cantidad: acuerdos.deEstaReunion.length },
+              { id: "evidencia", texto: "La evidencia", cantidad: conDatos.length },
+            ]}
+          />
+        )}
+      </div>
     </div>
   );
 }

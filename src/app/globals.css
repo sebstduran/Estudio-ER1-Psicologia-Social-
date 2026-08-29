@@ -171,3 +171,12 @@ body {
     break-inside: avoid;
   }
 }
+
+/* Espera del informe: la barra recorre y cada etapa aparece a su tiempo. */
+@keyframes avance {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+@keyframes aparecer {
+  to { opacity: 1; }
+}

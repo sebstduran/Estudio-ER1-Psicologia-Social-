@@ -123,3 +123,51 @@ body {
 .animate-fade-in {
   animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* ── Impresión ──
+   La reunión de CCAA se hace con el documento sobre la mesa. Al imprimir se
+   quitan los controles, se despliega todo el detalle que en pantalla está
+   plegado y se evita cortar una competencia entre dos páginas. */
+@media print {
+  :root {
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --sunken: #ffffff;
+    --ink: #000000;
+    --muted: #333333;
+    --muted-2: #555555;
+    --border: #cccccc;
+  }
+
+  header,
+  form,
+  button,
+  a[href^="/niveles"] {
+    display: none !important;
+  }
+
+  /* Todo el detalle plegado se muestra: en papel no se puede desplegar nada. */
+  details > summary {
+    display: none !important;
+  }
+  details > *:not(summary) {
+    display: block !important;
+  }
+
+  main {
+    max-width: none;
+  }
+
+  .animate-fade-in,
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Que una competencia no quede partida entre dos hojas. */
+  section,
+  article {
+    break-inside: avoid;
+  }
+}

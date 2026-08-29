@@ -12,16 +12,14 @@ export function totalDe(c: ConteoLogro) {
 }
 
 // Puntaje 0-100: Logrado pesa 1, En proceso 0.5, Incipiente 0.
-// Una sola cifra comparable entre reuniones, competencias e indicadores.
 export function scoreDe(c: ConteoLogro): number | null {
   const total = totalDe(c);
   if (total === 0) return null;
   return ((c.LOGRADO + c.EN_PROCESO * 0.5) / total) * 100;
 }
 
-// Los cortes traducen el puntaje a una decisión de gestión, que es lo que el
-// coordinador necesita para priorizar:
-//   < 40  la mayoría de los votos son incipientes -> intervención inmediata
+// Los cortes traducen el puntaje a una decisión de gestión:
+//   < 40  predominan los incipientes -> intervención inmediata
 //   < 70  predomina "en proceso" -> hay avance pero no alcanza el estándar
 //   >= 70 la mayoría alcanzó el logro -> sostener, no intervenir
 export function clasificar(score: number | null): Severidad {
@@ -29,6 +27,18 @@ export function clasificar(score: number | null): Severidad {
   if (score < 40) return "CRITICO";
   if (score < 70) return "EN_RIESGO";
   return "CONSOLIDADO";
+}
+
+/**
+ * Hay disenso cuando la MISMA evidencia fue calificada como lograda por alguien
+ * y como incipiente por otra persona. No es ruido estadístico: significa que el
+ * equipo no comparte el criterio de logro, que es justamente lo que una
+ * comunidad académica existe para construir. Se distingue del bajo desempeño:
+ * una competencia puede estar "en proceso" con criterio compartido, o "lograda"
+ * con criterios incompatibles — y son problemas distintos.
+ */
+export function hayDisenso(c: ConteoLogro): boolean {
+  return c.LOGRADO > 0 && c.INCIPIENTE > 0;
 }
 
 export const ORDEN_SEVERIDAD: Record<Severidad, number> = {
@@ -44,6 +54,7 @@ export type IndicadorDiagnostico = {
   conteo: ConteoLogro;
   score: number | null;
   severidad: Severidad;
+  disenso: boolean;
   comentarios: { docente: string; asignatura: string; nivelLogro: string; texto: string }[];
 };
 
@@ -54,6 +65,8 @@ export type AsignaturaDiagnostico = {
   conteo: ConteoLogro;
   score: number | null;
 };
+
+export type PuntoTrayectoria = { numero: number; fase: string; score: number | null };
 
 export type CompetenciaDiagnostico = {
   id: string;
@@ -66,35 +79,44 @@ export type CompetenciaDiagnostico = {
   severidad: Severidad;
   scoreBase: number | null;
   delta: number | null;
+  trayectoria: PuntoTrayectoria[];
   indicadores: IndicadorDiagnostico[];
   indicadorMasDebil: IndicadorDiagnostico | null;
+  indicadoresConDisenso: number;
   asignaturas: AsignaturaDiagnostico[];
   docentesQueEvaluaron: number;
 };
 
+export type ParticipacionDocente = {
+  id: string;
+  nombre: string;
+  email: string;
+  asignaturas: string[];
+  esperadas: number;
+  respondidas: number;
+  completo: boolean;
+};
+
 export type Diagnostico = {
-  nivel: {
-    id: string;
-    nombre: string;
-    ciclo: string;
-    modalidad: string;
-    trimestre: string;
-  };
+  nivel: { id: string; nombre: string; ciclo: string; modalidad: string; trimestre: string };
   reunionActual: { id: string; numero: number; fase: string } | null;
   reunionBase: { id: string; numero: number } | null;
   competencias: CompetenciaDiagnostico[];
+  participacion: ParticipacionDocente[];
   totalVotos: number;
-  resumen: { criticas: number; enRiesgo: number; consolidadas: number; sinDatos: number };
+  resumen: {
+    criticas: number;
+    enRiesgo: number;
+    consolidadas: number;
+    sinDatos: number;
+    conDisenso: number;
+  };
 };
 
 /**
- * Arma la lectura completa de un nivel para la reunión en curso: puntaje y
- * severidad por competencia y por indicador, comentarios de los docentes,
- * apertura por asignatura y delta contra la línea base.
- *
- * Es la única fuente de verdad: la alimenta tanto la pantalla de resultados
- * como el prompt que se le envía al modelo, de modo que ambos no puedan
- * contar historias distintas.
+ * Lectura completa de un nivel para la reunión en curso. Es la única fuente de
+ * verdad: alimenta la pantalla de resultados y el prompt del modelo, de modo
+ * que ambos no puedan contar historias distintas.
  */
 export async function construirDiagnostico(
   nivelId: string,
@@ -104,6 +126,10 @@ export async function construirDiagnostico(
     where: { id: nivelId, coordinadorId },
     include: {
       reuniones: { orderBy: { numero: "asc" } },
+      docentes: {
+        orderBy: { nombre: "asc" },
+        include: { asignaturas: { include: { asignatura: true } } },
+      },
       competencias: {
         orderBy: { orden: "asc" },
         include: {
@@ -119,29 +145,24 @@ export async function construirDiagnostico(
   const reunionActual = nivel.reuniones.find((r) => r.numero === nivel.reunionActualNumero) ?? null;
   const reunionBase = nivel.reuniones.find((r) => r.fase === "BASE") ?? null;
 
-  const evaluaciones = reunionActual
-    ? await prisma.evaluacion.findMany({
-        where: { reunionId: reunionActual.id },
-        include: { docente: true, asignatura: true },
-      })
-    : [];
+  // Una sola consulta para todo el nivel: de aquí salen la reunión en curso,
+  // la línea base y la trayectoria completa.
+  const evaluaciones = await prisma.evaluacion.findMany({
+    where: { reunion: { nivelId } },
+    include: { docente: true, asignatura: true },
+  });
 
-  const evaluacionesBase =
-    reunionBase && reunionBase.id !== reunionActual?.id
-      ? await prisma.evaluacion.findMany({
-          where: { reunionId: reunionBase.id },
-          select: { competenciaId: true, nivelLogro: true },
-        })
-      : [];
+  const deLaReunion = reunionActual ? evaluaciones.filter((e) => e.reunionId === reunionActual.id) : [];
 
-  // Agregaciones en una sola pasada.
+  // Agregaciones de la reunión en curso.
   const porCompetencia = new Map<string, ConteoLogro>();
   const porIndicador = new Map<string, ConteoLogro>();
   const porCompAsig = new Map<string, ConteoLogro>();
   const comentariosPorIndicador = new Map<string, IndicadorDiagnostico["comentarios"]>();
   const docentesPorCompetencia = new Map<string, Set<string>>();
+  const respondidasPorDocente = new Map<string, number>();
 
-  for (const e of evaluaciones) {
+  for (const e of deLaReunion) {
     const c = porCompetencia.get(e.competenciaId) ?? conteoVacio();
     c[e.nivelLogro] += 1;
     porCompetencia.set(e.competenciaId, c);
@@ -150,14 +171,15 @@ export async function construirDiagnostico(
     i[e.nivelLogro] += 1;
     porIndicador.set(e.indicadorId, i);
 
-    const claveCA = `${e.competenciaId}:${e.asignaturaId}`;
-    const ca = porCompAsig.get(claveCA) ?? conteoVacio();
+    const ca = porCompAsig.get(`${e.competenciaId}:${e.asignaturaId}`) ?? conteoVacio();
     ca[e.nivelLogro] += 1;
-    porCompAsig.set(claveCA, ca);
+    porCompAsig.set(`${e.competenciaId}:${e.asignaturaId}`, ca);
 
     const set = docentesPorCompetencia.get(e.competenciaId) ?? new Set<string>();
     set.add(e.docenteId);
     docentesPorCompetencia.set(e.competenciaId, set);
+
+    respondidasPorDocente.set(e.docenteId, (respondidasPorDocente.get(e.docenteId) ?? 0) + 1);
 
     if (e.comentario) {
       const lista = comentariosPorIndicador.get(e.indicadorId) ?? [];
@@ -171,12 +193,43 @@ export async function construirDiagnostico(
     }
   }
 
-  const baseporCompetencia = new Map<string, ConteoLogro>();
-  for (const e of evaluacionesBase) {
-    const c = baseporCompetencia.get(e.competenciaId) ?? conteoVacio();
+  // Trayectoria: puntaje de cada competencia en cada reunión.
+  const porReunionCompetencia = new Map<string, ConteoLogro>();
+  for (const e of evaluaciones) {
+    const k = `${e.reunionId}:${e.competenciaId}`;
+    const c = porReunionCompetencia.get(k) ?? conteoVacio();
     c[e.nivelLogro] += 1;
-    baseporCompetencia.set(e.competenciaId, c);
+    porReunionCompetencia.set(k, c);
   }
+
+  // Cuántos indicadores debería responder cada docente: los de las competencias
+  // que tributan las asignaturas que dicta.
+  const indicadoresPorAsignatura = new Map<string, number>();
+  for (const comp of nivel.competencias) {
+    for (const m of comp.mapeos) {
+      indicadoresPorAsignatura.set(
+        m.asignaturaId,
+        (indicadoresPorAsignatura.get(m.asignaturaId) ?? 0) + comp.indicadores.length
+      );
+    }
+  }
+
+  const participacion: ParticipacionDocente[] = nivel.docentes.map((d) => {
+    const esperadas = d.asignaturas.reduce(
+      (n, da) => n + (indicadoresPorAsignatura.get(da.asignaturaId) ?? 0),
+      0
+    );
+    const respondidas = respondidasPorDocente.get(d.id) ?? 0;
+    return {
+      id: d.id,
+      nombre: d.nombre,
+      email: d.email,
+      asignaturas: d.asignaturas.map((da) => da.asignatura.nombre),
+      esperadas,
+      respondidas,
+      completo: esperadas > 0 && respondidas >= esperadas,
+    };
+  });
 
   const competencias: CompetenciaDiagnostico[] = nivel.competencias.map((comp) => {
     const conteo = porCompetencia.get(comp.id) ?? conteoVacio();
@@ -191,15 +244,14 @@ export async function construirDiagnostico(
         conteo: ic,
         score: iscore,
         severidad: clasificar(iscore),
+        disenso: hayDisenso(ic),
         comentarios: comentariosPorIndicador.get(ind.id) ?? [],
       };
     });
 
     const conDatos = indicadores.filter((i) => i.score !== null);
     const indicadorMasDebil =
-      conDatos.length > 0
-        ? conDatos.reduce((a, b) => (a.score! <= b.score! ? a : b))
-        : null;
+      conDatos.length > 0 ? conDatos.reduce((a, b) => (a.score! <= b.score! ? a : b)) : null;
 
     const asignaturas: AsignaturaDiagnostico[] = comp.mapeos.map((m) => {
       const ac = porCompAsig.get(`${comp.id}:${m.asignaturaId}`) ?? conteoVacio();
@@ -212,8 +264,16 @@ export async function construirDiagnostico(
       };
     });
 
-    const baseConteo = baseporCompetencia.get(comp.id);
-    const scoreBase = baseConteo ? scoreDe(baseConteo) : null;
+    const trayectoria: PuntoTrayectoria[] = nivel.reuniones.map((r) => ({
+      numero: r.numero,
+      fase: r.fase,
+      score: scoreDe(porReunionCompetencia.get(`${r.id}:${comp.id}`) ?? conteoVacio()),
+    }));
+
+    const scoreBase = reunionBase
+      ? scoreDe(porReunionCompetencia.get(`${reunionBase.id}:${comp.id}`) ?? conteoVacio())
+      : null;
+    const esLaBase = reunionActual?.id === reunionBase?.id;
 
     return {
       id: comp.id,
@@ -225,9 +285,11 @@ export async function construirDiagnostico(
       score,
       severidad: clasificar(score),
       scoreBase,
-      delta: score !== null && scoreBase !== null ? score - scoreBase : null,
+      delta: !esLaBase && score !== null && scoreBase !== null ? score - scoreBase : null,
+      trayectoria,
       indicadores,
       indicadorMasDebil,
+      indicadoresConDisenso: indicadores.filter((i) => i.disenso).length,
       asignaturas,
       docentesQueEvaluaron: docentesPorCompetencia.get(comp.id)?.size ?? 0,
     };
@@ -253,12 +315,14 @@ export async function construirDiagnostico(
       : null,
     reunionBase: reunionBase ? { id: reunionBase.id, numero: reunionBase.numero } : null,
     competencias,
-    totalVotos: evaluaciones.length,
+    participacion,
+    totalVotos: deLaReunion.length,
     resumen: {
       criticas: competencias.filter((c) => c.severidad === "CRITICO").length,
       enRiesgo: competencias.filter((c) => c.severidad === "EN_RIESGO").length,
       consolidadas: competencias.filter((c) => c.severidad === "CONSOLIDADO").length,
       sinDatos: competencias.filter((c) => c.severidad === "SIN_DATOS").length,
+      conDisenso: competencias.filter((c) => c.indicadoresConDisenso > 0).length,
     },
   };
 }

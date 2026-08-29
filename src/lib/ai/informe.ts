@@ -21,6 +21,12 @@ export type Veredicto = {
   fundamento: string;
 };
 
+export type Disenso = {
+  evidencia: string;
+  lectura: string;
+  comoResolver: string;
+};
+
 export type CompetenciaInforme = {
   codigo: string;
   nombre: string;
@@ -37,6 +43,7 @@ export type TipoInforme = {
   sintesis: string;
   prioridades: string[];
   competencias: CompetenciaInforme[];
+  disensos: Disenso[];
   alertasHito: string[];
 };
 
@@ -45,7 +52,7 @@ export type TipoInforme = {
 const ESQUEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["veredicto", "sintesis", "prioridades", "competencias", "alertasHito"],
+  required: ["veredicto", "sintesis", "prioridades", "competencias", "disensos", "alertasHito"],
   properties: {
     veredicto: {
       type: "object",
@@ -162,6 +169,29 @@ const ESQUEMA = {
         },
       },
     },
+    disensos: {
+      type: "array",
+      description:
+        "Evidencias donde el equipo docente no comparte el criterio de logro. Vacío si no las hay.",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["evidencia", "lectura", "comoResolver"],
+        properties: {
+          evidencia: { type: "string", description: "El indicador en disputa, citado textualmente." },
+          lectura: {
+            type: "string",
+            description:
+              "Qué explica la discrepancia: distinto nivel de exigencia, distinta interpretación del indicador, o condiciones distintas entre asignaturas.",
+          },
+          comoResolver: {
+            type: "string",
+            description:
+              "Acción concreta para construir criterio compartido, por ejemplo una calibración con muestras de trabajos reales.",
+          },
+        },
+      },
+    },
     alertasHito: {
       type: "array",
       description:
@@ -209,6 +239,12 @@ Cómo trabajas:
   en una frase por qué ataca ese problema en particular. Una técnica mal elegida para el
   problema es peor que ninguna: si los datos no justifican una metodología nueva, propón
   ajustar la que ya existe.
+- Distingues dos problemas que se confunden: el bajo desempeño de las y los estudiantes,
+  y la falta de criterio compartido entre docentes. Cuando una misma evidencia recibe
+  "logrado" de una persona e "incipiente" de otra, el problema no es (solo) el
+  estudiantado: el equipo no comparte el estándar. Eso se resuelve calibrando criterios
+  con muestras reales de trabajos, no con más contenido ni más ejercitación. Repórtalo en
+  "disensos" y no lo disfraces de bajo logro.
 - Los comentarios que los docentes escribieron en la rúbrica son tu mejor pista sobre la
   causa. Úsalos: si un docente dice que llegan sin la lectura hecha, eso apunta a aula
   invertida o a control de lectura, no a más contenido en clase.
@@ -240,6 +276,17 @@ export function construirPrompt(d: Diagnostico): string {
     ""
   );
 
+  const faltantes = d.participacion.filter((p) => !p.completo);
+  if (d.participacion.length > 0) {
+    partes.push(
+      `PARTICIPACIÓN: respondieron completo ${d.participacion.length - faltantes.length} de ${d.participacion.length} docentes.`,
+      faltantes.length > 0
+        ? `Falta o está incompleto: ${faltantes.map((p) => p.nombre).join(", ")}. Considera esto al calibrar cuánta confianza depositas en las cifras.`
+        : "La cobertura está completa.",
+      ""
+    );
+  }
+
   partes.push(
     "ESCALA: cada indicador se califica Logrado / En proceso / Incipiente.",
     "El puntaje va de 0 a 100 (Logrado=1, En proceso=0,5, Incipiente=0).",
@@ -266,13 +313,24 @@ export function construirPrompt(d: Diagnostico): string {
       );
     }
 
+    const serie = c.trayectoria.filter((t) => t.score !== null);
+    if (serie.length > 1) {
+      partes.push(
+        "Trayectoria: " + serie.map((t) => `R${t.numero} ${Math.round(t.score!)}`).join(" → ")
+      );
+    }
     partes.push("Indicadores observables:");
     for (const i of c.indicadores) {
-      const marca = i.id === c.indicadorMasDebil?.id ? " ← el más débil" : "";
+      const marcas = [
+        i.id === c.indicadorMasDebil?.id ? "← el más débil" : "",
+        i.disenso ? "← DISENSO: alguien lo calificó logrado y alguien incipiente" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
       partes.push(
         `  · "${i.texto}" — ${
           i.score === null ? "sin datos" : `${Math.round(i.score)}/100 (${describirConteo(i.conteo)})`
-        }${marca}`
+        }${marcas ? " " + marcas : ""}`
       );
       for (const com of i.comentarios) {
         partes.push(

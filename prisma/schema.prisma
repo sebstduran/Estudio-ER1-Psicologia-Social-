@@ -66,6 +66,7 @@ model Nivel {
   docentes     Docente[]
   reuniones    Reunion[]
   informes     Informe[]
+  acuerdos     Acuerdo[]
 
   @@index([coordinadorId])
 }
@@ -88,6 +89,7 @@ model Competencia {
   indicadores Indicador[]
   mapeos      MapeoAsignaturaCompetencia[]
   evaluaciones Evaluacion[]
+  acuerdos    Acuerdo[]
 
   @@unique([nivelId, codigo])
   @@index([nivelId])
@@ -193,6 +195,7 @@ model Reunion {
   evaluaciones Evaluacion[]
   actas        Acta[]
   informes     Informe[]
+  acuerdos     Acuerdo[]
 
   @@unique([nivelId, numero])
   @@index([nivelId])
@@ -271,6 +274,42 @@ model Informe {
 
   reunionId String
   reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  @@index([nivelId])
+  @@index([reunionId])
+}
+
+// ─── Cierre del ciclo de mejora ──────────────────────────────
+
+enum EstadoAcuerdo {
+  PENDIENTE
+  EN_CURSO
+  CUMPLIDO
+  DESCARTADO
+}
+
+// Una recomendación solo mejora algo si alguien se hace cargo de ella. El
+// acuerdo nace en una reunión, tiene responsable y plazo, y se revisa en la
+// reunión siguiente: es lo que convierte el diagnóstico en mejora continua.
+model Acuerdo {
+  id          String        @id @default(cuid())
+  texto       String
+  responsable String?
+  plazo       String?
+  estado      EstadoAcuerdo @default(PENDIENTE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  // Reunión en la que se acordó.
+  reunionId String
+  reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  // Competencia que busca fortalecer, si el acuerdo nace de una en particular.
+  competenciaId String?
+  competencia   Competencia? @relation(fields: [competenciaId], references: [id], onDelete: SetNull)
 
   @@index([nivelId])
   @@index([reunionId])

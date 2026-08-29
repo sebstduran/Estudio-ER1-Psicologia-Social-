@@ -1,21 +1,29 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { construirDiagnostico, type CompetenciaDiagnostico } from "@/lib/diagnostico";
+import {
+  construirDiagnostico,
+  type CompetenciaDiagnostico,
+  type ParticipacionDocente,
+} from "@/lib/diagnostico";
 import { informeVigente } from "@/lib/actions/informe";
+import { acuerdosDelNivel, cambiarEstadoAcuerdo, eliminarAcuerdo } from "@/lib/actions/acuerdos";
 import type { TipoInforme } from "@/lib/ai/informe";
 import {
   Button,
   Card,
   DeltaBadge,
+  DisensoBadge,
   Eyebrow,
   LogroLegend,
   LogroStackedBar,
   SectionLabel,
   SeveridadBadge,
+  Trayectoria,
   franjaSeveridad,
 } from "@/components/ui";
 import { InformeBoton } from "./informe-boton";
+import { AcuerdoForm } from "./acuerdo-form";
 
 const FASE_LABEL = {
   BASE: "línea base",
@@ -43,6 +51,7 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
             <Eyebrow>{c.codigo}</Eyebrow>
             <SeveridadBadge severidad={c.severidad} />
             {c.delta !== null && <DeltaBadge delta={c.delta} />}
+            {c.indicadoresConDisenso > 0 && <DisensoBadge compacto />}
           </div>
           <h3 className="mt-1.5 font-serif text-xl font-medium">{c.nombre}</h3>
           <p className="mt-1 text-xs text-muted-2">
@@ -50,7 +59,8 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
             {c.docentesQueEvaluaron > 0 && ` · ${c.docentesQueEvaluaron} docente(s)`}
           </p>
         </div>
-        <div className="text-right">
+        <div className="flex items-center gap-4">
+          <Trayectoria puntos={c.trayectoria} />
           <Puntaje score={c.score} />
         </div>
       </div>
@@ -88,7 +98,14 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
           {c.indicadores.map((ind) => (
             <div key={ind.id}>
               <div className="flex items-start justify-between gap-4">
-                <p className="text-sm leading-relaxed">{ind.texto}</p>
+                <p className="text-sm leading-relaxed">
+                  {ind.texto}
+                  {ind.disenso && (
+                    <span className="ml-2 align-middle">
+                      <DisensoBadge compacto />
+                    </span>
+                  )}
+                </p>
                 <span className="shrink-0 font-mono text-xs tabular-nums text-muted-2">
                   {ind.score === null ? "—" : `${Math.round(ind.score)}`}
                 </span>
@@ -133,6 +150,63 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
           )}
         </div>
       </details>
+    </Card>
+  );
+}
+
+/* ── Quién ya evaluó y quién falta: lo primero que necesita el coordinador
+      antes de la reunión, para poder ir a buscar a quien no ha respondido. ── */
+function PanelParticipacion({ gente }: { gente: ParticipacionDocente[] }) {
+  if (gente.length === 0) return null;
+  const faltan = gente.filter((p) => !p.completo);
+
+  return (
+    <Card className="mb-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
+          Participación
+        </p>
+        <p className="text-sm text-muted">
+          {gente.length - faltan.length} de {gente.length} respondieron completo
+        </p>
+      </div>
+
+      <ul className="mt-4 flex flex-col divide-y divide-border">
+        {gente.map((p) => {
+          const pct = p.esperadas > 0 ? Math.min(100, (p.respondidas / p.esperadas) * 100) : 0;
+          return (
+            <li key={p.id} className="flex items-center gap-4 py-2.5">
+              <span
+                className={`h-2 w-2 shrink-0 rounded-full ${p.completo ? "bg-logrado" : p.respondidas > 0 ? "bg-proceso" : "bg-border-strong"}`}
+                aria-hidden="true"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{p.nombre}</p>
+                <p className="truncate text-xs text-muted-2">{p.asignaturas.join(" · ")}</p>
+              </div>
+              <div className="hidden w-28 sm:block">
+                <div className="h-1.5 overflow-hidden rounded-full bg-surface-muted">
+                  <div
+                    className={`h-full rounded-full ${p.completo ? "bg-logrado" : "bg-proceso"}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+              <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted">
+                {p.respondidas}/{p.esperadas}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {faltan.length > 0 && (
+        <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed text-muted">
+          Antes de cerrar la reunión conviene recordarle el enlace a{" "}
+          <span className="text-foreground">{faltan.map((p) => p.nombre).join(", ")}</span>: las
+          cifras de abajo se calculan solo con lo respondido.
+        </p>
+      )}
     </Card>
   );
 }
@@ -245,6 +319,29 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
         </Card>
       ))}
 
+      {informe.disensos?.length > 0 && (
+        <Card className="border-l-[3px] border-l-proceso">
+          <Eyebrow className="!text-proceso">Criterios que el equipo no comparte</Eyebrow>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            En estas evidencias hubo docentes que calificaron logrado y docentes que
+            calificaron incipiente. Antes de intervenir con las y los estudiantes, conviene
+            acordar qué cuenta como logro.
+          </p>
+          <div className="mt-5 flex flex-col gap-5">
+            {informe.disensos.map((d, i) => (
+              <div key={i} className="border-t border-border pt-4 first:border-0 first:pt-0">
+                <p className="text-sm font-medium leading-relaxed">{d.evidencia}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{d.lectura}</p>
+                <p className="mt-2 text-sm leading-relaxed">
+                  <span className="font-medium">Cómo resolverlo: </span>
+                  {d.comoResolver}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       {informe.alertasHito.length > 0 && (
         <Card className="border-l-[3px] border-l-proceso">
           <Eyebrow className="!text-proceso">Alertas · Hito de Evaluación de Ciclo</Eyebrow>
@@ -268,6 +365,75 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
   );
 }
 
+const ESTADO_ACUERDO = {
+  PENDIENTE: { texto: "Pendiente", cls: "bg-surface-muted text-muted" },
+  EN_CURSO: { texto: "En curso", cls: "bg-proceso-tint text-proceso" },
+  CUMPLIDO: { texto: "Cumplido", cls: "bg-logrado-tint text-logrado" },
+  DESCARTADO: { texto: "Descartado", cls: "bg-surface-muted text-muted-2" },
+} as const;
+
+type AcuerdoFila = {
+  id: string;
+  texto: string;
+  responsable: string | null;
+  plazo: string | null;
+  estado: keyof typeof ESTADO_ACUERDO;
+  competencia: { codigo: string; nombre: string } | null;
+  reunion: { numero: number };
+};
+
+function FilaAcuerdo({ a, nivelId }: { a: AcuerdoFila; nivelId: string }) {
+  const { texto, cls } = ESTADO_ACUERDO[a.estado];
+  const siguiente =
+    a.estado === "PENDIENTE" ? "EN_CURSO" : a.estado === "EN_CURSO" ? "CUMPLIDO" : "PENDIENTE";
+  const etiquetaSiguiente = ESTADO_ACUERDO[siguiente].texto;
+
+  const avanzar = async () => {
+    "use server";
+    await cambiarEstadoAcuerdo(nivelId, a.id, siguiente);
+  };
+  const borrar = async () => {
+    "use server";
+    await eliminarAcuerdo(nivelId, a.id);
+  };
+
+  return (
+    <Card className="!p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>{texto}</span>
+            {a.competencia && (
+              <span className="font-mono text-xs text-ua">{a.competencia.codigo}</span>
+            )}
+            <span className="font-mono text-[0.68rem] text-muted-2">R{a.reunion.numero}</span>
+          </div>
+          <p className="text-sm leading-relaxed">{a.texto}</p>
+          {(a.responsable || a.plazo) && (
+            <p className="mt-2 text-xs text-muted-2">
+              {a.responsable && <>Responsable: {a.responsable}</>}
+              {a.responsable && a.plazo && " · "}
+              {a.plazo && <>Plazo: {a.plazo}</>}
+            </p>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <form action={avanzar}>
+            <Button type="submit" size="sm" variant="secondary">
+              Marcar {etiquetaSiguiente.toLowerCase()}
+            </Button>
+          </form>
+          <form action={borrar}>
+            <button className="text-xs text-muted-2 transition-colors hover:text-incipiente">
+              Eliminar
+            </button>
+          </form>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default async function ResultadosPage({
   params,
 }: PageProps<"/niveles/[id]/resultados">) {
@@ -277,6 +443,7 @@ export default async function ResultadosPage({
   const d = await construirDiagnostico(id, user.id);
   if (!d) notFound();
 
+  const acuerdos = await acuerdosDelNivel(id, d.reunionActual?.id ?? null);
   const informe = d.reunionActual ? await informeVigente(id, d.reunionActual.id) : null;
   const contenido = informe?.estado === "LISTO" ? (informe.contenido as TipoInforme) : null;
 
@@ -356,6 +523,20 @@ export default async function ResultadosPage({
             </div>
           </Card>
 
+          <PanelParticipacion gente={d.participacion} />
+
+          {/* Acuerdos arrastrados: primer punto de tabla de la reunión */}
+          {acuerdos.arrastrados.length > 0 && (
+            <section className="mb-12">
+              <SectionLabel>Acuerdos pendientes de reuniones anteriores</SectionLabel>
+              <div className="flex flex-col gap-3">
+                {acuerdos.arrastrados.map((a) => (
+                  <FilaAcuerdo key={a.id} a={a} nivelId={id} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Recomendaciones */}
           <section className="mb-12">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -391,6 +572,29 @@ export default async function ResultadosPage({
                 <InformeBoton nivelId={id} yaExiste />
               </div>
             )}
+          </section>
+
+          {/* Acuerdos de esta reunión */}
+          <section className="mb-12">
+            <SectionLabel>Acuerdos de esta reunión</SectionLabel>
+            <p className="-mt-2 mb-4 max-w-prose text-sm leading-relaxed text-muted">
+              Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres
+              aquí aparecerá como primer punto de tabla en la reunión siguiente.
+            </p>
+            <div className="flex flex-col gap-4">
+              {acuerdos.deEstaReunion.map((a) => (
+                <FilaAcuerdo key={a.id} a={a} nivelId={id} />
+              ))}
+              <AcuerdoForm
+                nivelId={id}
+                competencias={d.competencias.map((c) => ({
+                  id: c.id,
+                  codigo: c.codigo,
+                  nombre: c.nombre,
+                }))}
+                compacto={acuerdos.deEstaReunion.length > 0}
+              />
+            </div>
           </section>
 
           {/* Evidencia */}

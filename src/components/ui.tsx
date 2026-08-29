@@ -358,6 +358,65 @@ export function Paso({
   );
 }
 
+/**
+ * Trayectoria del puntaje a lo largo de las reuniones. Serie única: no lleva
+ * leyenda (el título la nombra) y se enfatiza el último punto, que es el estado
+ * actual. Los tramos sin datos se saltan en vez de dibujarse como cero.
+ */
+export function Trayectoria({
+  puntos,
+}: {
+  puntos: { numero: number; score: number | null }[];
+}) {
+  const conDatos = puntos.filter((p) => p.score !== null);
+  if (conDatos.length < 2) return null;
+
+  const W = 96;
+  const H = 28;
+  const P = 3;
+  const maxN = Math.max(...puntos.map((p) => p.numero));
+  const minN = Math.min(...puntos.map((p) => p.numero));
+  const x = (n: number) => P + ((n - minN) / Math.max(maxN - minN, 1)) * (W - P * 2);
+  const y = (s: number) => H - P - (s / 100) * (H - P * 2);
+
+  const d = conDatos.map((p, i) => `${i === 0 ? "M" : "L"} ${x(p.numero)} ${y(p.score!)}`).join(" ");
+  const ultimo = conDatos[conDatos.length - 1];
+  const sube = ultimo.score! >= conDatos[0].score!;
+
+  return (
+    <svg
+      width={W}
+      height={H}
+      viewBox={`0 0 ${W} ${H}`}
+      className="overflow-visible"
+      role="img"
+      aria-label={`Trayectoria: ${conDatos.map((p) => `reunión ${p.numero}, ${Math.round(p.score!)} de 100`).join("; ")}`}
+    >
+      <line x1={P} y1={y(70)} x2={W - P} y2={y(70)} className="stroke-border" strokeDasharray="2 3" strokeWidth="1" />
+      <path d={d} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+        className={sube ? "stroke-logrado" : "stroke-incipiente"} />
+      <circle cx={x(ultimo.numero)} cy={y(ultimo.score!)} r="3"
+        className={sube ? "fill-logrado" : "fill-incipiente"} />
+    </svg>
+  );
+}
+
+/** Marca la evidencia sobre la que el equipo docente no comparte criterio. */
+export function DisensoBadge({ compacto }: { compacto?: boolean }) {
+  return (
+    <span
+      title="Una misma evidencia fue calificada como lograda por un docente y como incipiente por otro"
+      className={cx(
+        "inline-flex items-center gap-1.5 rounded-full bg-proceso-tint font-medium text-proceso",
+        compacto ? "px-2 py-0.5 text-[0.65rem]" : "px-2.5 py-1 text-xs"
+      )}
+    >
+      <span aria-hidden="true">⇄</span>
+      {compacto ? "Disenso" : "Criterio no compartido"}
+    </span>
+  );
+}
+
 export function DeltaBadge({ delta }: { delta: number }) {
   if (Math.abs(delta) < 1) {
     return <span className="inline-flex items-center gap-1 text-xs text-muted">→ Sin cambio</span>;

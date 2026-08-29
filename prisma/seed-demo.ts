@@ -182,9 +182,19 @@ async function main() {
   await evaluar(reunionBase.id, 1, 1, "EN_PROCESO");
   await evaluar(reunionBase.id, 2, 2, "INCIPIENTE");
 
+  // Seguimiento intermedio, para que la trayectoria tenga más de dos puntos.
+  const reunionSeguimiento = nivel.reuniones.find((r) => r.numero === 2)!;
+  await evaluar(reunionSeguimiento.id, 0, 0, "EN_PROCESO");
+  await evaluar(reunionSeguimiento.id, 1, 1, "EN_PROCESO");
+
   await evaluar(reunionCierre.id, 0, 0, "LOGRADO");
   await evaluar(reunionCierre.id, 1, 1, "EN_PROCESO");
   await evaluar(reunionCierre.id, 2, 2, "INCIPIENTE");
+
+  // El disenso sobre 1.1 Fundamentar aparece solo: la competencia la tributan
+  // Psicología del Desarrollo (directa, la da por lograda) y Bases Biológicas
+  // (transversal, la califica incipiente). Es el caso que el instrumento debe
+  // distinguir del bajo logro: el equipo no comparte el criterio.
 
   console.log("Demo lista:");
   console.log(`  Coordinador: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);

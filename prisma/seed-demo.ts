@@ -127,7 +127,27 @@ async function main() {
   const reunionBase = nivel.reuniones.find((r) => r.numero === 1)!;
   const reunionCierre = nivel.reuniones.find((r) => r.numero === 4)!;
 
+  // Comentarios de ejemplo: el dato cualitativo que explica el número y que la
+  // vista de resultados y el informe usan como evidencia.
+  const COMENTARIOS: Record<string, string[]> = {
+    INCIPIENTE: [
+      "Cuesta que distingan el fundamento teórico de la opinión personal; en el control la mayoría describió sin fundamentar.",
+      "Llegan sin la lectura previa hecha, así que la clase se va en cubrir lo mínimo.",
+      "Confunden los niveles de análisis. Necesitan más práctica guiada antes de trabajar solos.",
+    ],
+    EN_PROCESO: [
+      "Avanzaron respecto del primer trabajo, pero la argumentación sigue siendo descriptiva.",
+      "El grupo que asistió al taller mejoró bastante; el resto quedó atrás.",
+      "Ya identifican los elementos, falta que los relacionen entre sí.",
+    ],
+    LOGRADO: [
+      "El trabajo final mostró un manejo sólido, incluso citando autores fuera de la bibliografía obligatoria.",
+      "La rúbrica compartida con la otra asignatura ayudó: llegaron con el criterio claro.",
+    ],
+  };
+
   // Evaluaciones: línea base floja (incipiente/en proceso), cierre con avance (logrado).
+  let contador = 0;
   async function evaluar(
     reunionId: string,
     docenteIdx: number,
@@ -139,6 +159,10 @@ async function main() {
     for (const [, compIdx] of mapeosDeAsignatura) {
       const competencia = competencias[compIdx];
       for (const indicador of competencia.indicadores) {
+        // Un comentario cada dos votos, para que la vista tenga casos con y sin.
+        const pool = COMENTARIOS[nivelLogro];
+        const comentario = contador % 2 === 0 ? pool[(contador / 2) % pool.length] : null;
+        contador += 1;
         await prisma.evaluacion.create({
           data: {
             reunionId,
@@ -147,6 +171,7 @@ async function main() {
             indicadorId: indicador.id,
             competenciaId: competencia.id,
             nivelLogro,
+            comentario,
           },
         });
       }
@@ -158,8 +183,8 @@ async function main() {
   await evaluar(reunionBase.id, 2, 2, "INCIPIENTE");
 
   await evaluar(reunionCierre.id, 0, 0, "LOGRADO");
-  await evaluar(reunionCierre.id, 1, 1, "LOGRADO");
-  await evaluar(reunionCierre.id, 2, 2, "EN_PROCESO");
+  await evaluar(reunionCierre.id, 1, 1, "EN_PROCESO");
+  await evaluar(reunionCierre.id, 2, 2, "INCIPIENTE");
 
   console.log("Demo lista:");
   console.log(`  Coordinador: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);

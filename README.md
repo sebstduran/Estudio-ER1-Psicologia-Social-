@@ -61,7 +61,8 @@ Esto crea el coordinador `demo@ua.cl` / `demo1234` con un nivel de ejemplo
    Variables), iguales a `.env.example`:
    - `AUTH_SECRET` (genera uno con `npx auth secret`)
    - `AUTH_TRUST_HOST=true`
-   - `ANTHROPIC_API_KEY` (cuando esté listo el Milestone 4; puede quedar vacía)
+   - `ANTHROPIC_API_KEY` (habilita el botón "Generar recomendaciones"; si queda
+     vacía el resto de la app funciona igual)
 5. Deploy. El comando de build es `npm run vercel-build`, que ya deja
    `prisma migrate deploy` corriendo antes de `next build` — cada deploy
    aplica las migraciones pendientes automáticamente.
@@ -95,6 +96,10 @@ NextAuth (Credentials). Ver el schema completo en `prisma/schema.prisma`.
       Asignaturas, matriz de mapeo Asignatura × Competencia.
 - [x] M2 — Evaluar: Docentes, rúbrica por indicador (sin cuenta, vía enlace),
       subida de actas.
-- [x] M3 — Sintetizar: distribución de logro por evidencia/competencia y
-      comparación automática línea base vs. cierre.
-- [ ] M4 — Informe generado con la API de Anthropic.
+- [x] M3 — Sintetizar: competencias priorizadas por urgencia (crítico / en
+      riesgo / consolidado), evidencia más débil, comentarios de los docentes,
+      apertura por asignatura y comparación línea base vs. cierre.
+- [x] M4 — Recomendaciones generadas con la API de Anthropic: diagnóstico por
+      competencia, decisión EPG a activar, acciones concretas para que las y los
+      estudiantes alcancen el estándar, recomendaciones por asignatura y alertas
+      de cara al Hito de Evaluación de Ciclo.

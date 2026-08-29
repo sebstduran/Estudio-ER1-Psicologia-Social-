@@ -65,6 +65,7 @@ model Nivel {
   asignaturas  Asignatura[]
   docentes     Docente[]
   reuniones    Reunion[]
+  informes     Informe[]
 
   @@index([coordinadorId])
 }
@@ -191,6 +192,7 @@ model Reunion {
 
   evaluaciones Evaluacion[]
   actas        Acta[]
+  informes     Informe[]
 
   @@unique([nivelId, numero])
   @@index([nivelId])
@@ -241,5 +243,35 @@ model Acta {
   reunionId String
   reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
 
+  @@index([reunionId])
+}
+
+// ─── Sintetizar: informe generado con IA ─────────────────────
+
+enum EstadoInforme {
+  GENERANDO
+  LISTO
+  ERROR
+}
+
+// Un informe corresponde a una reunión concreta del nivel: se genera con los
+// datos disponibles en ese momento y queda guardado para volver a consultarlo
+// sin gastar otra llamada al modelo.
+model Informe {
+  id        String        @id @default(cuid())
+  estado    EstadoInforme @default(GENERANDO)
+  // Cuerpo del informe, tal como lo devuelve el modelo (ver TipoInforme).
+  contenido Json?
+  error     String?
+  modelo    String
+  createdAt DateTime      @default(now())
+
+  nivelId String
+  nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+
+  reunionId String
+  reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  @@index([nivelId])
   @@index([reunionId])
 }

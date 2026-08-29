@@ -233,6 +233,45 @@ export function LogroLegend() {
   );
 }
 
+// Severidad: la forma (punto lleno / anillo / línea) acompaña al color, para que
+// el estado se distinga sin depender sólo del matiz.
+export function SeveridadBadge({
+  severidad,
+}: {
+  severidad: "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS";
+}) {
+  const map = {
+    CRITICO: { texto: "Crítico", cls: "bg-incipiente-tint text-incipiente", marca: "●" },
+    EN_RIESGO: { texto: "En riesgo", cls: "bg-proceso-tint text-proceso", marca: "◐" },
+    CONSOLIDADO: { texto: "Consolidado", cls: "bg-logrado-tint text-logrado", marca: "○" },
+    SIN_DATOS: { texto: "Sin evaluar", cls: "bg-surface-muted text-muted-2", marca: "—" },
+  } as const;
+  const { texto, cls, marca } = map[severidad];
+  return (
+    <span
+      className={cx(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+        cls
+      )}
+    >
+      <span aria-hidden="true">{marca}</span>
+      {texto}
+    </span>
+  );
+}
+
+// Franja lateral que tiñe la tarjeta según urgencia.
+export function franjaSeveridad(
+  severidad: "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS"
+) {
+  return {
+    CRITICO: "border-l-[3px] border-l-incipiente",
+    EN_RIESGO: "border-l-[3px] border-l-proceso",
+    CONSOLIDADO: "border-l-[3px] border-l-logrado",
+    SIN_DATOS: "border-l-[3px] border-l-border",
+  }[severidad];
+}
+
 export function DeltaBadge({ delta }: { delta: number }) {
   if (Math.abs(delta) < 1) {
     return <span className="inline-flex items-center gap-1 text-xs text-muted">→ Sin cambio</span>;

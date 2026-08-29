@@ -55,3 +55,7 @@ next-env.d.ts
 /.claude/skills
 /.windsurf/skills
 skills-lock.json
+
+# Prototipo ensamblado: se regenera con prototipo/construir.mjs
+prototipo/instrumento.html
+prototipo/captura-*.png

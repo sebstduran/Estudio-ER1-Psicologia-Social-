@@ -1,382 +1,476 @@
 <title>Instrumento CCAA</title>
 
 <style>
-/* ══════════ Sistema ══════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   Sistema
+
+   La referencia no es un documento académico sino una herramienta de
+   trabajo: densa, precisa y sin adornos. La profundidad viene de líneas
+   de un píxel y de superficies que se distinguen apenas, no de sombras.
+   El color se reserva; casi todo el tablero es tinta sobre blanco.
+   ═══════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* El lienzo es un neutro cálido; las tarjetas son blancas. Esa diferencia
-     es la que da profundidad sin recurrir a sombras pesadas. */
-  --lienzo: #f2eeea;
-  --carta: #ffffff;
-  --carta-2: #faf7f5;
-  --rail: #191411;
-  --rail-2: #241d18;
-  --rail-texto: #cdc2b9;
-  --tinta: #191411;
-  --suave: #6b6058;
-  --tenue: #9a8d84;
-  --regla: #e6dfd8;
-  --regla-2: #d6ccc3;
+  /* Grises con un sesgo frío mínimo: hacen que el rojo institucional
+     se lea más profundo de lo que es. */
+  --fondo:      #f4f5f7;
+  --panel:      #ffffff;
+  --panel-2:    #f8f9fa;
+  --panel-3:    #f1f3f5;
+  --linea:      #e4e6ea;
+  --linea-2:    #d0d4da;
+  --tinta:      #0e1014;
+  --tinta-2:    #545b66;
+  --tinta-3:    #858c98;
 
-  --ua: #8a1515;
-  --ua-hondo: #6b0f0f;
-  --ua-vivo: #b23a2e;
-  --ua-velo: #f9eae8;
+  --marca:      #9e1b32;
+  --marca-2:    #7d1427;
+  --marca-velo: #fdf2f4;
 
-  --logrado: #2f7a4f;
-  --logrado-velo: #e8f3ec;
-  --proceso: #b8790f;
-  --proceso-velo: #fbf1e0;
-  --incipiente: #c1303c;
-  --incipiente-velo: #fbe9ea;
+  /* Escala de severidad. El color nunca va solo: cada celda lleva su
+     puntaje y un medidor de tres segmentos, así que quien no distingue
+     rojo y verde sigue leyendo la misma información. */
+  --ok:         #10714f;
+  --ok-velo:    #eefaf4;
+  --ok-linea:   #c6ead9;
+  --medio:      #96660a;
+  --medio-velo: #fdf6e8;
+  --medio-linea:#f0dfb4;
+  --bajo:       #bb2637;
+  --bajo-velo:  #fdf1f2;
+  --bajo-linea: #f3d0d4;
 
-  --sombra: 25 20 17;
-}
-
-:root[data-theme="dark"], :root:not([data-theme="light"]) {
+  --foco:       #9e1b32;
   color-scheme: light;
 }
+
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --lienzo: #100d0b;
-    --carta: #1b1613;
-    --carta-2: #221c18;
-    --rail: #0b0908;
-    --rail-2: #171210;
-    --rail-texto: #b3a79e;
-    --tinta: #f5efe9;
-    --suave: #ab9f96;
-    --tenue: #7d7169;
-    --regla: #322a25;
-    --regla-2: #443a33;
-    --ua: #e2564c;
-    --ua-hondo: #ef7168;
-    --ua-vivo: #e2564c;
-    --ua-velo: #33201d;
-    --logrado-velo: #1b2c21;
-    --proceso-velo: #2f2513;
-    --incipiente-velo: #35201f;
-    --sombra: 0 0 0;
-    color-scheme: dark;
+  :root:not([data-theme="light"]) { color-scheme: dark;
+    --fondo: #0b0c0f; --panel: #131519; --panel-2: #181b20; --panel-3: #1e2127;
+    --linea: #24272e; --linea-2: #343841;
+    --tinta: #eceef2; --tinta-2: #9aa1ad; --tinta-3: #6b7280;
+    --marca: #ef6d7f; --marca-2: #f79aa6; --marca-velo: #24151a;
+    --ok: #46b98b; --ok-velo: #10241d; --ok-linea: #1d3a30;
+    --medio: #d9a63f; --medio-velo: #241d0e; --medio-linea: #3c3117;
+    --bajo: #f0707e; --bajo-velo: #241418; --bajo-linea: #3d2027;
+    --foco: #ef6d7f;
   }
 }
-:root[data-theme="dark"] {
-  --lienzo: #100d0b;
-  --carta: #1b1613;
-  --carta-2: #221c18;
-  --rail: #0b0908;
-  --rail-2: #171210;
-  --rail-texto: #b3a79e;
-  --tinta: #f5efe9;
-  --suave: #ab9f96;
-  --tenue: #7d7169;
-  --regla: #322a25;
-  --regla-2: #443a33;
-  --ua: #e2564c;
-  --ua-hondo: #ef7168;
-  --ua-vivo: #e2564c;
-  --ua-velo: #33201d;
-  --logrado-velo: #1b2c21;
-  --proceso-velo: #2f2513;
-  --incipiente-velo: #35201f;
-  --sombra: 0 0 0;
-  color-scheme: dark;
+:root[data-theme="dark"] { color-scheme: dark;
+  --fondo: #0b0c0f; --panel: #131519; --panel-2: #181b20; --panel-3: #1e2127;
+  --linea: #24272e; --linea-2: #343841;
+  --tinta: #eceef2; --tinta-2: #9aa1ad; --tinta-3: #6b7280;
+  --marca: #ef6d7f; --marca-2: #f79aa6; --marca-velo: #24151a;
+  --ok: #46b98b; --ok-velo: #10241d; --ok-linea: #1d3a30;
+  --medio: #d9a63f; --medio-velo: #241d0e; --medio-linea: #3c3117;
+  --bajo: #f0707e; --bajo-velo: #241418; --bajo-linea: #3d2027;
+  --foco: #ef6d7f;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
-  background: var(--lienzo);
+  background: var(--fondo);
   color: var(--tinta);
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: .875rem;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  font-size: 15px;
-  line-height: 1.55;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 { margin: 0; font-family: "Source Serif 4", Georgia, serif; font-weight: 600; text-wrap: balance; letter-spacing: -0.012em; }
-p { margin: 0; }
-ul, ol { margin: 0; padding: 0; list-style: none; }
-button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-a { color: inherit; }
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.021em; text-wrap: balance; line-height: 1.22; }
+p, ul, ol { margin: 0; }
+ul { padding: 0; list-style: none; }
+button, input, textarea { font: inherit; color: inherit; }
 
-.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-.serif { font-family: "Source Serif 4", Georgia, serif; }
-.rotulo { font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--tenue); }
-
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--ua-vivo); outline-offset: 3px; border-radius: 4px;
+:where(a, button, [tabindex], summary, input, textarea):focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* ══════════ Estructura ══════════ */
-.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+/* ── Tipografía ─────────────────────────────────────────────── */
+.mono { font-family: "Geist Mono", ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; }
+.d1   { font-size: 2.125rem; letter-spacing: -.028em; }
+.d2   { font-size: 1.625rem; letter-spacing: -.024em; }
+.d3   { font-size: 1.25rem; }
+.t16  { font-size: 1rem; }
+.t13  { font-size: .8125rem; }
+.t12  { font-size: .75rem; line-height: 1.45; }
+.sec  { color: var(--tinta-2); }
+.ter  { color: var(--tinta-3); }
+.med  { font-weight: 500; }
 
-.rail {
-  background: var(--rail);
-  color: var(--rail-texto);
-  display: flex; flex-direction: column;
-  padding: 20px 16px;
-  gap: 26px;
-  position: sticky; top: 0; height: 100vh;
-  border-right: 1px solid rgb(255 255 255 / 0.05);
+/* Rótulo: el mismo objeto tipográfico en toda la aplicación. */
+.rot {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: .6875rem;
+  font-weight: 500;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
 }
-.rail-marca { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
-.rail-escudo { width: 34px; height: 34px; border-radius: 8px; background: #fff; padding: 3px; display: grid; place-items: center; }
-.rail-escudo img { width: 100%; height: auto; display: block; }
-.rail-marca strong { display: block; color: #fff; font-family: "Source Serif 4", serif; font-size: 0.95rem; line-height: 1.15; }
-.rail-marca span { font-size: 0.66rem; color: #8a7c73; letter-spacing: 0.06em; }
 
-.rail-grupo { display: flex; flex-direction: column; gap: 2px; }
-.rail-grupo > .rotulo { padding: 0 10px 8px; color: #6d615a; }
-.rail-btn {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%; padding: 9px 10px; border-radius: 9px;
-  font-size: 0.88rem; text-align: left; color: var(--rail-texto);
-  transition: background-color .18s ease, color .18s ease;
+/* ── Composición ────────────────────────────────────────────── */
+.pila  { display: flex; flex-direction: column; }
+.fila  { display: flex; align-items: center; flex-wrap: wrap; }
+.alto  { align-items: flex-start; }
+.entre { justify-content: space-between; }
+.crece { flex: 1; min-width: 0; }
+.g4 { gap: 4px } .g6 { gap: 6px } .g8 { gap: 8px } .g10 { gap: 10px }
+.g12 { gap: 12px } .g16 { gap: 16px } .g20 { gap: 20px } .g24 { gap: 24px } .g32 { gap: 32px }
+
+/* ── Cáscara ────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
+
+.lateral {
+  position: sticky; top: 0; align-self: start;
+  display: flex; flex-direction: column; gap: 24px;
+  height: 100vh; padding: 16px 12px;
+  background: var(--panel);
+  border-right: 1px solid var(--linea);
 }
-.rail-btn:hover { background: var(--rail-2); color: #fff; }
-.rail-btn[aria-current="page"] { background: var(--ua); color: #fff; }
-.rail-btn .n { font-family: "IBM Plex Mono", monospace; font-size: 0.7rem; opacity: .65; }
-.rail-btn .punto { width: 6px; height: 6px; border-radius: 99px; margin-left: auto; }
 
-.rail-pie { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 0 4px; }
-.rail-usuario { display: flex; align-items: center; gap: 9px; font-size: 0.8rem; }
-.rail-avatar { width: 28px; height: 28px; border-radius: 99px; background: var(--ua); color: #fff; display: grid; place-items: center; font-size: 0.7rem; font-weight: 600; }
+.marca { display: flex; align-items: center; gap: 10px; padding: 4px 8px 0; }
+.marca img { display: block; width: 34px; height: 34px; object-fit: contain; }
+.marca b { display: block; font-size: .8125rem; font-weight: 600; letter-spacing: -.01em; }
+.marca span { display: block; font-size: .6875rem; color: var(--tinta-3); }
 
-.lienzo { min-width: 0; display: flex; flex-direction: column; }
+.grupo { display: flex; flex-direction: column; gap: 1px; }
+.grupo > .rot { padding: 0 8px 6px; }
 
-.barra {
+.nav {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 7px 9px;
+  border: 0; border-radius: 6px;
+  background: transparent; color: var(--tinta-2);
+  font-size: .8125rem; text-align: left; cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.nav:hover { background: var(--panel-3); color: var(--tinta); }
+.nav[aria-current="page"] { background: var(--panel-3); color: var(--tinta); font-weight: 500; }
+.nav svg { flex: none; opacity: .75; }
+.nav .cola { margin-left: auto; }
+
+/* Punto de estado en la navegación: dice que ahí hay algo que mirar. */
+.pip { width: 6px; height: 6px; border-radius: 2px; flex: none; }
+
+.lateral-pie { margin-top: auto; display: flex; flex-direction: column; gap: 2px; }
+.quien { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-top: 1px solid var(--linea); margin-top: 6px; }
+.avatar {
+  width: 25px; height: 25px; border-radius: 6px; flex: none;
+  display: grid; place-items: center;
+  background: var(--marca); color: #fff;
+  font-family: "Geist Mono", monospace; font-size: .625rem; font-weight: 500;
+}
+:root[data-theme="dark"] .avatar { color: #1a0d10; }
+
+.tabla-sup {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 0 32px; height: 60px;
-  background: color-mix(in srgb, var(--lienzo) 86%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--regla);
+  height: 49px; padding: 0 28px;
+  background: color-mix(in srgb, var(--fondo) 82%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--linea);
 }
-.miga { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--suave); }
-.miga b { color: var(--tinta); font-weight: 500; }
-.miga .sep { color: var(--regla-2); }
+.miga { display: flex; align-items: center; gap: 8px; font-size: .8125rem; color: var(--tinta-3); min-width: 0; }
+.miga b { font-weight: 500; color: var(--tinta); }
+.miga i { font-style: normal; color: var(--linea-2); }
 
-.contenido { padding: 34px 32px 80px; max-width: 1180px; width: 100%; }
+.lienzo { min-width: 0; }
+.hoja { max-width: 1080px; padding: 28px 28px 96px; }
 
-/* ══════════ Piezas ══════════ */
-.carta {
-  background: var(--carta);
-  border: 1px solid var(--regla);
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgb(var(--sombra) / .04), 0 12px 28px -18px rgb(var(--sombra) / .16);
-}
-.carta.plana { box-shadow: none; }
+/* ── Superficies ────────────────────────────────────────────── */
+.panel { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; }
+.p16 { padding: 16px } .p20 { padding: 20px } .p24 { padding: 24px }
 
+/* Encabezado interno: título, apoyo y una regla que separa del contenido. */
+.panel-cab { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px 16px; padding: 16px 20px; border-bottom: 1px solid var(--linea); }
+.panel-cab .crece { min-width: 220px; }
+.panel-cab h2 { font-size: .9375rem; }
+.panel-cab .apoyo { margin-top: 3px; font-size: .75rem; color: var(--tinta-3); }
+.panel-cpo { padding: 20px; }
+.regla { border-top: 1px solid var(--linea); }
+
+/* ── Controles ──────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 17px; border-radius: 99px;
-  font-size: 0.85rem; font-weight: 500;
-  transition: background-color .16s ease, box-shadow .16s ease, transform .12s ease, border-color .16s ease;
-}
-.btn:active { transform: translateY(1px); }
-.btn-p { background: var(--ua); color: #fff; box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--ua) 75%, transparent); }
-.btn-p:hover { background: var(--ua-hondo); box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--ua) 80%, transparent); }
-.btn-s { background: var(--carta); border: 1px solid var(--regla); }
-.btn-s:hover { border-color: var(--regla-2); background: var(--carta-2); }
-.btn-f { color: var(--suave); }
-.btn-f:hover { color: var(--tinta); background: var(--carta-2); }
-.btn-sm { padding: 6px 13px; font-size: 0.78rem; }
-
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 500; }
-.chip-crit { background: var(--incipiente-velo); color: var(--incipiente); }
-.chip-riesgo { background: var(--proceso-velo); color: var(--proceso); }
-.chip-ok { background: var(--logrado-velo); color: var(--logrado); }
-.chip-ua { background: var(--ua-velo); color: var(--ua); }
-.chip-neutro { background: var(--carta-2); color: var(--suave); border: 1px solid var(--regla); }
-
-/* Cifra grande: el dato es el protagonista */
-.cifra { font-family: "Source Serif 4", serif; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1; }
-.cifra-xl { font-size: 3.4rem; }
-.cifra-l { font-size: 2.1rem; }
-.cifra small { font-size: .42em; font-weight: 400; color: var(--tenue); margin-left: 2px; }
-
-.barra-logro { display: flex; height: 8px; gap: 2px; border-radius: 99px; overflow: hidden; background: var(--carta-2); }
-.barra-logro i { display: block; height: 100%; transition: width .9s cubic-bezier(.22,1,.36,1); }
-.barra-logro i:first-child { border-radius: 99px 0 0 99px; }
-.barra-logro i:last-child { border-radius: 0 99px 99px 0; }
-.seg-inc { background: var(--incipiente); }
-.seg-pro { background: var(--proceso); }
-.seg-log { background: var(--logrado); }
-
-/* ══════════ Matriz de evidencias — la pieza central ══════════ */
-.matriz-caja { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
-.matriz { display: grid; min-width: 460px; grid-template-columns: minmax(150px, 1.4fr) repeat(3, 1fr) 84px; gap: 6px; align-items: center; }
-.matriz-cab { font-family: "IBM Plex Mono", monospace; font-size: 0.62rem; letter-spacing: .13em; text-transform: uppercase; color: var(--tenue); padding-bottom: 4px; }
-.celda {
-  position: relative;
-  height: 46px; border-radius: 9px;
-  display: grid; place-items: center;
-  font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: 7px;
   border: 1px solid transparent;
-  transition: transform .16s ease, box-shadow .16s ease;
-  cursor: default;
+  font-size: .8125rem; font-weight: 500; white-space: nowrap; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s, opacity .12s;
 }
-.celda:hover { transform: scale(1.045); box-shadow: 0 6px 18px -8px rgb(var(--sombra) / .3); z-index: 3; }
-.celda-crit { background: var(--incipiente); color: #fff; }
-.celda-riesgo { background: var(--proceso); color: #fff; }
-.celda-ok { background: var(--logrado); color: #fff; }
-.celda-vacia { background: var(--carta-2); border-color: var(--regla); color: var(--tenue); }
-/* El disenso se marca con una esquina, no solo con color */
-.celda-disenso::after {
-  content: ""; position: absolute; top: 4px; right: 4px;
-  width: 0; height: 0; border-style: solid; border-width: 0 9px 9px 0;
-  border-color: transparent rgb(255 255 255 / .92) transparent transparent;
-  border-radius: 0 2px 0 0;
+.btn-p { background: var(--tinta); color: var(--panel); }
+.btn-p:hover { background: color-mix(in srgb, var(--tinta) 86%, var(--fondo)); }
+.btn-s { background: var(--panel); border-color: var(--linea-2); color: var(--tinta); }
+.btn-s:hover { background: var(--panel-2); border-color: var(--tinta-3); }
+.btn-f { background: transparent; color: var(--tinta-2); }
+.btn-f:hover { background: var(--panel-3); color: var(--tinta); }
+.btn-xs { padding: 5px 10px; font-size: .75rem; }
+.btn:disabled { cursor: default; opacity: .6; }
+
+.campo {
+  padding: 7px 11px; border-radius: 7px;
+  border: 1px solid var(--linea-2); background: var(--panel-2);
+  font-size: .8125rem; color: var(--tinta-2);
 }
-.matriz-fila-tit { font-size: 0.84rem; padding-right: 8px; min-width: 0; }
-.matriz-fila-tit b { font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--ua); margin-right: 6px; }
-.matriz-punt { text-align: right; font-family: "IBM Plex Mono", monospace; font-size: .84rem; font-weight: 500; }
+textarea.campo { color: var(--tinta); resize: vertical; width: 100%; }
 
-.leyenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: .74rem; color: var(--suave); }
-.leyenda span { display: inline-flex; align-items: center; gap: 6px; }
-.leyenda i { width: 9px; height: 9px; border-radius: 3px; display: block; }
+/* Distintivo: siempre lleva palabra, nunca sólo color. */
+.dist {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 5px;
+  border: 1px solid var(--linea);
+  background: var(--panel-2);
+  font-size: .6875rem; font-weight: 500; color: var(--tinta-2); white-space: nowrap;
+}
+.dist-ok    { background: var(--ok-velo);    border-color: var(--ok-linea);    color: var(--ok); }
+.dist-medio { background: var(--medio-velo); border-color: var(--medio-linea); color: var(--medio); }
+.dist-bajo  { background: var(--bajo-velo);  border-color: var(--bajo-linea);  color: var(--bajo); }
+.dist-marca { background: var(--marca-velo); border-color: color-mix(in srgb, var(--marca) 22%, transparent); color: var(--marca); }
 
-/* ══════════ Utilidades ══════════ */
-.pila { display: flex; flex-direction: column; }
-.g6 { gap: 6px } .g10 { gap: 10px } .g14 { gap: 14px } .g18 { gap: 18px } .g26 { gap: 26px }
-.fila { display: flex; align-items: center; }
-.entre { justify-content: space-between; }
-.envuelve { flex-wrap: wrap; }
-.crece { flex: 1; min-width: 0; }
-.suave { color: var(--suave); }
-.tenue { color: var(--tenue); }
-.p20 { padding: 20px } .p24 { padding: 24px }
-.tsm { font-size: .84rem } .txs { font-size: .76rem }
-.regla-arriba { border-top: 1px solid var(--regla); }
+/* ── Medidor de tres segmentos ──────────────────────────────────
+   Codifica la severidad con forma además de color: tres barras
+   llenas, dos o una. Se lee igual en escala de grises. */
+.med3 { display: inline-flex; gap: 1.5px; flex: none; }
+.med3 i { display: block; width: 3px; height: 10px; border-radius: 1px; background: currentColor; opacity: .2; }
+.med3-3 i { opacity: 1; }
+.med3-2 i:nth-child(-n+2) { opacity: 1; }
+.med3-1 i:nth-child(1) { opacity: 1; }
 
-.vista { display: none; animation: entra .4s cubic-bezier(.22,1,.36,1) both; }
-.vista.on { display: block; }
-@keyframes entra { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+/* ── Rejilla de evidencias ──────────────────────────────────────
+   La pieza central. Competencias en filas, evidencias en columnas:
+   cada celda es un indicador observable con su puntaje. */
+.rejilla-caja { overflow-x: auto; }
+.rejilla {
+  display: grid;
+  grid-template-columns: minmax(178px, 1.5fr) repeat(3, minmax(104px, 1fr)) 104px;
+  gap: 4px;
+  min-width: 660px;
+}
+.rej-cab { padding: 0 4px 8px; }
+.rej-fila { display: contents; }
+.rej-fila:hover .cel { border-color: var(--linea-2); }
+.rej-tit {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 10px 10px 2px; min-width: 0;
+}
+.rej-tit b { font-family: "Geist Mono", monospace; font-size: .75rem; font-weight: 500; color: var(--tinta-3); flex: none; }
+.rej-tit span { font-size: .8125rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.aparece { opacity: 0; animation: entra .5s cubic-bezier(.22,1,.36,1) forwards; }
+.cel {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 11px; border-radius: 7px;
+  border: 1px solid var(--linea); background: var(--panel-2);
+  cursor: default; transition: border-color .12s, transform .12s;
+}
+.cel:hover, .cel:focus-visible { transform: translateY(-1px); }
+.cel-num { font-family: "Geist Mono", monospace; font-size: .8125rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.cel-ok    { background: var(--ok-velo);    border-color: var(--ok-linea);    color: var(--ok); }
+.cel-medio { background: var(--medio-velo); border-color: var(--medio-linea); color: var(--medio); }
+.cel-bajo  { background: var(--bajo-velo);  border-color: var(--bajo-linea);  color: var(--bajo); }
+.cel-nulo  { color: var(--tinta-3); border-style: dashed; background: transparent; }
 
-/* ══════════ Rúbrica del docente ══════════ */
-.rub { display: inline-flex; gap: 7px; flex-wrap: wrap; }
+/* Disenso: un signo, no un matiz. Se ve en blanco y negro y se nombra. */
+.cel-dis::before {
+  content: "⇄";
+  font-size: .75rem; font-weight: 600; color: var(--tinta-2);
+  margin-right: -2px;
+}
+
+.rej-punt {
+  display: flex; align-items: baseline; justify-content: flex-end; gap: 5px;
+  padding: 10px 2px 10px 10px;
+}
+.rej-punt b { font-family: "Geist Mono", monospace; font-size: 1.0625rem; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.rej-punt small { font-size: .6875rem; color: var(--tinta-3); }
+
+.leyenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .6875rem; color: var(--tinta-3); }
+.leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+.leyenda i { width: 9px; height: 9px; border-radius: 2px; border: 1px solid; flex: none; }
+
+/* ── Cifras y barras ────────────────────────────────────────── */
+.cifra { font-family: "Geist Mono", monospace; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.03em; line-height: 1; }
+.cifra-l { font-size: 1.75rem; }
+.cifra-xl { font-size: 2.5rem; }
+.cifra small { font-size: .75rem; font-weight: 400; color: var(--tinta-3); letter-spacing: 0; }
+
+.barra { display: flex; gap: 2px; height: 6px; width: 100%; border-radius: 99px; overflow: hidden; background: var(--linea); }
+.barra i { display: block; height: 100%; }
+.b-bajo { background: var(--bajo) } .b-medio { background: var(--medio) } .b-ok { background: var(--ok) }
+
+/* Métrica: rótulo, cifra y apoyo, siempre en ese orden. */
+.metrica { display: flex; flex-direction: column; gap: 6px; min-width: 92px; }
+
+/* ── Pasos de configuración ─────────────────────────────────── */
+.paso { display: flex; gap: 14px; padding: 16px 20px; }
+.paso + .paso { border-top: 1px solid var(--linea); }
+.paso-n {
+  width: 22px; height: 22px; border-radius: 6px; flex: none; margin-top: 1px;
+  display: grid; place-items: center;
+  font-family: "Geist Mono", monospace; font-size: .6875rem; font-weight: 500;
+  background: var(--panel-3); color: var(--tinta-3);
+}
+.paso-listo .paso-n { background: var(--ok-velo); color: var(--ok); border: 1px solid var(--ok-linea); }
+.paso-actual { background: var(--panel-2); }
+.paso-actual .paso-n { background: var(--tinta); color: var(--panel); }
+
+/* ── Rúbrica del docente ────────────────────────────────────── */
+.rub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .rub button {
-  padding: 7px 14px; border-radius: 99px; border: 1px solid var(--regla);
-  font-size: .78rem; font-weight: 500; color: var(--suave);
-  transition: all .15s ease;
+  padding: 9px 8px; border-radius: 7px;
+  border: 1px solid var(--linea-2); background: var(--panel);
+  font-size: .75rem; font-weight: 500; color: var(--tinta-2); cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
 }
-.rub button:hover { border-color: var(--regla-2); }
-.rub button[aria-pressed="true"][data-v="INCIPIENTE"] { background: var(--incipiente-velo); border-color: var(--incipiente); color: var(--incipiente); }
-.rub button[aria-pressed="true"][data-v="EN_PROCESO"] { background: var(--proceso-velo); border-color: var(--proceso); color: var(--proceso); }
-.rub button[aria-pressed="true"][data-v="LOGRADO"] { background: var(--logrado-velo); border-color: var(--logrado); color: var(--logrado); }
+.rub button:hover { border-color: var(--tinta-3); color: var(--tinta); }
+.rub button[data-v="INCIPIENTE"][aria-pressed="true"] { background: var(--bajo-velo);  border-color: var(--bajo);  color: var(--bajo); }
+.rub button[data-v="EN_PROCESO"][aria-pressed="true"] { background: var(--medio-velo); border-color: var(--medio); color: var(--medio); }
+.rub button[data-v="LOGRADO"][aria-pressed="true"]    { background: var(--ok-velo);    border-color: var(--ok);    color: var(--ok); }
 
-/* ══════════ Pasos ══════════ */
-.paso { display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding: 20px; border-radius: 16px; border: 1px solid var(--regla); background: var(--carta); }
-.paso.actual { border-color: color-mix(in srgb, var(--ua) 42%, transparent); box-shadow: 0 1px 2px rgb(var(--sombra)/.05), 0 14px 30px -18px rgb(var(--sombra)/.2); }
-.paso.pendiente { opacity: .5; }
-.paso-n { width: 30px; height: 30px; border-radius: 99px; display: grid; place-items: center; font-size: .82rem; font-weight: 600; background: var(--carta-2); color: var(--tenue); }
-.paso.listo .paso-n { background: var(--logrado-velo); color: var(--logrado); }
-.paso.actual .paso-n { background: var(--ua); color: #fff; }
-
-/* ══════════ Adaptación ══════════ */
-@media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; }
-  .rail {
-    position: static; height: auto; flex-direction: row; align-items: center;
-    gap: 14px; overflow-x: auto; padding: 12px 16px;
-    border-right: 0; border-bottom: 1px solid rgb(255 255 255 / .06);
-  }
-  .rail-grupo { flex-direction: row; gap: 6px; }
-  .rail-grupo > .rotulo, .rail-pie, .rail-marca span { display: none; }
-  .rail-btn { white-space: nowrap; padding: 7px 12px; }
-  .rail-btn .punto { display: none; }
-  .contenido { padding: 22px 18px 60px; }
-  .barra { padding: 0 18px; }
-  .matriz { grid-template-columns: minmax(118px, 1.2fr) repeat(3, minmax(62px, 1fr)) 56px; }
-  .cifra-xl { font-size: 2.6rem; }
+/* ── Indicadores de una competencia ─────────────────────────── */
+.ind { display: flex; gap: 14px; padding: 13px 0; }
+.ind + .ind { border-top: 1px solid var(--linea); }
+.ind-p {
+  display: flex; align-items: center; align-self: flex-start; gap: 6px;
+  flex: none; width: 58px; padding-top: 3px;
+  font-family: "Geist Mono", monospace; font-size: .75rem; font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
+
+/* ── Citas de docentes ──────────────────────────────────────── */
+.cita { padding-left: 13px; border-left: 2px solid var(--linea-2); }
+.cita p:first-child { font-size: .8125rem; color: var(--tinta-2); }
+
+/* ── Movimiento ─────────────────────────────────────────────── */
+@keyframes entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.entra { animation: entra .32s cubic-bezier(.22,.61,.36,1) backwards; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-  .aparece { opacity: 1; }
+  .cel:hover { transform: none; }
+}
+
+/* ── Adaptación ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .lateral {
+    position: static; height: auto; flex-direction: row; align-items: center;
+    gap: 12px; padding: 10px 14px; overflow-x: auto;
+    border-right: 0; border-bottom: 1px solid var(--linea);
+  }
+  .lateral .grupo { flex-direction: row; gap: 2px; }
+  .lateral .grupo > .rot, .lateral .marca span, .quien span, .nav .cola { display: none; }
+  .lateral-pie { margin: 0; flex-direction: row; }
+  .quien { border: 0; margin: 0; padding: 8px 0 8px 9px; }
+  .nav { width: auto; white-space: nowrap; }
+  .panel-cab { flex-direction: column; align-items: stretch; }
+  .panel-cab .crece { min-width: 0; }
+  .tabla-sup { padding: 0 16px; }
+  .hoja { padding: 20px 16px 72px; }
+}
+
+@media print {
+  .lateral, .tabla-sup, .btn { display: none !important; }
+  .hoja { max-width: none; padding: 0; }
+  .panel { break-inside: avoid; }
+  body { background: #fff; }
 }
 </style>
 
 <style>{{FONTS}}</style>
 
 <div class="app">
-  <!-- ══════ Barra lateral ══════ -->
-  <aside class="rail">
-    <div class="rail-marca">
-      <span class="rail-escudo"><img src="{{LOGO}}" alt="Universidad Autónoma de Chile"></span>
-      <span>
-        <strong>Instrumento CCAA</strong>
-        <span>Psicología · EPG</span>
-      </span>
+  <!-- ══════════ Barra lateral ══════════ -->
+  <aside class="lateral">
+    <div class="marca">
+      <img src="{{LOGO}}" alt="Universidad Autónoma de Chile">
+      <span><b>Instrumento CCAA</b><span>Psicología · EPG</span></span>
     </div>
 
-    <nav class="rail-grupo" aria-label="Secciones">
-      <p class="rotulo">Nivel 1 · Sede Temuco</p>
-      <button class="rail-btn" data-ir="panel"><span class="n">01</span> Mis niveles</button>
-      <button class="rail-btn" data-ir="configurar"><span class="n">02</span> Configurar</button>
-      <button class="rail-btn" data-ir="evaluar"><span class="n">03</span> Evaluar</button>
-      <button class="rail-btn" data-ir="resultados" aria-current="page"><span class="n">04</span> Qué fortalecer <i class="punto" style="background:var(--incipiente)"></i></button>
+    <nav class="grupo" aria-label="General">
+      <button class="nav" data-ir="panel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Mis niveles
+      </button>
     </nav>
 
-    <div class="rail-pie">
-      <button class="rail-btn" id="tema">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-i="sol"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" data-i="luna" hidden><path d="M20.5 14.5c-4.5 1.5-9-3-7.5-7.5C9.5 8 7 11 7.5 14.5c.6 4 4.3 6.8 8.3 6.2 2-.3 3.7-1.4 4.7-3z"/></svg>
-        <span>Tema</span>
+    <!-- El flujo real del instrumento, en su orden real. -->
+    <nav class="grupo" aria-label="Nivel 1 · Sede Temuco">
+      <p class="rot">Nivel 1 · Temuco</p>
+      <button class="nav" data-ir="configurar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>
+        Configurar
       </button>
-      <div class="rail-usuario">
-        <span class="rail-avatar">SD</span>
-        <span>Sebastián Durán</span>
+      <button class="nav" data-ir="evaluar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H16l4 4v10.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M8.5 13.5l2 2 4-4.5"/></svg>
+        Evaluar
+      </button>
+      <button class="nav" data-ir="resultados" aria-current="page">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V11M12 19V5M19 19v-6"/></svg>
+        Qué fortalecer
+        <i class="pip cola" style="background:var(--bajo)" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <div class="lateral-pie">
+      <button class="nav" id="tema">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" data-i="sol"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.5 12h2M19.5 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" data-i="luna" hidden><path d="M20.5 14.5c-4.5 1.5-9-3-7.5-7.5C9.5 8 7 11 7.5 14.5c.6 4 4.3 6.8 8.3 6.2 2-.3 3.7-1.4 4.7-3z"/></svg>
+        Tema
+      </button>
+      <div class="quien">
+        <span class="avatar" aria-hidden="true">SD</span>
+        <span class="t13 sec">Sebastián Durán</span>
       </div>
     </div>
   </aside>
 
-  <!-- ══════ Lienzo ══════ -->
+  <!-- ══════════ Lienzo ══════════ -->
   <div class="lienzo">
-    <header class="barra">
+    <header class="tabla-sup">
       <div class="miga" id="miga"></div>
-      <span class="chip chip-ua mono" style="font-size:.7rem">R4 · cierre comparativo</span>
+      <span class="dist mono">R4 · cierre comparativo</span>
     </header>
-
-    <main class="contenido" id="main"></main>
+    <main class="hoja" id="main"></main>
   </div>
 </div>
 
 <script>
-// ════════ Datos del nivel de ejemplo ════════
+// ═══════════ Datos del nivel de ejemplo ═══════════
 const COMPS = [
-  { cod: "3.1", nom: "Evaluar", epg: "Instrumentos de evaluación", score: 25, sev: "crit", docentes: 2, base: 25,
+  { cod: "3.1", nom: "Evaluar", epg: "Instrumentos de evaluación", score: 25, sev: "bajo", docentes: 2, base: 25,
     ind: [
-      { t: "Reconoce los principales enfoques teóricos de evaluación cognitivo-conductual.", s: 25, sev: "crit" },
-      { t: "Compara enfoques de evaluación según el fenómeno conductual a comprender.", s: 25, sev: "crit",
+      { t: "Reconoce los principales enfoques teóricos de evaluación cognitivo-conductual.", s: 25, sev: "bajo" },
+      { t: "Compara enfoques de evaluación según el fenómeno conductual a comprender.", s: 25, sev: "bajo",
         com: [{ q: "Ya identifican los elementos, falta que los relacionen entre sí.", a: "Prof. Matías Herrera · Metodología de la Investigación I" },
               { q: "Confunden los niveles de análisis. Necesitan más práctica guiada antes de trabajar solos.", a: "Prof. Daniela Soto · Bases Biológicas de la Conducta" }] },
-      { t: "Integra los enfoques revisados en una comprensión global de un caso o situación.", s: 25, sev: "crit" },
+      { t: "Integra los enfoques revisados en una comprensión global de un caso o situación.", s: 25, sev: "bajo" },
     ],
-    asig: [["Metodología de la Investigación I","transversal",50],["Bases Biológicas de la Conducta","directa",0]] },
+    asig: [["Metodología de la Investigación I", "transversal", 50], ["Bases Biológicas de la Conducta", "directa", 0]] },
 
-  { cod: "1.1", nom: "Fundamentar", epg: "Elementos curriculares", score: 50, sev: "riesgo", docentes: 2, base: 0, disenso: 3,
+  { cod: "1.1", nom: "Fundamentar", epg: "Elementos curriculares", score: 50, sev: "medio", docentes: 2, base: 0, disenso: 3,
     ind: [
-      { t: "Identifica fundamentos psicobiológicos, socioculturales y epistemológicos pertinentes a un problema disciplinar.", s: 50, sev: "riesgo", dis: true,
+      { t: "Identifica fundamentos psicobiológicos, socioculturales y epistemológicos pertinentes a un problema disciplinar.", s: 50, sev: "medio", dis: true,
         com: [{ q: "Cuesta que distingan el fundamento teórico de la opinión personal; en el control la mayoría describió sin fundamentar.", a: "Prof. Daniela Soto · Bases Biológicas de la Conducta" }] },
-      { t: "Relaciona esos fundamentos entre sí para construir una explicación coherente del fenómeno psicosocial.", s: 50, sev: "riesgo", dis: true,
+      { t: "Relaciona esos fundamentos entre sí para construir una explicación coherente del fenómeno psicosocial.", s: 50, sev: "medio", dis: true,
         com: [{ q: "La rúbrica compartida con la otra asignatura ayudó: llegaron con el criterio claro.", a: "Prof. Carla Vidal · Psicología del Desarrollo I" }] },
-      { t: "Traduce la fundamentación teórica en una propuesta de investigación con preguntas y objetivos claros.", s: 50, sev: "riesgo", dis: true,
+      { t: "Traduce la fundamentación teórica en una propuesta de investigación con preguntas y objetivos claros.", s: 50, sev: "medio", dis: true,
         com: [{ q: "Llegan sin la lectura previa hecha, así que la clase se va en cubrir lo mínimo.", a: "Prof. Daniela Soto · Bases Biológicas de la Conducta" }] },
     ],
-    asig: [["Psicología del Desarrollo I","directa",100],["Bases Biológicas de la Conducta","transversal",0]] },
+    asig: [["Psicología del Desarrollo I", "directa", 100], ["Bases Biológicas de la Conducta", "transversal", 0]] },
 
-  { cod: "2.1", nom: "Investigar", epg: "Estrategias metodológicas", score: 50, sev: "riesgo", docentes: 1, base: 50,
+  { cod: "2.1", nom: "Investigar", epg: "Estrategias metodológicas", score: 50, sev: "medio", docentes: 1, base: 50,
     ind: [
-      { t: "Analiza problemas psicosociales relevantes para delimitar un tema de investigación.", s: 50, sev: "riesgo",
+      { t: "Analiza problemas psicosociales relevantes para delimitar un tema de investigación.", s: 50, sev: "medio",
         com: [{ q: "Avanzaron respecto del primer trabajo, pero la argumentación sigue siendo descriptiva.", a: "Prof. Matías Herrera · Metodología de la Investigación I" }] },
-      { t: "Aplica las etapas del método científico al diseño de su propuesta.", s: 50, sev: "riesgo" },
-      { t: "Argumenta la pertinencia y viabilidad del tema propuesto.", s: 50, sev: "riesgo" },
+      { t: "Aplica las etapas del método científico al diseño de su propuesta.", s: 50, sev: "medio" },
+      { t: "Argumenta la pertinencia y viabilidad del tema propuesto.", s: 50, sev: "medio" },
     ],
-    asig: [["Metodología de la Investigación I","directa",50]] },
+    asig: [["Metodología de la Investigación I", "directa", 50]] },
 
   { cod: "4.1", nom: "Analizar", epg: "Estrategias metodológicas", score: 100, sev: "ok", docentes: 1, base: 0,
     ind: [
@@ -384,7 +478,7 @@ const COMPS = [
       { t: "Contrasta críticamente las aproximaciones paradigmáticas utilizadas.", s: 100, sev: "ok" },
       { t: "Elabora conclusiones fundamentadas a partir del análisis realizado.", s: 100, sev: "ok" },
     ],
-    asig: [["Psicología del Desarrollo I","directa",100]] },
+    asig: [["Psicología del Desarrollo I", "directa", 100]] },
 
   { cod: "6.1", nom: "Autoexplorar", epg: "Seguimiento de resultados", score: 100, sev: "ok", docentes: 1, base: 0,
     ind: [
@@ -392,13 +486,13 @@ const COMPS = [
       { t: "Valora fortalezas y áreas de mejora identificadas en el proceso.", s: 100, sev: "ok" },
       { t: "Define acciones concretas de crecimiento personal y profesional.", s: 100, sev: "ok" },
     ],
-    asig: [["Psicología del Desarrollo I","transversal",100]] },
+    asig: [["Psicología del Desarrollo I", "transversal", 100]] },
 
-  { cod: "5.1", nom: "Intervenir", epg: "Derivación al SAAC", score: null, sev: "vacia", docentes: 0, base: null,
+  { cod: "5.1", nom: "Intervenir", epg: "Derivación al SAAC", score: null, sev: "nulo", docentes: 0, base: null,
     ind: [
-      { t: "Analiza críticamente la información disponible sobre una necesidad psicosocial.", s: null, sev: "vacia" },
-      { t: "Formula objetivos y acciones de un proyecto de intervención pertinente.", s: null, sev: "vacia" },
-      { t: "Justifica la propuesta de intervención en función de la necesidad detectada.", s: null, sev: "vacia" },
+      { t: "Analiza críticamente la información disponible sobre una necesidad psicosocial.", s: null, sev: "nulo" },
+      { t: "Formula objetivos y acciones de un proyecto de intervención pertinente.", s: null, sev: "nulo" },
+      { t: "Justifica la propuesta de intervención en función de la necesidad detectada.", s: null, sev: "nulo" },
     ], asig: [] },
 ];
 
@@ -408,12 +502,40 @@ const GENTE = [
   { n: "Prof. Matías Herrera", a: "Metodología de la Investigación I", r: 6, e: 6 },
 ];
 
-const CLASE = { crit: "crit", riesgo: "riesgo", ok: "ok", vacia: "vacia" };
-const NOMBRE_SEV = { crit: "Crítico", riesgo: "En riesgo", ok: "Consolidado", vacia: "Sin evaluar" };
+const NOMBRE = { bajo: "Crítico", medio: "En riesgo", ok: "Consolidado", nulo: "Sin evaluar" };
+const LLENO  = { bajo: 1, medio: 2, ok: 3, nulo: 0 };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-// ════════ Vistas ════════
+// ═══════════ Piezas reutilizables ═══════════
+function medidor(sev) {
+  return `<span class="med3 med3-${LLENO[sev]}" aria-hidden="true"><i></i><i></i><i></i></span>`;
+}
+
+function distintivo(sev) {
+  return `<span class="dist${sev === "nulo" ? "" : " dist-" + sev}">${medidor(sev)}${NOMBRE[sev]}</span>`;
+}
+
+function metrica(rot, cifra, apoyo, color) {
+  return `<div class="metrica">
+    <p class="rot">${rot}</p>
+    <p class="cifra cifra-l"${color ? ` style="color:${color}"` : ""}>${cifra}</p>
+    ${apoyo ? `<p class="t12 ter">${apoyo}</p>` : ""}
+  </div>`;
+}
+
+function panel(cab, cuerpo, extra = "") {
+  return `<section class="panel entra"${extra}>${cab}${cuerpo}</section>`;
+}
+
+function cabecera(titulo, apoyo, derecha = "") {
+  return `<div class="panel-cab">
+    <div class="crece"><h2>${titulo}</h2>${apoyo ? `<p class="apoyo">${apoyo}</p>` : ""}</div>
+    ${derecha}
+  </div>`;
+}
+
+// ═══════════ Vistas ═══════════
 const MIGAS = {
   panel: ["Mis niveles"],
   configurar: ["Nivel 1 · Sede Temuco", "Configurar"],
@@ -423,365 +545,363 @@ const MIGAS = {
 
 function vistaPanel() {
   return `
-  <div class="pila g26">
-    <div class="fila entre envuelve g14">
+  <div class="pila g24">
+    <div class="fila entre g16">
       <div>
-        <h1 style="font-size:2rem">Mis niveles</h1>
-        <p class="suave tsm" style="margin-top:6px">1 nivel tiene competencias en estado crítico.</p>
+        <h1 class="d1">Mis niveles</h1>
+        <p class="t13 sec" style="margin-top:6px">Un nivel tiene competencias en estado crítico.</p>
       </div>
       <button class="btn btn-p">Nuevo nivel</button>
     </div>
 
-    <article class="carta p24 aparece" style="border-left:3px solid var(--incipiente)">
-      <div class="fila entre envuelve g14" style="align-items:flex-start">
-        <div>
-          <p class="rotulo">Ciclo Inicial · Diurno · 2026-T3</p>
-          <h2 style="font-size:1.35rem;margin-top:5px">Nivel 1 · Sede Temuco</h2>
-          <p style="color:var(--incipiente);font-weight:500;font-size:.88rem;margin-top:8px">3 competencias necesitan trabajo</p>
+    ${panel(
+      cabecera(
+        `<span class="fila g10">Nivel 1 · Sede Temuco ${distintivo("bajo")}</span>`,
+        "Ciclo Inicial · Diurno · 2026-T3",
+        `<span class="dist mono">R4 cierre</span>`
+      ),
+      `<div class="panel-cpo pila g20">
+        <div class="fila g32">
+          ${metrica("Crítico", "1", "3.1 Evaluar", "var(--bajo)")}
+          ${metrica("En riesgo", "2", "1.1 · 2.1", "var(--medio)")}
+          ${metrica("Consolidado", "2", "4.1 · 6.1", "var(--ok)")}
+          ${metrica("Sin evaluar", "1", "5.1 Intervenir", "var(--tinta-3)")}
         </div>
-        <span class="chip chip-ua mono" style="font-size:.7rem">R4 cierre</span>
-      </div>
 
-      <div class="barra-logro" style="margin-top:16px;height:9px">
-        <i class="seg-inc" style="width:20%"></i><i class="seg-pro" style="width:40%"></i><i class="seg-log" style="width:33%"></i><i style="width:7%;background:var(--regla)"></i>
-      </div>
+        <div class="barra" role="img" aria-label="1 crítica, 2 en riesgo, 2 consolidadas, 1 sin evaluar">
+          <i class="b-bajo" style="width:16.6%"></i><i class="b-medio" style="width:33.3%"></i><i class="b-ok" style="width:33.3%"></i>
+        </div>
 
-      <div class="fila envuelve regla-arriba" style="gap:34px;margin-top:18px;padding-top:16px">
-        <div><p class="rotulo">Docentes</p><p class="tsm" style="margin-top:3px"><b>3 de 3</b> <span class="tenue">respondieron</span></p></div>
-        <div><p class="rotulo">Asignaturas</p><p class="tsm mono" style="margin-top:3px">3</p></div>
-        <div><p class="rotulo">Acuerdos abiertos</p><p class="tsm mono" style="margin-top:3px;color:var(--proceso)">1</p></div>
-      </div>
+        <div class="fila g32 regla" style="padding-top:16px">
+          <div><p class="rot">Docentes</p><p class="t13 med" style="margin-top:4px">3 de 3 <span class="ter" style="font-weight:400">respondieron</span></p></div>
+          <div><p class="rot">Asignaturas</p><p class="t13 med mono" style="margin-top:4px">3</p></div>
+          <div><p class="rot">Acuerdos abiertos</p><p class="t13 med mono" style="margin-top:4px;color:var(--medio)">1</p></div>
+        </div>
 
-      <div class="fila g10" style="margin-top:18px">
-        <button class="btn btn-p btn-sm" data-ir="resultados">Ver qué fortalecer</button>
-        <button class="btn btn-f btn-sm" data-ir="configurar">Configurar</button>
-      </div>
-    </article>
+        <div class="fila g8">
+          <button class="btn btn-p btn-xs" data-ir="resultados">Ver qué fortalecer</button>
+          <button class="btn btn-s btn-xs" data-ir="configurar">Configurar</button>
+        </div>
+      </div>`
+    )}
   </div>`;
 }
 
 function vistaConfigurar() {
   const pasos = [
-    ["Competencias del ciclo", "listo", "6 competencias", "El Ciclo Inicial viene con sus seis competencias e indicadores ya cargados."],
-    ["Asignaturas del nivel", "listo", "3 asignaturas", ""],
-    ["Docentes", "listo", "3 docentes", ""],
-    ["Qué competencia tributa cada asignatura", "listo", "7 vínculos", ""],
+    ["Competencias del ciclo", "6 competencias", "El Ciclo Inicial viene con sus seis competencias e indicadores ya cargados."],
+    ["Asignaturas del nivel", "3 asignaturas", ""],
+    ["Docentes", "3 docentes", ""],
+    ["Qué competencia tributa cada asignatura", "7 vínculos", ""],
   ];
+
   return `
-  <div class="pila g26">
+  <div class="pila g24">
     <div>
-      <p class="rotulo">Ciclo Inicial</p>
-      <h1 style="font-size:2rem;margin-top:5px">Nivel 1 · Sede Temuco</h1>
-      <p class="suave tsm" style="margin-top:5px">Diurno · 2026-T3</p>
+      <p class="rot">Ciclo Inicial · Diurno · 2026-T3</p>
+      <h1 class="d1" style="margin-top:6px">Nivel 1 · Sede Temuco</h1>
     </div>
 
-    <div class="carta p20 fila entre envuelve g14">
-      <div>
-        <p class="rotulo">Configuración</p>
-        <p class="serif" style="font-size:1.15rem;margin-top:3px">Nivel listo para evaluar</p>
-      </div>
-      <div class="fila g10">
-        <div class="fila" style="gap:5px">${[1,2,3,4].map(()=>'<i style="display:block;width:38px;height:5px;border-radius:99px;background:var(--ua)"></i>').join("")}</div>
-        <button class="btn btn-p btn-sm" data-ir="resultados">Ver qué fortalecer</button>
-      </div>
-    </div>
-
-    <div class="pila g14">
-      ${pasos.map((p,i)=>`
-        <section class="paso listo aparece" style="animation-delay:${i*60}ms">
-          <span class="paso-n">✓</span>
-          <div class="crece">
-            <div class="fila entre envuelve g10">
-              <h3 style="font-size:1.05rem">${p[0]}</h3>
-              <span class="tsm suave">${p[2]}</span>
+    ${panel(
+      cabecera("Configuración completa", "Los cuatro pasos están resueltos: el nivel puede evaluar.",
+        `<button class="btn btn-p btn-xs" data-ir="resultados">Ver qué fortalecer</button>`),
+      `<div>
+        ${pasos.map((p, i) => `
+          <div class="paso paso-listo">
+            <span class="paso-n" aria-label="Paso ${i + 1}, listo">✓</span>
+            <div class="crece">
+              <div class="fila entre g10">
+                <h3 class="t13">${p[0]}</h3>
+                <span class="t12 ter mono">${p[1]}</span>
+              </div>
+              ${p[2] ? `<p class="t12 ter" style="margin-top:4px">${p[2]}</p>` : ""}
             </div>
-            ${p[3] ? `<p class="txs suave" style="margin-top:5px">${p[3]}</p>` : ""}
-          </div>
-        </section>`).join("")}
+          </div>`).join("")}
 
-      <section class="paso actual aparece" style="animation-delay:260ms">
-        <span class="paso-n">5</span>
-        <div class="crece pila g18">
-          <div>
-            <h3 style="font-size:1.05rem">Reunión y evaluación</h3>
-            <p class="txs suave" style="margin-top:5px">Elige la reunión en curso, comparte el enlace con tus docentes y guarda el acta.</p>
-          </div>
-
-          <div>
-            <p class="rotulo" style="margin-bottom:8px">Reunión en curso</p>
-            <div class="fila envuelve g6">
-              ${[["R1","Línea base"],["R2","Seguimiento"],["R3","Seguimiento"],["R4","Cierre comparativo"]].map(([r,f],i)=>`
-                <button class="btn ${i===3?"btn-p":"btn-s"} btn-sm">${r} <span style="opacity:.7;font-size:.72rem">${f}</span></button>`).join("")}
+        <div class="paso paso-actual">
+          <span class="paso-n">5</span>
+          <div class="crece pila g20">
+            <div>
+              <h3 class="t13">Reunión y evaluación</h3>
+              <p class="t12 ter" style="margin-top:4px">Elige la reunión en curso, comparte el enlace con tus docentes y guarda el acta.</p>
             </div>
-          </div>
 
-          <div class="regla-arriba" style="padding-top:16px">
-            <p class="rotulo" style="margin-bottom:8px">Enlace para docentes</p>
-            <div class="fila g10 envuelve">
-              <input readonly value="instrumento-ccaa.cl/evaluar/nivel-1-temuco"
-                class="mono crece" style="padding:9px 13px;border-radius:11px;border:1px solid var(--regla);background:var(--carta-2);color:var(--suave);font-size:.76rem;min-width:220px">
-              <button class="btn btn-s btn-sm" id="copiar">Copiar</button>
-              <button class="btn btn-f btn-sm" data-ir="evaluar">Ver como docente ↗</button>
+            <div>
+              <p class="rot" style="margin-bottom:8px">Reunión en curso</p>
+              <div class="fila g6">
+                ${[["R1", "Línea base"], ["R2", "Seguimiento"], ["R3", "Seguimiento"], ["R4", "Cierre"]].map(([r, f], i) => `
+                  <button class="btn ${i === 3 ? "btn-p" : "btn-s"} btn-xs"><b class="mono">${r}</b> <span style="font-weight:400;opacity:.7">${f}</span></button>`).join("")}
+              </div>
             </div>
-          </div>
 
-          <div class="regla-arriba" style="padding-top:16px">
-            <p class="rotulo" style="margin-bottom:8px">Actas de la reunión 4</p>
-            <p class="tsm suave">acta-ccaa-r4.pdf <span class="tenue txs">· Coordinación</span></p>
+            <div>
+              <p class="rot" style="margin-bottom:8px">Enlace para docentes</p>
+              <div class="fila g8">
+                <input readonly class="campo mono crece" style="min-width:200px;font-size:.75rem" value="instrumento-ccaa.cl/evaluar/nivel-1-temuco">
+                <button class="btn btn-s btn-xs" id="copiar">Copiar</button>
+                <button class="btn btn-f btn-xs" data-ir="evaluar">Ver como docente</button>
+              </div>
+            </div>
+
+            <div>
+              <p class="rot" style="margin-bottom:8px">Actas de la reunión 4</p>
+              <p class="t13 sec">acta-ccaa-r4.pdf <span class="ter t12">· Coordinación</span></p>
+            </div>
           </div>
         </div>
-      </section>
-    </div>
+      </div>`
+    )}
   </div>`;
 }
 
 function vistaEvaluar() {
   const c = COMPS[1];
   return `
-  <div class="pila g26" style="max-width:720px">
+  <div class="pila g24" style="max-width:660px">
     <div>
-      <p class="rotulo">Vista del docente · Prof. Carla Vidal</p>
-      <h1 style="font-size:2rem;margin-top:5px">Psicología del Desarrollo I</h1>
-      <p class="suave tsm" style="margin-top:5px">Evalúas solo las competencias que tu asignatura tributa. Reunión 4 · cierre comparativo.</p>
+      <p class="rot">Vista del docente · Prof. Carla Vidal</p>
+      <h1 class="d1" style="margin-top:6px">Psicología del Desarrollo I</h1>
+      <p class="t13 sec" style="margin-top:6px">Evalúas solo las competencias que tu asignatura tributa. Reunión 4 · cierre comparativo.</p>
     </div>
 
-    <article class="carta p24 aparece">
-      <div class="fila entre envuelve g10">
-        <p class="rotulo" style="color:var(--ua)">${c.cod} · ${c.epg}</p>
-        <span class="chip chip-ua">Directa</span>
-      </div>
-      <h2 style="font-size:1.3rem;margin-top:8px">${c.nom}</h2>
-      <p class="tsm suave" style="margin-top:6px">Relaciona fundamentos psicobiológicos, socioculturales y epistemológicos para generar propuestas de investigación en la disciplina.</p>
+    ${panel(
+      cabecera(`${c.cod} · ${c.nom}`, c.epg, `<span class="dist dist-marca">Directa</span>`),
+      `<div class="panel-cpo">
+        <p class="t13 sec">Relaciona fundamentos psicobiológicos, socioculturales y epistemológicos para generar propuestas de investigación en la disciplina.</p>
 
-      <div class="pila g18" style="margin-top:22px">
-        ${c.ind.map((i, k)=>`
-          <div class="regla-arriba" style="padding-top:16px">
-            <p class="tsm">${esc(i.t)}</p>
-            <div class="rub" style="margin-top:10px" data-rub="${k}">
-              ${["INCIPIENTE","EN_PROCESO","LOGRADO"].map(v=>`
-                <button data-v="${v}" aria-pressed="false">${v==="EN_PROCESO"?"En proceso":v[0]+v.slice(1).toLowerCase()}</button>`).join("")}
-            </div>
-            <textarea rows="2" placeholder="Comentario (opcional)"
-              style="width:100%;margin-top:10px;padding:10px 13px;border-radius:11px;border:1px solid var(--regla);background:var(--carta-2);color:var(--tinta);font:inherit;font-size:.84rem;resize:vertical"></textarea>
-          </div>`).join("")}
-      </div>
+        <div class="pila g20" style="margin-top:20px">
+          ${c.ind.map((i, k) => `
+            <div class="regla" style="padding-top:16px">
+              <p class="t13">${esc(i.t)}</p>
+              <div class="rub" style="margin-top:10px" data-rub="${k}">
+                ${["INCIPIENTE", "EN_PROCESO", "LOGRADO"].map((v) => `
+                  <button data-v="${v}" aria-pressed="false">${v === "EN_PROCESO" ? "En proceso" : v[0] + v.slice(1).toLowerCase()}</button>`).join("")}
+              </div>
+              <textarea rows="2" class="campo" style="margin-top:8px" placeholder="Comentario (opcional)"></textarea>
+            </div>`).join("")}
+        </div>
 
-      <button class="btn btn-p" style="margin-top:20px" id="guardar-eval">Guardar evaluación</button>
-      <p class="txs tenue" style="margin-top:10px">Prototipo: las respuestas no se guardan.</p>
-    </article>
+        <div class="fila g10 regla" style="margin-top:20px;padding-top:16px">
+          <button class="btn btn-p" id="guardar-eval">Guardar evaluación</button>
+          <span class="t12 ter">Prototipo: las respuestas no se guardan.</span>
+        </div>
+      </div>`
+    )}
   </div>`;
 }
 
 function celda(i) {
-  const cls = "celda celda-" + CLASE[i.sev] + (i.dis ? " celda-disenso" : "");
-  const tit = `${esc(i.t)}\n${i.s === null ? "Sin evaluar" : i.s + "/100 · " + NOMBRE_SEV[i.sev]}${i.dis ? "\n⇄ Criterio no compartido entre docentes" : ""}`;
-  return `<div class="${cls}" title="${tit}" tabindex="0" role="img" aria-label="${tit.replace(/\n/g, ". ")}">${i.s === null ? "—" : i.s}</div>`;
+  const cls = `cel cel-${i.sev}` + (i.dis ? " cel-dis" : "");
+  const desc = `${i.t} — ${i.s === null ? "Sin evaluar" : i.s + " de 100, " + NOMBRE[i.sev]}${i.dis ? ". Criterio no compartido entre docentes" : ""}`;
+  return `<div class="${cls}" tabindex="0" role="img" aria-label="${esc(desc)}" title="${esc(desc)}">
+    ${medidor(i.sev)}<span class="cel-num">${i.s === null ? "—" : i.s}</span>
+  </div>`;
 }
 
 function vistaResultados() {
-  const atencion = COMPS.filter(c => c.sev === "crit" || c.sev === "riesgo");
-  const ok = COMPS.filter(c => c.sev === "ok");
+  const atencion = COMPS.filter((c) => c.sev === "bajo" || c.sev === "medio");
+  const ok = COMPS.filter((c) => c.sev === "ok");
 
   return `
-  <div class="pila g26">
-    <div class="fila entre envuelve g14">
+  <div class="pila g24">
+    <div class="fila entre g16">
       <div>
-        <p class="rotulo">Sintetizar</p>
-        <h1 style="font-size:2.1rem;margin-top:5px">Qué fortalecer</h1>
-        <p class="suave tsm" style="margin-top:5px">Nivel 1 · Sede Temuco — Reunión 4, cierre comparativo</p>
+        <p class="rot">Sintetizar · Reunión 4</p>
+        <h1 class="d1" style="margin-top:6px">Qué fortalecer</h1>
+        <p class="t13 sec" style="margin-top:6px">Nivel 1 · Sede Temuco — cierre comparativo contra la línea base.</p>
       </div>
-      <button class="btn btn-s btn-sm" onclick="window.print()">Imprimir para la reunión</button>
+      <button class="btn btn-s btn-xs" onclick="window.print()">Imprimir para la reunión</button>
     </div>
 
-    <!-- Titular -->
-    <section class="carta p24 aparece">
-      <div class="fila entre envuelve g26">
-        <div style="max-width:380px">
-          <h2 class="serif" style="font-size:1.6rem;line-height:1.2">3 de 5 competencias necesitan trabajo.</h2>
-          <p class="suave tsm" style="margin-top:8px">Ordenadas de la más urgente a la menos urgente. Una además muestra criterio no compartido entre docentes.</p>
+    <!-- Veredicto -->
+    ${panel(
+      "",
+      `<div class="panel-cpo p24 fila entre alto g24">
+        <div style="max-width:400px">
+          <p class="rot">¿El nivel cumple con sus competencias?</p>
+          <p class="d2" style="margin-top:8px;color:var(--medio)">Parcialmente.</p>
+          <p class="t13 sec" style="margin-top:8px">Dos de cinco competencias evaluadas alcanzan el estándar. <b class="med" style="color:var(--tinta)">3.1 Evaluar</b> sigue en 25 y no ha variado desde la línea base; <b class="med" style="color:var(--tinta)">1.1 Fundamentar</b> subió 50 puntos, pero con criterio no compartido entre docentes.</p>
         </div>
-        <div class="fila" style="gap:34px">
-          <div><p class="rotulo" style="color:var(--incipiente)">Crítico</p><p class="cifra cifra-l" style="margin-top:6px">1</p></div>
-          <div><p class="rotulo" style="color:var(--proceso)">En riesgo</p><p class="cifra cifra-l" style="margin-top:6px">2</p></div>
-          <div><p class="rotulo" style="color:var(--logrado)">Consolidado</p><p class="cifra cifra-l" style="margin-top:6px">2</p></div>
+        <div class="fila g32">
+          ${metrica("Crítico", "1", "de 6", "var(--bajo)")}
+          ${metrica("En riesgo", "2", "de 6", "var(--medio)")}
+          ${metrica("Consolidado", "2", "de 6", "var(--ok)")}
         </div>
-      </div>
-    </section>
+      </div>`
+    )}
 
-    <!-- ══ Matriz de evidencias: la pieza central ══ -->
-    <section class="carta p24 aparece" style="animation-delay:70ms">
-      <div class="fila entre envuelve g14" style="margin-bottom:18px">
-        <div>
-          <h2 style="font-size:1.15rem">Mapa de evidencias</h2>
-          <p class="txs suave" style="margin-top:4px">Cada celda es un indicador observable. Dónde está el rojo, ahí está el problema.</p>
+    <!-- ══ Rejilla de evidencias: la pieza central ══ -->
+    ${panel(
+      cabecera("Mapa de evidencias", "Cada celda es un indicador observable. El puntaje y el medidor dicen lo mismo que el color.",
+        `<div class="leyenda">
+          <span><i style="background:var(--bajo-velo);border-color:var(--bajo-linea)"></i>Crítico</span>
+          <span><i style="background:var(--medio-velo);border-color:var(--medio-linea)"></i>En riesgo</span>
+          <span><i style="background:var(--ok-velo);border-color:var(--ok-linea)"></i>Consolidado</span>
+          <span><b style="font-size:.75rem;color:var(--tinta-2)">⇄</b> Disenso</span>
+        </div>`),
+      `<div class="panel-cpo">
+        <div class="rejilla-caja">
+          <div class="rejilla">
+            <div class="rej-cab rot"></div>
+            <div class="rej-cab rot">Evidencia 1</div>
+            <div class="rej-cab rot">Evidencia 2</div>
+            <div class="rej-cab rot">Evidencia 3</div>
+            <div class="rej-cab rot" style="text-align:right">Puntaje</div>
+            ${COMPS.map((c) => `
+              <div class="rej-fila">
+                <div class="rej-tit"><b>${c.cod}</b><span>${c.nom}</span></div>
+                ${c.ind.map(celda).join("")}
+                <div class="rej-punt">
+                  <b${c.score === null ? ' style="color:var(--tinta-3)"' : ""}>${c.score === null ? "—" : c.score}</b><small>/100</small>
+                </div>
+              </div>`).join("")}
+          </div>
         </div>
-        <div class="leyenda">
-          <span><i style="background:var(--incipiente)"></i>Crítico</span>
-          <span><i style="background:var(--proceso)"></i>En riesgo</span>
-          <span><i style="background:var(--logrado)"></i>Consolidado</span>
-          <span><i style="background:var(--carta-2);border:1px solid var(--regla)"></i>Sin evaluar</span>
-          <span><i style="background:var(--tinta);clip-path:polygon(100% 0,100% 100%,0 0)"></i>Disenso</span>
-        </div>
-      </div>
-
-      <div class="matriz-caja">
-      <div class="matriz">
-        <div></div>
-        <div class="matriz-cab">Evidencia 1</div>
-        <div class="matriz-cab">Evidencia 2</div>
-        <div class="matriz-cab">Evidencia 3</div>
-        <div class="matriz-cab" style="text-align:right">Puntaje</div>
-        ${COMPS.map(c => `
-          <div class="matriz-fila-tit"><b>${c.cod}</b>${c.nom}</div>
-          ${c.ind.map(celda).join("")}
-          <div class="matriz-punt" style="color:${c.score===null?"var(--tenue)":"inherit"}">${c.score === null ? "—" : c.score}</div>
-        `).join("")}
-      </div>
-      </div>
-    </section>
+      </div>`,
+      ' style="animation-delay:40ms"'
+    )}
 
     <!-- Participación -->
-    <section class="carta p24 aparece" style="animation-delay:120ms">
-      <div class="fila entre envuelve g10">
-        <p class="rotulo">Participación</p>
-        <p class="tsm suave">3 de 3 respondieron completo</p>
-      </div>
-      <ul class="pila" style="margin-top:14px">
-        ${GENTE.map((p,i)=>`
-          <li class="fila g14" style="padding:10px 0;${i?"border-top:1px solid var(--regla)":""}">
-            <i style="width:8px;height:8px;border-radius:99px;background:var(--logrado);flex:none"></i>
-            <div class="crece"><p class="tsm" style="font-weight:500">${p.n}</p><p class="txs tenue">${p.a}</p></div>
-            <div style="width:110px" class="barra-logro"><i class="seg-log" style="width:100%"></i></div>
-            <span class="mono txs suave" style="width:42px;text-align:right">${p.r}/${p.e}</span>
-          </li>`).join("")}
-      </ul>
-    </section>
+    ${panel(
+      cabecera("Participación", "3 de 3 docentes respondieron el total de sus indicadores."),
+      `<div class="panel-cpo">
+        <ul>
+          ${GENTE.map((p, i) => `
+            <li class="fila g12" style="padding:10px 0${i ? ";border-top:1px solid var(--linea)" : ""}">
+              <span class="dist dist-ok">${medidor("ok")}Completo</span>
+              <div class="crece"><p class="t13 med">${p.n}</p><p class="t12 ter">${p.a}</p></div>
+              <span class="mono t12 ter">${p.r}/${p.e}</span>
+            </li>`).join("")}
+        </ul>
+      </div>`,
+      ' style="animation-delay:80ms"'
+    )}
 
     <!-- Recomendaciones -->
-    <section class="carta p24 aparece" style="animation-delay:170ms;border-left:3px solid var(--ua)">
-      <p class="rotulo" style="color:var(--ua)">Recomendaciones · generadas con IA</p>
-      <div style="margin-top:14px;padding-bottom:16px;border-bottom:1px solid var(--regla)">
-        <p class="rotulo">¿El nivel está cumpliendo con sus competencias?</p>
-        <p class="serif" style="font-size:1.5rem;color:var(--proceso);margin-top:6px">Parcialmente.</p>
-        <p class="tsm suave" style="margin-top:6px">Dos de cinco competencias evaluadas alcanzan el estándar. La competencia 3.1 Evaluar está en 25/100 y no ha variado desde la línea base; 1.1 Fundamentar avanzó 50 puntos pero con criterio no compartido entre docentes.</p>
-      </div>
-
-      <div style="margin-top:18px">
-        <p class="rotulo" style="margin-bottom:10px">Foco 1 · 3.1 Evaluar — Instrumentos de evaluación</p>
-        <p class="tsm">Los tres indicadores están en 25/100 y ningún docente reporta logro. Los comentarios apuntan a que reconocen los enfoques pero no logran contrastarlos: es un problema de aplicación, no de cobertura de contenido.</p>
-
-        <div class="carta plana p20" style="background:var(--carta-2);margin-top:14px;border-radius:12px">
-          <span class="chip chip-ua" style="text-transform:uppercase;letter-spacing:.06em;font-size:.66rem">Instrucción entre pares</span>
-          <p class="tsm" style="margin-top:9px">En la semana 5, presentar dos casos donde el mismo comportamiento admita lectura conductual y cognitiva. Votación individual, discusión en parejas, revotación y cierre del docente sobre el criterio de contraste.</p>
-          <p class="txs tenue" style="margin-top:8px">Por qué: los comentarios muestran una concepción errónea compartida sobre los niveles de análisis, y ese es el caso donde la discusión entre pares supera a la exposición.</p>
+    ${panel(
+      cabecera("Cómo fortalecerlo", "Propuestas generadas con IA a partir de la evidencia y los comentarios del equipo.",
+        `<span class="dist dist-marca">Foco 1 de 3</span>`),
+      `<div class="panel-cpo pila g16">
+        <div>
+          <p class="rot" style="color:var(--bajo)">3.1 Evaluar · Instrumentos de evaluación</p>
+          <p class="t13" style="margin-top:8px">Los tres indicadores están en 25 y ningún docente reporta logro. Los comentarios apuntan a que reconocen los enfoques pero no logran contrastarlos: es un problema de aplicación, no de cobertura de contenido.</p>
         </div>
 
-        <div class="carta plana p20" style="background:var(--carta-2);margin-top:10px;border-radius:12px">
-          <span class="chip chip-ua" style="text-transform:uppercase;letter-spacing:.06em;font-size:.66rem">Ejemplos resueltos</span>
-          <p class="tsm" style="margin-top:9px">Antes de pedir el análisis autónomo, modelar un caso completo mostrando el razonamiento de selección del enfoque, y luego entregar dos casos con el andamiaje retirado progresivamente.</p>
-          <p class="txs tenue" style="margin-top:8px">Por qué: "necesitan más práctica guiada antes de trabajar solos" describe exactamente una carga cognitiva excesiva para la tarea planteada.</p>
-        </div>
-      </div>
-    </section>
+        ${[
+          ["Instrucción entre pares",
+           "En la semana 5, presentar dos casos donde el mismo comportamiento admita lectura conductual y cognitiva. Votación individual, discusión en parejas, revotación y cierre del docente sobre el criterio de contraste.",
+           "Los comentarios muestran una concepción errónea compartida sobre los niveles de análisis, y ese es justamente el caso donde la discusión entre pares supera a la exposición."],
+          ["Ejemplos resueltos",
+           "Antes de pedir el análisis autónomo, modelar un caso completo mostrando el razonamiento de selección del enfoque, y luego entregar dos casos retirando el andamiaje de forma progresiva.",
+           "«Necesitan más práctica guiada antes de trabajar solos» describe exactamente una carga cognitiva excesiva para la tarea planteada."],
+        ].map(([tec, acc, por]) => `
+          <div style="background:var(--panel-2);border:1px solid var(--linea);border-radius:8px;padding:16px">
+            <span class="dist dist-marca">${tec}</span>
+            <p class="t13" style="margin-top:10px">${acc}</p>
+            <p class="t12 ter" style="margin-top:8px"><b class="med">Por qué:</b> ${por}</p>
+          </div>`).join("")}
+      </div>`,
+      ' style="animation-delay:120ms"'
+    )}
 
     <!-- Disenso -->
-    <section class="carta p24 aparece" style="animation-delay:210ms;border-left:3px solid var(--proceso)">
-      <p class="rotulo" style="color:var(--proceso)">Criterios que el equipo no comparte</p>
-      <p class="tsm suave" style="margin-top:8px">En las tres evidencias de 1.1 Fundamentar hubo docentes que calificaron logrado y docentes que calificaron incipiente. Antes de intervenir con las y los estudiantes, conviene acordar qué cuenta como logro.</p>
-      <p class="tsm" style="margin-top:12px"><b>Cómo resolverlo:</b> calibrar con tres trabajos de muestra: cada docente los califica por separado y luego se discuten las diferencias hasta fijar el descriptor de "logrado".</p>
-    </section>
+    ${panel(
+      cabecera(`<span class="fila g8">Criterios que el equipo no comparte <span class="dist dist-medio">3 evidencias</span></span>`,
+        "1.1 Fundamentar — hubo docentes que calificaron logrado y docentes que calificaron incipiente sobre la misma evidencia."),
+      `<div class="panel-cpo">
+        <p class="t13 sec">Antes de intervenir con las y los estudiantes, conviene acordar qué cuenta como logro: mientras el criterio no sea común, el puntaje mide dos cosas distintas.</p>
+        <p class="t13" style="margin-top:12px"><b class="med">Cómo resolverlo:</b> calibrar con tres trabajos de muestra. Cada docente los califica por separado y luego se discuten las diferencias hasta fijar el descriptor de «logrado».</p>
+      </div>`,
+      ' style="animation-delay:160ms"'
+    )}
 
     <!-- Acuerdos -->
-    <section class="aparece" style="animation-delay:250ms">
-      <p class="rotulo" style="margin-bottom:6px">Acuerdos de esta reunión</p>
-      <p class="tsm suave" style="margin-bottom:14px">Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres aquí aparece como primer punto de tabla en la reunión siguiente.</p>
-      <article class="carta p20">
-        <div class="fila entre envuelve g10">
-          <div class="crece">
-            <div class="fila g10 envuelve" style="margin-bottom:8px">
-              <span class="chip chip-riesgo">En curso</span>
-              <span class="mono txs" style="color:var(--ua)">1.1</span>
-              <span class="mono txs tenue">R4</span>
-            </div>
-            <p class="tsm">Calibrar el criterio de logro de 1.1 con tres trabajos de muestra.</p>
-            <p class="txs tenue" style="margin-top:6px">Responsable: Carla Vidal y Daniela Soto · Plazo: antes de R3</p>
+    ${panel(
+      cabecera("Acuerdos de esta reunión", "Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres aquí abre la tabla de la reunión siguiente.",
+        `<button class="btn btn-s btn-xs">Nuevo acuerdo</button>`),
+      `<div class="panel-cpo fila entre alto g16">
+        <div class="crece">
+          <div class="fila g8" style="margin-bottom:8px">
+            <span class="dist dist-medio">En curso</span>
+            <span class="mono t12 ter">1.1 · R4</span>
           </div>
-          <button class="btn btn-s btn-sm">Marcar cumplido</button>
+          <p class="t13">Calibrar el criterio de logro de 1.1 con tres trabajos de muestra.</p>
+          <p class="t12 ter" style="margin-top:6px">Carla Vidal y Daniela Soto · antes de R3</p>
         </div>
-      </article>
-    </section>
+        <button class="btn btn-s btn-xs">Marcar cumplido</button>
+      </div>`,
+      ' style="animation-delay:200ms"'
+    )}
 
     <!-- Evidencia detallada -->
-    <section class="aparece" style="animation-delay:290ms">
-      <p class="rotulo" style="margin-bottom:14px">La evidencia</p>
-      <div class="pila g14">
-        ${atencion.map(c => tarjetaComp(c)).join("")}
-        <details class="carta p20">
-          <summary style="cursor:pointer;list-style:none" class="fila entre envuelve g10">
-            <span class="fila g10 tsm"><i style="width:8px;height:8px;border-radius:99px;background:var(--logrado)"></i>
-              <b style="font-weight:500">2 competencias alcanzan el estándar</b>
-              <span class="tenue">${ok.map(c=>c.cod).join(" · ")}</span></span>
-            <span class="txs tenue">Ver ▾</span>
-          </summary>
-          <div class="pila g14" style="margin-top:16px">${ok.map(c => tarjetaComp(c)).join("")}</div>
-        </details>
-      </div>
+    <section class="pila g12 entra" style="animation-delay:240ms">
+      <p class="rot">La evidencia</p>
+      ${atencion.map(tarjetaComp).join("")}
+      <details class="panel">
+        <summary class="fila entre g10 p16" style="cursor:pointer;list-style:none">
+          <span class="fila g10 t13">${distintivo("ok")}<b class="med">2 competencias alcanzan el estándar</b>
+            <span class="ter mono t12">${ok.map((c) => c.cod).join(" · ")}</span></span>
+          <span class="t12 ter">Ver</span>
+        </summary>
+        <div class="pila g12 p16" style="padding-top:0">${ok.map(tarjetaComp).join("")}</div>
+      </details>
     </section>
   </div>`;
 }
 
 function tarjetaComp(c) {
-  const borde = c.sev === "crit" ? "var(--incipiente)" : c.sev === "riesgo" ? "var(--proceso)" : "var(--logrado)";
-  const fondo = c.sev === "crit" ? "background:color-mix(in srgb, var(--incipiente-velo) 55%, var(--carta));" : "";
-  const total = c.ind.filter(i => i.s !== null).length || 1;
-  const inc = c.ind.filter(i => i.sev === "crit").length / total * 100;
-  const pro = c.ind.filter(i => i.sev === "riesgo").length / total * 100;
-  const log = c.ind.filter(i => i.sev === "ok").length / total * 100;
-
   return `
-  <article class="carta p24" style="border-left:3px solid ${borde};${fondo}">
-    <div class="fila entre envuelve g14" style="align-items:flex-start">
+  <article class="panel">
+    <div class="panel-cab">
       <div class="crece">
-        <div class="fila g10 envuelve">
-          <span class="mono txs" style="color:var(--ua);font-weight:500">${c.cod}</span>
-          <span class="chip chip-${CLASE[c.sev] === "crit" ? "crit" : CLASE[c.sev] === "riesgo" ? "riesgo" : "ok"}">${NOMBRE_SEV[c.sev]}</span>
-          ${c.base !== null && c.score !== null && c.score !== c.base ? `<span class="txs" style="color:var(--logrado);font-weight:500">↑ ${c.score - c.base} pts</span>` : ""}
-          ${c.disenso ? `<span class="chip chip-riesgo">⇄ Disenso</span>` : ""}
+        <div class="fila g8">
+          <span class="mono t12 ter">${c.cod}</span>
+          ${distintivo(c.sev)}
+          ${c.base !== null && c.score !== null && c.score !== c.base
+            ? `<span class="t12 med" style="color:var(--ok)">+${c.score - c.base} vs. línea base</span>` : ""}
+          ${c.disenso ? `<span class="dist dist-medio">⇄ Disenso</span>` : ""}
         </div>
-        <h3 style="font-size:1.25rem;margin-top:7px">${c.nom}</h3>
-        <p class="txs tenue" style="margin-top:4px">Componente EPG · ${c.epg} · ${c.docentes} docente${c.docentes === 1 ? "" : "s"}</p>
+        <h3 class="d3" style="margin-top:7px">${c.nom}</h3>
+        <p class="apoyo">${c.epg} · ${c.docentes} docente${c.docentes === 1 ? "" : "s"}</p>
       </div>
       <p class="cifra cifra-xl">${c.score === null ? "—" : c.score}<small>/100</small></p>
     </div>
 
-    <div class="barra-logro" style="margin-top:16px">
-      <i class="seg-inc" style="width:${inc}%"></i><i class="seg-pro" style="width:${pro}%"></i><i class="seg-log" style="width:${log}%"></i>
+    <div class="panel-cpo" style="padding-top:4px;padding-bottom:8px">
+      <ul>
+        ${c.ind.map((i) => `
+          <li class="ind">
+            <span class="ind-p" style="color:var(--${i.sev === "nulo" ? "tinta-3" : i.sev})">
+              ${medidor(i.sev)}${i.s === null ? "—" : i.s}
+            </span>
+            <div class="crece">
+              <p class="t13">${esc(i.t)}</p>
+              ${(i.com || []).length ? `
+                <ul class="pila g10" style="margin-top:10px">
+                  ${i.com.map((m) => `
+                    <li class="cita">
+                      <p>«${esc(m.q)}»</p>
+                      <p class="t12 ter" style="margin-top:3px">${esc(m.a)}</p>
+                    </li>`).join("")}
+                </ul>` : ""}
+            </div>
+          </li>`).join("")}
+      </ul>
     </div>
-
-    ${c.ind.some(i => i.com) ? `
-      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--regla)">
-        <p class="rotulo" style="margin-bottom:10px">Lo que dicen los docentes</p>
-        <ul class="pila g10">
-          ${c.ind.flatMap(i => (i.com || []).map(m => `
-            <li style="border-left:2px solid var(--regla);padding-left:13px">
-              <p class="tsm suave" style="font-style:italic">“${esc(m.q)}”</p>
-              <p class="txs tenue" style="margin-top:3px">${esc(m.a)}</p>
-            </li>`)).join("")}
-        </ul>
-      </div>` : ""}
   </article>`;
 }
 
-// ════════ Navegación ════════
+// ═══════════ Navegación ═══════════
 const VISTAS = { panel: vistaPanel, configurar: vistaConfigurar, evaluar: vistaEvaluar, resultados: vistaResultados };
 const main = document.getElementById("main");
 const miga = document.getElementById("miga");
 
 function ir(id) {
-  main.innerHTML = `<div class="vista on">${VISTAS[id]()}</div>`;
-  miga.innerHTML = MIGAS[id].map((m, i, a) =>
-    i === a.length - 1 ? `<b>${m}</b>` : `${m} <span class="sep">/</span>`).join(" ");
-  document.querySelectorAll(".rail-btn[data-ir]").forEach((b) =>
+  main.innerHTML = VISTAS[id]();
+  miga.innerHTML = MIGAS[id]
+    .map((m, i, a) => (i === a.length - 1 ? `<b>${m}</b>` : `${m} <i>/</i>`))
+    .join(" ");
+  document.querySelectorAll(".nav[data-ir]").forEach((b) =>
     b.setAttribute("aria-current", b.dataset.ir === id ? "page" : "false"));
   window.scrollTo({ top: 0 });
   enganchar();
@@ -789,12 +909,11 @@ function ir(id) {
 
 function enganchar() {
   document.querySelectorAll("[data-ir]").forEach((b) => {
-    if (b.dataset.enganchado) return;
-    b.dataset.enganchado = "1";
+    if (b.dataset.listo) return;
+    b.dataset.listo = "1";
     b.addEventListener("click", () => ir(b.dataset.ir));
   });
 
-  // Rúbrica del docente
   document.querySelectorAll("[data-rub] button").forEach((b) => {
     b.addEventListener("click", () => {
       b.parentElement.querySelectorAll("button").forEach((o) => o.setAttribute("aria-pressed", "false"));
@@ -804,9 +923,8 @@ function enganchar() {
 
   const guardar = document.getElementById("guardar-eval");
   if (guardar) guardar.addEventListener("click", () => {
-    guardar.textContent = "Evaluación guardada ✓";
+    guardar.textContent = "Evaluación guardada";
     guardar.disabled = true;
-    guardar.style.opacity = ".7";
   });
 
   const copiar = document.getElementById("copiar");
@@ -816,17 +934,21 @@ function enganchar() {
   });
 }
 
-// Tema
+// Tema: tres estados — claro, oscuro del sistema y oscuro elegido.
 (function () {
   const raiz = document.documentElement;
   const b = document.getElementById("tema");
-  const sol = b.querySelector('[data-i="sol"]'), luna = b.querySelector('[data-i="luna"]');
+  const sol = b.querySelector('[data-i="sol"]');
+  const luna = b.querySelector('[data-i="luna"]');
   const oscuro = () => {
-    const e = raiz.getAttribute("data-theme");
-    return e ? e === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const elegido = raiz.getAttribute("data-theme");
+    return elegido ? elegido === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   const pintar = () => { const o = oscuro(); sol.hidden = o; luna.hidden = !o; };
-  b.addEventListener("click", () => { raiz.setAttribute("data-theme", oscuro() ? "light" : "dark"); pintar(); });
+  b.addEventListener("click", () => {
+    raiz.setAttribute("data-theme", oscuro() ? "light" : "dark");
+    pintar();
+  });
   pintar();
 })();
 

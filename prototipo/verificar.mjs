@@ -33,7 +33,7 @@ async function ver(nombre, { w, h, oscuro = false, vista = null }) {
   await p.goto(archivo, { waitUntil: "networkidle" });
   await p.waitForTimeout(700);
   if (vista) {
-    await p.click(`.rail-btn[data-ir="${vista}"]`);
+    await p.click(`.nav[data-ir="${vista}"]`);
     await p.waitForTimeout(700);
   }
   await p.screenshot({ path: join(aqui, `captura-${nombre}.png`), fullPage: true });
@@ -41,15 +41,16 @@ async function ver(nombre, { w, h, oscuro = false, vista = null }) {
   const d = await p.evaluate(() => ({
     desborde: document.documentElement.scrollWidth > window.innerWidth + 1,
     fondo: getComputedStyle(document.body).backgroundColor,
-    serif: getComputedStyle(document.querySelector("h1")).fontFamily.slice(0, 20),
-    celdas: document.querySelectorAll(".celda").length,
-    disenso: document.querySelectorAll(".celda-disenso").length,
+    // Una fuente que no cargó cae en la del sistema sin avisar; esto lo detecta.
+    fuentes: document.fonts.check('600 1rem "Instrument Sans"') && document.fonts.check('1rem "Geist Mono"'),
+    celdas: document.querySelectorAll(".cel").length,
+    disenso: document.querySelectorAll(".cel-dis").length,
   }));
   await ctx.close();
 
-  if (d.desborde || errores.length) fallas += 1;
+  if (d.desborde || !d.fuentes || errores.length) fallas += 1;
   console.log(
-    `${nombre}: desborde=${d.desborde} fondo=${d.fondo} serif=${d.serif} ` +
+    `${nombre}: desborde=${d.desborde} fuentes=${d.fuentes} fondo=${d.fondo} ` +
       `celdas=${d.celdas} disenso=${d.disenso}${errores.length ? " ⚠ " + errores.slice(0, 2).join(" | ") : ""}`
   );
 }
@@ -63,6 +64,6 @@ await ver("movil", { w: 390, h: 844 });
 
 await navegador.close();
 if (fallas) {
-  console.error(`\n${fallas} vista(s) con desborde o errores de consola.`);
+  console.error(`\n${fallas} vista(s) con desborde, fuentes sin cargar o errores de consola.`);
   process.exit(1);
 }

@@ -1,7 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import type { Diagnostico } from "@/lib/diagnostico";
 
-export const MODELO = "claude-opus-5";
+/**
+ * Gemini tiene una capa de uso gratuita, que es lo que hace viable este botón
+ * sin presupuesto. El modelo se puede cambiar por variable de entorno sin tocar
+ * código: la lista vigente está en https://ai.google.dev/gemini-api/docs/models
+ */
+export const MODELO = process.env.GEMINI_MODELO ?? "gemini-2.5-flash";
 
 // ─── Forma del informe ───────────────────────────────────────
 
@@ -364,40 +369,111 @@ export function construirPrompt(d: Diagnostico): string {
 
 export class FaltaApiKey extends Error {
   constructor() {
-    super("Falta configurar ANTHROPIC_API_KEY.");
+    super("Falta configurar GEMINI_API_KEY.");
     this.name = "FaltaApiKey";
   }
 }
 
+/**
+ * Gemini no acepta `additionalProperties` en el esquema de respuesta y rechaza
+ * la petición entera si lo encuentra. Se quita al vuelo en vez de sacarlo del
+ * esquema, porque ahí documenta la forma exacta que espera la interfaz.
+ */
+function paraGemini(nodo: unknown): unknown {
+  if (Array.isArray(nodo)) return nodo.map(paraGemini);
+  if (nodo === null || typeof nodo !== "object") return nodo;
+  return Object.fromEntries(
+    Object.entries(nodo as Record<string, unknown>)
+      .filter(([clave]) => clave !== "additionalProperties")
+      .map(([clave, valor]) => [clave, paraGemini(valor)])
+  );
+}
+
+/**
+ * El esquema guía al modelo pero no lo obliga: si falta un campo, la pantalla
+ * de resultados reventaría al pintarlo. Se revisa antes de darlo por bueno.
+ */
+function pareceInforme(x: unknown): x is TipoInforme {
+  if (x === null || typeof x !== "object") return false;
+  const i = x as Record<string, unknown>;
+  return (
+    typeof i.sintesis === "string" &&
+    typeof i.veredicto === "object" &&
+    i.veredicto !== null &&
+    Array.isArray(i.prioridades) &&
+    Array.isArray(i.competencias) &&
+    Array.isArray(i.disensos) &&
+    Array.isArray(i.alertasHito)
+  );
+}
+
 export async function generarInforme(d: Diagnostico): Promise<TipoInforme> {
-  if (!process.env.ANTHROPIC_API_KEY) throw new FaltaApiKey();
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new FaltaApiKey();
 
-  const client = new Anthropic();
+  const ai = new GoogleGenAI({ apiKey });
 
-  // Streaming porque el informe es largo y una petición no-streaming con este
-  // max_tokens puede superar el timeout HTTP del SDK.
-  const stream = client.messages.stream({
-    model: MODELO,
-    max_tokens: 16000,
-    system: SISTEMA,
-    thinking: { type: "adaptive" },
-    output_config: {
-      effort: "high",
-      format: { type: "json_schema", schema: ESQUEMA },
-    },
-    messages: [{ role: "user", content: construirPrompt(d) }],
-  });
-
-  const respuesta = await stream.finalMessage();
-
-  if (respuesta.stop_reason === "refusal") {
-    throw new Error("El modelo declinó generar el informe con estos datos.");
+  let respuesta;
+  try {
+    respuesta = await ai.models.generateContent({
+      model: MODELO,
+      contents: construirPrompt(d),
+      config: {
+        systemInstruction: SISTEMA,
+        responseMimeType: "application/json",
+        responseJsonSchema: paraGemini(ESQUEMA),
+        // Holgado a propósito: el modelo razona antes de responder y ese
+        // razonamiento también consume del tope. Si se queda corto, la
+        // respuesta llega cortada y sin texto.
+        maxOutputTokens: 32000,
+        temperature: 0.4,
+      },
+    });
+  } catch (error) {
+    // La capa gratuita tiene un límite de peticiones por minuto. Vale la pena
+    // decirlo con esas palabras: el problema se resuelve esperando, no tocando
+    // la configuración.
+    const mensaje = error instanceof Error ? error.message : String(error);
+    if (/429|RESOURCE_EXHAUSTED|quota/i.test(mensaje)) {
+      throw new Error(
+        "Se alcanzó el límite gratuito de Gemini por ahora. Espera unos minutos y vuelve a intentarlo."
+      );
+    }
+    if (/API_KEY_INVALID|API key not valid/i.test(mensaje)) {
+      throw new Error(
+        "La clave de Gemini no es válida. Genera una nueva en aistudio.google.com/apikey y actualiza GEMINI_API_KEY."
+      );
+    }
+    if (/404|not found|NOT_FOUND/i.test(mensaje)) {
+      throw new Error(
+        `El modelo «${MODELO}» no está disponible para tu clave. Revisa la lista vigente en ai.google.dev y ajusta GEMINI_MODELO.`
+      );
+    }
+    throw error;
   }
 
-  const bloque = respuesta.content.find((b) => b.type === "text");
-  if (!bloque || bloque.type !== "text") {
-    throw new Error("El modelo no devolvió contenido de texto.");
+  const razon = respuesta.candidates?.[0]?.finishReason;
+  if (razon && razon !== "STOP") {
+    throw new Error(
+      razon === "MAX_TOKENS"
+        ? "El informe salió más largo de lo que cabe en una respuesta. Vuelve a intentarlo."
+        : `El modelo no completó el informe (${razon}).`
+    );
   }
 
-  return JSON.parse(bloque.text) as TipoInforme;
+  const texto = respuesta.text;
+  if (!texto) throw new Error("El modelo no devolvió contenido.");
+
+  let contenido: unknown;
+  try {
+    contenido = JSON.parse(texto);
+  } catch {
+    throw new Error("El modelo devolvió una respuesta que no se pudo leer como informe.");
+  }
+
+  if (!pareceInforme(contenido)) {
+    throw new Error("El informe llegó incompleto. Vuelve a intentarlo.");
+  }
+
+  return contenido;
 }

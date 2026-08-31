@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { Button, Card, Eyebrow, Paso, TipoMapeoBadge } from "@/components/ui";
+import { Button, Card, CLASE_ROTULO, Eyebrow, Paso, TipoMapeoBadge } from "@/components/ui";
 import { eliminarAsignatura, ciclarMapeo } from "@/lib/actions/asignaturas";
 import { eliminarCompetencia } from "@/lib/actions/competencias";
 import { eliminarDocente } from "@/lib/actions/docentes";
@@ -100,21 +100,19 @@ export default async function NivelDetallePage({
       {/* Encabezado */}
       <div className="mb-8">
         <Eyebrow>{CICLO_LABEL[nivel.cicloTipo]}</Eyebrow>
-        <h1 className="mt-1.5 font-serif text-3xl font-semibold tracking-tight">{nivel.nombre}</h1>
+        <h1 className="mt-1.5 text-[2.125rem] font-semibold tracking-tight">{nivel.nombre}</h1>
         <p className="mt-1.5 text-sm text-muted">
           {MODALIDAD_LABEL[nivel.modalidad]} · {nivel.trimestre}
         </p>
       </div>
 
       {/* Progreso */}
-      <Card className="mb-8">
+      <Card className="mb-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-              Configuración
-            </p>
-            <p className="mt-1 font-serif text-lg font-medium">
-              {pasoActual === 5 ? "Nivel listo para evaluar" : `Paso ${pasoActual} de 4`}
+            <p className={CLASE_ROTULO}>Configuración</p>
+            <p className="mt-1 text-base font-semibold">
+              {pasoActual === 5 ? "Todo listo" : `Paso ${pasoActual} de 4`}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -122,7 +120,7 @@ export default async function NivelDetallePage({
               {[1, 2, 3, 4].map((n) => (
                 <span
                   key={n}
-                  className={`h-1.5 w-10 rounded-full ${n <= completados ? "bg-ua" : "bg-surface-muted"}`}
+                  className={`h-1 w-9 rounded-full ${n <= completados ? "bg-logrado" : "bg-border"}`}
                 />
               ))}
             </div>
@@ -136,21 +134,21 @@ export default async function NivelDetallePage({
       </Card>
 
       {aviso && (
-        <p className="mb-6 rounded-xl border border-incipiente/30 bg-incipiente-tint px-4 py-2.5 text-sm text-incipiente">
+        <p className="mb-5 rounded-[7px] border border-incipiente-line bg-incipiente-tint px-3.5 py-2.5 text-[0.8125rem] text-incipiente">
           {aviso}
         </p>
       )}
       {actaSubida && (
-        <p className="mb-6 rounded-xl border border-logrado/30 bg-logrado-tint px-4 py-2.5 text-sm text-logrado">
+        <p className="mb-5 rounded-[7px] border border-logrado-line bg-logrado-tint px-3.5 py-2.5 text-[0.8125rem] text-logrado">
           Acta subida correctamente.
         </p>
       )}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5">
         {/* ── 1. Competencias ── */}
         <Paso
           numero={1}
-          titulo="Competencias del ciclo"
+          titulo="Las competencias del ciclo"
           descripcion={
             nivel.cicloTipo === "INICIAL"
               ? "El Ciclo Inicial viene con sus seis competencias e indicadores ya cargados."
@@ -173,7 +171,7 @@ export default async function NivelDetallePage({
                       <Eyebrow>
                         {c.codigo} · {c.componenteEpg.nombre}
                       </Eyebrow>
-                      <h3 className="mt-1 font-serif text-base font-medium">{c.nombre}</h3>
+                      <h3 className="mt-1 text-base font-medium">{c.nombre}</h3>
                       <p className="mt-1 text-sm leading-relaxed text-muted">{c.descriptor}</p>
                       <ul className="mt-2.5 space-y-1 text-sm text-muted">
                         {c.indicadores.map((i) => (
@@ -200,8 +198,8 @@ export default async function NivelDetallePage({
         {/* ── 2. Asignaturas ── */}
         <Paso
           numero={2}
-          titulo="Asignaturas del nivel"
-          descripcion="Agrega las asignaturas que se dictan en este nivel durante el trimestre."
+          titulo="Las asignaturas del nivel"
+          descripcion="Las que se dictan en este nivel durante el trimestre."
           estado={estadoDe(2)}
           colapsar={pasoActual === 5}
           resumen={plural(nivel.asignaturas.length, "asignatura", "asignaturas")}
@@ -234,8 +232,8 @@ export default async function NivelDetallePage({
         {/* ── 3. Docentes ── */}
         <Paso
           numero={3}
-          titulo="Docentes"
-          descripcion="Indica quiénes dictan cada asignatura. No necesitan crear una cuenta: entrarán por un enlace."
+          titulo="Quién hace clases en cada una"
+          descripcion="No necesitan crear una cuenta: entran por un enlace que tú les mandas."
           estado={estadoDe(3)}
           colapsar={pasoActual === 5}
           resumen={plural(nivel.docentes.length, "docente", "docentes")}
@@ -277,8 +275,8 @@ export default async function NivelDetallePage({
         {/* ── 4. Mapeo ── */}
         <Paso
           numero={4}
-          titulo="Qué competencia tributa cada asignatura"
-          descripcion="Haz clic en cada celda para ciclar entre sin relación, directa y transversal. Cada docente verá solo las competencias que su asignatura tributa."
+          titulo="Qué competencia trabaja cada asignatura"
+          descripcion="Haz clic en cada celda para cambiarla: sin relación, directa o transversal. Así cada docente evalúa solo lo que le toca."
           estado={estadoDe(4)}
           colapsar={pasoActual === 5}
           resumen={plural(totalMapeos, "vínculo", "vínculos")}
@@ -339,17 +337,15 @@ export default async function NivelDetallePage({
         {/* ── 5. Evaluar ── */}
         <Paso
           numero={5}
-          titulo="Reunión y evaluación"
-          descripcion="Elige la reunión en curso, comparte el enlace con tus docentes y guarda el acta de la sesión."
+          titulo="Ahora: pídeles que evalúen"
+          descripcion="Marca en qué reunión vas, manda el enlace y sube el acta cuando terminen."
           estado={pasoActual === 5 ? "actual" : "pendiente"}
           colapsar={pasoActual === 5}
         >
           <div className="flex flex-col gap-6">
             {/* Reunión en curso */}
             <div>
-              <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-                Reunión en curso
-              </p>
+              <p className={`${CLASE_ROTULO} mb-2.5 block`}>1 · Marca en qué reunión vas</p>
               <div className="flex flex-wrap items-center gap-2">
                 {nivel.reuniones.map((r) => {
                   const activa = r.numero === nivel.reunionActualNumero;
@@ -360,14 +356,14 @@ export default async function NivelDetallePage({
                   return (
                     <form action={action} key={r.id}>
                       <button
-                        className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-all ${
+                        className={`inline-flex items-center gap-1.5 rounded-[7px] border px-2.5 py-[5px] text-xs font-medium transition-colors ${
                           activa
-                            ? "bg-ua text-white"
-                            : "border border-border text-muted hover:border-border-strong hover:text-foreground"
+                            ? "border-transparent bg-foreground text-surface"
+                            : "border-border-strong text-muted hover:border-muted-2 hover:text-foreground"
                         }`}
                       >
-                        R{r.numero}
-                        <span className="ml-1.5 text-xs opacity-75">{FASE_LABEL[r.fase]}</span>
+                        <b className="font-mono">R{r.numero}</b>
+                        <span className="font-normal opacity-70">{FASE_LABEL[r.fase]}</span>
                       </button>
                     </form>
                   );
@@ -382,8 +378,8 @@ export default async function NivelDetallePage({
                 {/* Actas */}
                 {reunionActual && (
                   <div className="border-t border-border pt-5">
-                    <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-                      Actas de la reunión {reunionActual.numero}
+                    <p className={`${CLASE_ROTULO} mb-2.5 block`}>
+                      3 · Sube el acta de la reunión {reunionActual.numero}
                     </p>
                     <form
                       action={subirActaCoordinador.bind(
@@ -398,7 +394,7 @@ export default async function NivelDetallePage({
                         type="file"
                         name="archivo"
                         required
-                        className="flex-1 text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-ua-tint file:px-3.5 file:py-1.5 file:text-xs file:font-medium file:text-ua"
+                        className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground"
                       />
                       <Button type="submit" size="sm" variant="secondary">
                         Subir acta
@@ -422,8 +418,8 @@ export default async function NivelDetallePage({
                 <div className="border-t border-border pt-5">
                   <p className="text-sm text-muted">
                     {totalEvaluaciones === 0
-                      ? "Aún no hay evaluaciones registradas en esta reunión."
-                      : `${plural(totalEvaluaciones, "evaluación registrada", "evaluaciones registradas")} en esta reunión.`}
+                      ? "Todavía nadie ha respondido en esta reunión."
+                      : `${plural(totalEvaluaciones, "respuesta recibida", "respuestas recibidas")} en esta reunión.`}
                   </p>
                   {totalEvaluaciones > 0 && (
                     <Link href={`/niveles/${nivel.id}/resultados`} className="mt-3 inline-block">

@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4 } from "next/font/google";
+import { Geist_Mono, Instrument_Sans } from "next/font/google";
 import Script from "next/script";
-import { SiteHeader } from "@/components/site-header";
+import { Cascara } from "@/components/cascara";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Una sola familia para toda la interfaz y una monoespaciada para cifras,
+// códigos y rótulos. Las columnas de números se alinean con tabular-nums.
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
 });
 
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${sourceSerif.variable} h-full antialiased`}
+      className={`${instrument.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -44,9 +45,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {THEME_INIT_SCRIPT}
         </Script>
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
+      <body className="min-h-full bg-background font-sans text-foreground">
+        <Cascara>{children}</Cascara>
       </body>
     </html>
   );

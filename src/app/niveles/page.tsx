@@ -72,7 +72,7 @@ function TarjetaNivel({ n }: { n: ResumenNivel }) {
               {CICLO_LABEL[n.ciclo as keyof typeof CICLO_LABEL]} ·{" "}
               {MODALIDAD_LABEL[n.modalidad as keyof typeof MODALIDAD_LABEL]} · {n.trimestre}
             </p>
-            <h2 className="mt-1 truncate font-serif text-xl font-medium">
+            <h2 className="mt-1 truncate text-xl font-medium">
               <Link
                 href={`/niveles/${n.id}`}
                 className="transition-colors hover:text-ua focus-visible:text-ua"
@@ -166,7 +166,7 @@ export default async function NivelesPage() {
     <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight">
             {niveles.length === 0 ? `Hola, ${user.name?.split(" ")[0] ?? ""}` : "Mis niveles"}
           </h1>
           <p className="mt-1.5 text-[0.95rem] text-muted">
@@ -185,7 +185,7 @@ export default async function NivelesPage() {
       {niveles.length === 0 ? (
         <Card className="flex flex-col items-start gap-5 p-8">
           <div className="max-w-prose">
-            <h2 className="font-serif text-xl font-medium">Crea tu primer nivel</h2>
+            <h2 className="text-xl font-medium">Crea tu primer nivel</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               Declara el ciclo y la modalidad, y el instrumento arma solo las reuniones del
               trimestre: la primera queda como línea base y la última como cierre comparativo.

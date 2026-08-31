@@ -19,7 +19,7 @@ export function NuevoNivelPanel({ abiertoPorDefecto }: { abiertoPorDefecto?: boo
   return (
     <div className="w-full rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(var(--shadow-color)/0.04),0_16px_32px_-16px_rgba(var(--shadow-color)/0.12)]">
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="font-serif text-lg font-medium">Nuevo nivel</h2>
+        <h2 className="text-lg font-medium">Nuevo nivel</h2>
         {!abiertoPorDefecto && (
           <button
             onClick={() => setAbierto(false)}

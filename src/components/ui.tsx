@@ -12,9 +12,8 @@ export function Card({
   return (
     <div
       className={cx(
-        "rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(var(--shadow-color)/0.04),0_8px_24px_-12px_rgba(var(--shadow-color)/0.08)]",
-        interactive &&
-          "transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_1px_2px_rgba(var(--shadow-color)/0.05),0_16px_32px_-12px_rgba(var(--shadow-color)/0.14)]",
+        "rounded-[10px] border border-border bg-surface p-5",
+        interactive && "transition-colors duration-150 hover:border-border-strong",
         className
       )}
       {...props}
@@ -22,24 +21,84 @@ export function Card({
   );
 }
 
+export const CLASE_ROTULO =
+  "font-mono text-[0.6875rem] font-medium uppercase tracking-[0.085em] text-muted-2";
+
 export function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span
-      className={cx(
-        "inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-ua",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
+  return <span className={cx(CLASE_ROTULO, "inline-flex items-center gap-1.5", className)}>{children}</span>;
 }
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <h2 className={cx(CLASE_ROTULO, "mb-2.5 block")}>{children}</h2>;
+}
+
+/**
+ * Panel con encabezado propio: título, una línea de apoyo y, a la derecha, la
+ * acción o la leyenda. Es la unidad de la que está hecha la aplicación.
+ */
+export function Panel({
+  titulo,
+  apoyo,
+  derecha,
+  children,
+  className,
+  id,
+}: {
+  titulo?: React.ReactNode;
+  apoyo?: React.ReactNode;
+  derecha?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
   return (
-    <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-2">
-      {children}
-    </h2>
+    <section id={id} className={cx("rounded-[10px] border border-border bg-surface", className)}>
+      {titulo && (
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-border px-5 py-4">
+          <div className="min-w-[220px] flex-1">
+            <h2 className="text-[0.9375rem] font-semibold">{titulo}</h2>
+            {apoyo && <p className="mt-0.5 text-xs text-muted-2">{apoyo}</p>}
+          </div>
+          {derecha}
+        </div>
+      )}
+      <div className="p-5">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * Explicación que se pliega. Contar cómo se lee un tablero en un párrafo fijo
+ * no sirve: ocupa sitio permanente y nadie lo lee dos veces.
+ */
+export function Ayuda({ pregunta, children }: { pregunta: string; children: React.ReactNode }) {
+  return (
+    <details className="group border-t border-border">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 px-5 py-3 text-xs text-muted-2 transition-colors hover:text-foreground group-open:text-foreground">
+        <span className="grid h-[15px] w-[15px] shrink-0 place-items-center rounded-full border border-current text-[0.625rem] font-semibold">
+          ?
+        </span>
+        {pregunta}
+      </summary>
+      <div className="px-5 pb-4 pl-[41px] text-xs leading-relaxed text-muted">{children}</div>
+    </details>
+  );
+}
+
+const LLENO = { 3: "", 2: "[&>i:nth-child(n+3)]:opacity-20", 1: "[&>i:nth-child(n+2)]:opacity-20", 0: "[&>i]:opacity-20" } as const;
+
+/**
+ * Medidor de tres segmentos. Codifica el estado con forma además de color, así
+ * que sigue leyéndose en escala de grises o para quien no distingue rojo y
+ * verde — que es justo el par que más se confunde en una escala de semáforo.
+ */
+export function Medidor({ lleno }: { lleno: 0 | 1 | 2 | 3 }) {
+  return (
+    <span className={cx("inline-flex shrink-0 gap-[1.5px]", LLENO[lleno])} aria-hidden="true">
+      <i className="block h-2.5 w-[3px] rounded-[1px] bg-current" />
+      <i className="block h-2.5 w-[3px] rounded-[1px] bg-current" />
+      <i className="block h-2.5 w-[3px] rounded-[1px] bg-current" />
+    </span>
   );
 }
 
@@ -53,17 +112,15 @@ export function Button({
   size?: "sm" | "md";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-[7px] border border-transparent font-medium no-underline transition-colors duration-150 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ua";
   const sizes = {
-    sm: "px-3.5 py-1.5 text-xs",
-    md: "px-5 py-2.5 text-sm",
+    sm: "px-2.5 py-[5px] text-xs",
+    md: "px-3.5 py-[7px] text-[0.8125rem]",
   };
   const variants = {
-    primary:
-      "bg-ua text-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_16px_-4px_rgba(138,21,21,0.35)] hover:bg-ua-strong hover:shadow-[0_1px_2px_rgba(0,0,0,0.08),0_8px_20px_-4px_rgba(138,21,21,0.45)]",
-    secondary:
-      "bg-surface text-foreground border border-border hover:border-border-strong hover:bg-surface-hover",
-    ghost: "text-muted hover:text-foreground hover:bg-surface-hover",
+    primary: "bg-foreground text-surface hover:opacity-90",
+    secondary: "border-border-strong bg-surface text-foreground hover:border-muted-2 hover:bg-surface-muted",
+    ghost: "text-muted hover:bg-surface-hover hover:text-foreground",
     danger: "bg-incipiente text-white hover:opacity-90",
   };
   return (
@@ -93,7 +150,7 @@ export function Field({
 }
 
 export const inputClass =
-  "rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-2 transition-colors focus:outline-none focus:ring-2 focus:ring-ua/25 focus:border-ua";
+  "rounded-[7px] border border-border-strong bg-surface-muted px-3 py-[7px] text-[0.8125rem] text-foreground placeholder:text-muted-2 transition-colors focus:border-ua focus:outline-none";
 
 export function NivelLogroBadge({
   nivel,
@@ -101,18 +158,22 @@ export function NivelLogroBadge({
   nivel: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE";
 }) {
   const map = {
-    LOGRADO: { text: "Logrado", cls: "bg-logrado-tint text-logrado" },
-    EN_PROCESO: { text: "En proceso", cls: "bg-proceso-tint text-proceso" },
-    INCIPIENTE: { text: "Incipiente", cls: "bg-incipiente-tint text-incipiente" },
+    LOGRADO: { text: "Logrado", cls: "border-logrado-line bg-logrado-tint text-logrado", lleno: 3 },
+    EN_PROCESO: { text: "En proceso", cls: "border-proceso-line bg-proceso-tint text-proceso", lleno: 2 },
+    INCIPIENTE: { text: "Incipiente", cls: "border-incipiente-line bg-incipiente-tint text-incipiente", lleno: 1 },
   } as const;
-  const { text, cls } = map[nivel];
+  const { text, cls, lleno } = map[nivel];
   return (
-    <span className={cx("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", cls)}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+    <span className={cx(CLASE_DIST, cls)}>
+      <Medidor lleno={lleno} />
       {text}
     </span>
   );
 }
+
+/** Forma común de los distintivos: rectángulo con borde, nunca píldora suelta. */
+export const CLASE_DIST =
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-[5px] border px-2 py-0.5 text-[0.6875rem] font-medium";
 
 const RUBRICA_OPCIONES = [
   {
@@ -142,12 +203,12 @@ export function RubricaControl({
   defaultValue?: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE";
 }) {
   return (
-    <div className="inline-flex flex-wrap gap-2">
+    <div className="grid grid-cols-3 gap-1.5">
       {RUBRICA_OPCIONES.map((opt) => (
         <label
           key={opt.value}
           className={cx(
-            "cursor-pointer select-none rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border-strong",
+            "cursor-pointer select-none rounded-[7px] border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-colors hover:border-muted-2 hover:text-foreground",
             opt.active
           )}
         >
@@ -188,7 +249,7 @@ export function LogroStackedBar({
     return (
       <div
         className={cx(
-          "w-full rounded-full bg-surface-muted",
+          "w-full rounded-full bg-border",
           thin ? "h-1.5" : "h-2.5"
         )}
       />
@@ -197,8 +258,8 @@ export function LogroStackedBar({
   return (
     <div
       className={cx(
-        "flex w-full gap-0.5 overflow-hidden rounded-full",
-        thin ? "h-1.5" : "h-2.5"
+        "flex w-full gap-0.5 overflow-hidden rounded-full bg-border",
+        thin ? "h-1.5" : "h-1.5"
       )}
       role="img"
       aria-label={`Logrado ${counts.LOGRADO}, en proceso ${counts.EN_PROCESO}, incipiente ${counts.INCIPIENTE}`}
@@ -225,7 +286,7 @@ export function LogroLegend() {
     <div className="flex flex-wrap items-center gap-4">
       {items.map((it) => (
         <span key={it.label} className="inline-flex items-center gap-1.5 text-xs text-muted">
-          <span className={cx("h-2 w-2 rounded-full", it.cls)} />
+          <span className={cx("h-2 w-2 rounded-[2px]", it.cls)} />
           {it.label}
         </span>
       ))}
@@ -241,20 +302,15 @@ export function SeveridadBadge({
   severidad: "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS";
 }) {
   const map = {
-    CRITICO: { texto: "Crítico", cls: "bg-incipiente-tint text-incipiente", marca: "●" },
-    EN_RIESGO: { texto: "En riesgo", cls: "bg-proceso-tint text-proceso", marca: "◐" },
-    CONSOLIDADO: { texto: "Consolidado", cls: "bg-logrado-tint text-logrado", marca: "○" },
-    SIN_DATOS: { texto: "Sin evaluar", cls: "bg-surface-muted text-muted-2", marca: "—" },
+    CRITICO: { texto: "Crítico", cls: "border-incipiente-line bg-incipiente-tint text-incipiente", lleno: 1 },
+    EN_RIESGO: { texto: "En riesgo", cls: "border-proceso-line bg-proceso-tint text-proceso", lleno: 2 },
+    CONSOLIDADO: { texto: "Logrado", cls: "border-logrado-line bg-logrado-tint text-logrado", lleno: 3 },
+    SIN_DATOS: { texto: "Sin evaluar", cls: "border-border bg-surface-muted text-muted-2", lleno: 0 },
   } as const;
-  const { texto, cls, marca } = map[severidad];
+  const { texto, cls, lleno } = map[severidad];
   return (
-    <span
-      className={cx(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-        cls
-      )}
-    >
-      <span aria-hidden="true">{marca}</span>
+    <span className={cx(CLASE_DIST, cls)}>
+      <Medidor lleno={lleno} />
       {texto}
     </span>
   );
@@ -265,10 +321,10 @@ export function franjaSeveridad(
   severidad: "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS"
 ) {
   return {
-    CRITICO: "border-l-[3px] border-l-incipiente",
-    EN_RIESGO: "border-l-[3px] border-l-proceso",
-    CONSOLIDADO: "border-l-[3px] border-l-logrado",
-    SIN_DATOS: "border-l-[3px] border-l-border",
+    CRITICO: "border-l-2 border-l-incipiente",
+    EN_RIESGO: "border-l-2 border-l-proceso",
+    CONSOLIDADO: "border-l-2 border-l-logrado",
+    SIN_DATOS: "border-l-2 border-l-border",
   }[severidad];
 }
 
@@ -306,23 +362,21 @@ export function Paso({
   return (
     <section
       className={cx(
-        "rounded-2xl border bg-surface p-6 transition-opacity",
-        estado === "actual"
-          ? "border-ua/40 shadow-[0_1px_2px_rgba(var(--shadow-color)/0.05),0_16px_32px_-16px_rgba(var(--shadow-color)/0.16)]"
-          : "border-border",
+        "rounded-[10px] border border-border bg-surface p-5 transition-opacity",
+        estado === "actual" && "bg-surface-muted",
         pendiente && "opacity-55"
       )}
       aria-current={estado === "actual" ? "step" : undefined}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3.5">
         <span
           className={cx(
-            "grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-medium",
+            "mt-px grid h-[22px] w-[22px] shrink-0 place-items-center rounded-md font-mono text-[0.6875rem] font-medium",
             listo
-              ? "bg-logrado-tint text-logrado"
+              ? "border border-logrado-line bg-logrado-tint text-logrado"
               : estado === "actual"
-                ? "bg-ua text-white"
-                : "bg-surface-muted text-muted-2"
+                ? "bg-foreground text-surface"
+                : "bg-surface-hover text-muted-2"
           )}
         >
           {listo ? "✓" : numero}
@@ -330,11 +384,11 @@ export function Paso({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h2 className="font-serif text-xl font-medium">{titulo}</h2>
-            {listo && resumen && <span className="text-sm text-muted">{resumen}</span>}
+            <h2 className="text-[0.8125rem] font-semibold">{titulo}</h2>
+            {listo && resumen && <span className="font-mono text-xs text-muted-2">{resumen}</span>}
           </div>
           {descripcion && !listo && (
-            <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-muted">{descripcion}</p>
+            <p className="mt-1 max-w-prose text-xs leading-relaxed text-muted-2">{descripcion}</p>
           )}
 
           {children && (
@@ -393,10 +447,21 @@ export function Trayectoria({
       aria-label={`Trayectoria: ${conDatos.map((p) => `reunión ${p.numero}, ${Math.round(p.score!)} de 100`).join("; ")}`}
     >
       <line x1={P} y1={y(70)} x2={W - P} y2={y(70)} className="stroke-border" strokeDasharray="2 3" strokeWidth="1" />
-      <path d={d} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-        className={sube ? "stroke-logrado" : "stroke-incipiente"} />
-      <circle cx={x(ultimo.numero)} cy={y(ultimo.score!)} r="3"
-        className={sube ? "fill-logrado" : "fill-incipiente"} />
+      <path
+        d={d}
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="stroke-muted-2 opacity-75"
+      />
+      <circle
+        cx={x(ultimo.numero)}
+        cy={y(ultimo.score!)}
+        r="3.5"
+        strokeWidth="2"
+        className={cx("stroke-surface", sube ? "fill-logrado" : "fill-incipiente")}
+      />
     </svg>
   );
 }
@@ -406,10 +471,7 @@ export function DisensoBadge({ compacto }: { compacto?: boolean }) {
   return (
     <span
       title="Una misma evidencia fue calificada como lograda por un docente y como incipiente por otro"
-      className={cx(
-        "inline-flex items-center gap-1.5 rounded-full bg-proceso-tint font-medium text-proceso",
-        compacto ? "px-2 py-0.5 text-[0.65rem]" : "px-2.5 py-1 text-xs"
-      )}
+      className={cx(CLASE_DIST, "border-proceso-line bg-proceso-tint text-proceso")}
     >
       <span aria-hidden="true">⇄</span>
       {compacto ? "Disenso" : "Criterio no compartido"}
@@ -419,7 +481,7 @@ export function DisensoBadge({ compacto }: { compacto?: boolean }) {
 
 export function DeltaBadge({ delta }: { delta: number }) {
   if (Math.abs(delta) < 1) {
-    return <span className="inline-flex items-center gap-1 text-xs text-muted">→ Sin cambio</span>;
+    return <span className="text-xs text-muted-2">Igual que en la primera reunión</span>;
   }
   const up = delta > 0;
   return (
@@ -429,7 +491,8 @@ export function DeltaBadge({ delta }: { delta: number }) {
         up ? "text-logrado" : "text-incipiente"
       )}
     >
-      {up ? "↑" : "↓"} {Math.round(Math.abs(delta))} pts · {up ? "avance" : "retroceso"}
+      {up ? "+" : "−"}
+      {Math.round(Math.abs(delta))} desde la primera reunión
     </span>
   );
 }
@@ -443,11 +506,11 @@ export function TipoMapeoBadge({
     return <span className="text-xs text-muted-2">Sin relación</span>;
   }
   const map = {
-    DIRECTA: "bg-ua-tint text-ua",
-    TRANSVERSAL: "bg-surface-muted text-muted border border-border",
+    DIRECTA: "border-ua/25 bg-ua-tint text-ua",
+    TRANSVERSAL: "border-border bg-surface-muted text-muted",
   } as const;
   return (
-    <span className={cx("rounded-full px-2.5 py-1 text-xs font-medium", map[tipo])}>
+    <span className={cx(CLASE_DIST, map[tipo])}>
       {tipo === "DIRECTA" ? "Directa" : "Transversal"}
     </span>
   );

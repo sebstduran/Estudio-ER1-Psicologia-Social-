@@ -16,7 +16,7 @@ const ETAPAS = [
 
 function Progreso() {
   return (
-    <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5">
+    <div className="w-full max-w-md rounded-[10px] border border-border bg-surface p-5">
       <div className="mb-4 h-1 overflow-hidden rounded-full bg-surface-muted">
         <div className="h-full w-1/3 animate-[avance_2.4s_ease-in-out_infinite] rounded-full bg-ua" />
       </div>
@@ -39,12 +39,17 @@ function Progreso() {
 export function InformeBoton({
   nivelId,
   yaExiste,
+  errorPrevio,
 }: {
   nivelId: string;
   yaExiste: boolean;
+  /** Error del último intento, guardado en la base. Se muestra al volver a
+   *  entrar; el del intento en curso lo reemplaza en cuanto llega. */
+  errorPrevio?: string | null;
 }) {
   const action = generarInformeDelNivel.bind(null, nivelId);
   const [estado, formAction, pendiente] = useActionState(action, undefined);
+  const error = estado?.error ?? (pendiente ? null : errorPrevio);
 
   return (
     <form action={formAction} className="flex w-full flex-col items-start gap-4">
@@ -58,9 +63,9 @@ export function InformeBoton({
 
       {pendiente && <Progreso />}
 
-      {estado?.error && (
-        <p className="max-w-prose rounded-xl border border-incipiente/30 bg-incipiente-tint px-4 py-2.5 text-sm text-incipiente">
-          {estado.error}
+      {error && (
+        <p className="max-w-prose rounded-[7px] border border-incipiente-line bg-incipiente-tint px-3.5 py-2.5 text-[0.8125rem] text-incipiente">
+          {error}
         </p>
       )}
     </form>

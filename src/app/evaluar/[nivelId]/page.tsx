@@ -93,7 +93,7 @@ export default async function EvaluarPage({
       <Eyebrow>
         {CICLO_LABEL[nivel.cicloTipo]} · {nivel.trimestre}
       </Eyebrow>
-      <h1 className="mt-1.5 font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
+      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
         {nivel.nombre}
       </h1>
       {reunionActual && (
@@ -281,7 +281,7 @@ export default async function EvaluarPage({
                 </Eyebrow>
                 <TipoMapeoBadge tipo={tipo} />
               </div>
-              <h3 className="font-serif text-lg font-medium">{competencia.nombre}</h3>
+              <h3 className="text-lg font-medium">{competencia.nombre}</h3>
               <p className="mt-1 text-sm leading-relaxed text-muted">{competencia.descriptor}</p>
 
               <div className="mt-5 flex flex-col divide-y divide-border">

@@ -4,57 +4,67 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #fefdfb;
+  /* Grises con un sesgo frío mínimo: hacen que el rojo institucional se lea
+     más profundo de lo que es. */
+  --background: #f4f5f7;
   --surface: #ffffff;
-  --surface-muted: #f8f4f1;
-  --surface-hover: #f3ede9;
-  --border: #eae3dd;
-  --border-strong: #ddd3ca;
-  --foreground: #221a17;
-  --muted: #7d716a;
-  --muted-2: #a89c94;
+  --surface-muted: #f8f9fa;
+  --surface-hover: #f1f3f5;
+  --border: #e4e6ea;
+  --border-strong: #d0d4da;
+  --foreground: #0e1014;
+  --muted: #545b66;
+  --muted-2: #858c98;
 
-  --ua: #8a1515;
-  --ua-strong: #6b0f0f;
-  --ua-soft: #b23a2e;
-  --ua-tint: #fbeceb;
-  --ua-tint-strong: #f5d9d6;
+  --ua: #9e1b32;
+  --ua-strong: #7d1427;
+  --ua-soft: #b23a4a;
+  --ua-tint: #fdf2f4;
+  --ua-tint-strong: #f7dde2;
 
-  /* Paleta de estado (logro): fija entre temas, solo cambia el tinte de fondo.
-     Validada con el validador de paletas: separación CVD y contraste OK. */
-  --logrado: #2f7a4f;
-  --logrado-tint: #eaf5ef;
-  --proceso: #b8790f;
-  --proceso-tint: #fbf1e0;
-  --incipiente: #c1303c;
-  --incipiente-tint: #fbeae8;
+  /* Paleta de logro. Validada con scripts/validate_palette.js del skill de
+     visualización: banda de luminosidad, croma, separación para daltonismo y
+     contraste, en claro y en oscuro. La versión anterior dejaba «incipiente» y
+     «en proceso» a ΔE 3.8 en visión deutan — casi el mismo color. */
+  --logrado: #10714f;
+  --logrado-tint: #eefaf4;
+  --logrado-line: #c6ead9;
+  --proceso: #b3820f;
+  --proceso-tint: #fdf7e9;
+  --proceso-line: #f0e0b6;
+  --incipiente: #a3182c;
+  --incipiente-tint: #fdf0f2;
+  --incipiente-line: #f2ccd2;
 
-  --shadow-color: 34 26 23;
+  --shadow-color: 14 16 20;
 }
 
 .dark {
-  --background: #15110f;
-  --surface: #1d1815;
-  --surface-muted: #251f1b;
-  --surface-hover: #2c2521;
-  --border: #362e28;
-  --border-strong: #453a32;
-  --foreground: #f6f0ea;
-  --muted: #ab9f96;
-  --muted-2: #7d716a;
+  --background: #0b0c0f;
+  --surface: #131519;
+  --surface-muted: #181b20;
+  --surface-hover: #1e2127;
+  --border: #24272e;
+  --border-strong: #343841;
+  --foreground: #eceef2;
+  --muted: #9aa1ad;
+  --muted-2: #6b7280;
 
-  --ua: #e2564c;
-  --ua-strong: #ef7168;
-  --ua-soft: #c73e33;
-  --ua-tint: #35201d;
-  --ua-tint-strong: #422924;
+  --ua: #ef6d7f;
+  --ua-strong: #f79aa6;
+  --ua-soft: #e15f7c;
+  --ua-tint: #24151a;
+  --ua-tint-strong: #341d24;
 
-  --logrado: #2f7a4f;
-  --logrado-tint: #1d2f24;
-  --proceso: #b8790f;
-  --proceso-tint: #332815;
-  --incipiente: #c1303c;
-  --incipiente-tint: #3c211d;
+  --logrado: #2e9c72;
+  --logrado-tint: #0f231c;
+  --logrado-line: #1c382e;
+  --proceso: #b08526;
+  --proceso-tint: #241d0e;
+  --proceso-line: #3b3018;
+  --incipiente: #e15f7c;
+  --incipiente-tint: #251319;
+  --incipiente-line: #3e1f29;
 
   --shadow-color: 0 0 0;
 }
@@ -78,13 +88,16 @@
 
   --color-logrado: var(--logrado);
   --color-logrado-tint: var(--logrado-tint);
+  --color-logrado-line: var(--logrado-line);
   --color-proceso: var(--proceso);
   --color-proceso-tint: var(--proceso-tint);
+  --color-proceso-line: var(--proceso-line);
   --color-incipiente: var(--incipiente);
   --color-incipiente-tint: var(--incipiente-tint);
+  --color-incipiente-line: var(--incipiente-line);
 
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-source-serif);
+  --font-sans: var(--font-instrument);
+  --font-mono: var(--font-geist-mono);
 }
 
 html {
@@ -97,7 +110,15 @@ html.dark {
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-feature-settings: "cv11", "ss01";
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Los titulares van ajustados: a este tamaño el espaciado por defecto se ve
+   suelto, y `balance` evita la línea huérfana de una sola palabra. */
+h1, h2, h3 {
+  letter-spacing: -0.021em;
+  text-wrap: balance;
 }
 
 ::selection {

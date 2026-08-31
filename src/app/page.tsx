@@ -40,7 +40,7 @@ export default async function PortadaPage() {
           Carrera de Psicología · Comunidad Académica
         </p>
 
-        <h1 className="mt-4 font-serif text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+        <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
           Instrumento de Competencias <span className="text-ua">CCAA</span>
         </h1>
 
@@ -67,7 +67,7 @@ export default async function PortadaPage() {
               <span className="mb-3 grid h-7 w-7 place-items-center rounded-full bg-ua-tint font-mono text-xs font-medium text-ua">
                 {i + 1}
               </span>
-              <h2 className="font-serif text-base font-medium">{titulo}</h2>
+              <h2 className="text-base font-medium">{titulo}</h2>
               <p className="mt-1.5 text-[0.85rem] leading-relaxed text-muted">{texto}</p>
             </li>
           ))}

@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 function toggle() {
   const next = !document.documentElement.classList.contains("dark");
   document.documentElement.classList.toggle("dark", next);
@@ -11,13 +13,16 @@ function toggle() {
 // Sin estado de React: el ícono correcto se decide en CSS según la clase
 // "dark" del <html> (ver globals.css), así se evita cualquier desajuste
 // entre el render del servidor y el del cliente.
-export function ThemeToggle() {
+export function ThemeToggle({
+  className = "flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground",
+  children,
+}: {
+  /** El rail lo quiere con la forma de sus ítems; en otras partes, redondo. */
+  className?: string;
+  children?: ReactNode;
+}) {
   return (
-    <button
-      onClick={toggle}
-      aria-label="Cambiar tema"
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted transition-colors hover:border-border-strong hover:text-foreground"
-    >
+    <button onClick={toggle} aria-label="Cambiar tema" className={className}>
       <svg
         className="dark:hidden"
         width="15"
@@ -34,6 +39,7 @@ export function ThemeToggle() {
       <svg className="hidden dark:block" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
         <path d="M20.5 14.5c-4.5 1.5-9-3-7.5-7.5C9.5 8 7 11 7.5 14.5c.6 4 4.3 6.8 8.3 6.2 2-.3 3.7-1.4 4.7-3z" />
       </svg>
+      {children}
     </button>
   );
 }

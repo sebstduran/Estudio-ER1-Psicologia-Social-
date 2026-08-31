@@ -11,10 +11,10 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
       <div className="text-center">
-        <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-ua font-serif text-lg font-semibold text-white">
+        <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-ua text-lg font-semibold text-white">
           E
         </span>
-        <h1 className="font-serif text-2xl font-semibold tracking-tight">Ingresar</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Ingresar</h1>
         <p className="mt-1.5 text-sm text-muted">Acceso para coordinadores de CCAA.</p>
       </div>
 

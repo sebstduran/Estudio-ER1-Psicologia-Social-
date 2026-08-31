@@ -100,7 +100,7 @@ export default async function NivelDetallePage({
       {/* Encabezado */}
       <div className="mb-8">
         <Eyebrow>{CICLO_LABEL[nivel.cicloTipo]}</Eyebrow>
-        <h1 className="mt-1.5 font-serif text-3xl font-semibold tracking-tight">{nivel.nombre}</h1>
+        <h1 className="mt-1.5 text-3xl font-semibold tracking-tight">{nivel.nombre}</h1>
         <p className="mt-1.5 text-sm text-muted">
           {MODALIDAD_LABEL[nivel.modalidad]} · {nivel.trimestre}
         </p>
@@ -113,7 +113,7 @@ export default async function NivelDetallePage({
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
               Configuración
             </p>
-            <p className="mt-1 font-serif text-lg font-medium">
+            <p className="mt-1 text-lg font-medium">
               {pasoActual === 5 ? "Nivel listo para evaluar" : `Paso ${pasoActual} de 4`}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default async function NivelDetallePage({
                       <Eyebrow>
                         {c.codigo} · {c.componenteEpg.nombre}
                       </Eyebrow>
-                      <h3 className="mt-1 font-serif text-base font-medium">{c.nombre}</h3>
+                      <h3 className="mt-1 text-base font-medium">{c.nombre}</h3>
                       <p className="mt-1 text-sm leading-relaxed text-muted">{c.descriptor}</p>
                       <ul className="mt-2.5 space-y-1 text-sm text-muted">
                         {c.indicadores.map((i) => (

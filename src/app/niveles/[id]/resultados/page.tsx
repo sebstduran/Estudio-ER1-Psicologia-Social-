@@ -18,6 +18,7 @@ import {
   LogroLegend,
   LogroStackedBar,
   SectionLabel,
+  CLASE_ROTULO,
   SeveridadBadge,
   Trayectoria,
   franjaSeveridad,
@@ -25,6 +26,7 @@ import {
 import { InformeBoton } from "./informe-boton";
 import { AcuerdoForm } from "./acuerdo-form";
 import { Indice } from "./indice";
+import { MapaEvidencias } from "./mapa-evidencias";
 
 const FASE_LABEL = {
   BASE: "línea base",
@@ -32,10 +34,32 @@ const FASE_LABEL = {
   CIERRE: "cierre comparativo",
 } as const;
 
+function Cifra({
+  rotulo,
+  valor,
+  apoyo,
+  tono,
+}: {
+  rotulo: string;
+  valor: number;
+  apoyo: string;
+  tono: string;
+}) {
+  return (
+    <div className="min-w-[88px]">
+      <dt className={`${CLASE_ROTULO} ${tono}`}>{rotulo}</dt>
+      <dd className={`mt-1.5 font-mono text-[1.75rem] font-medium leading-none tabular-nums tracking-tight ${tono}`}>
+        {valor}
+      </dd>
+      <dd className="mt-1.5 text-xs text-muted-2">{apoyo}</dd>
+    </div>
+  );
+}
+
 function Puntaje({ score }: { score: number | null }) {
   if (score === null) return <span className="text-sm text-muted-2">Sin evaluar</span>;
   return (
-    <span className="font-serif text-3xl font-semibold tabular-nums">
+    <span className="text-3xl font-semibold tabular-nums">
       {Math.round(score)}
       <span className="ml-0.5 text-base font-normal text-muted-2">/100</span>
     </span>
@@ -63,10 +87,10 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
             {c.delta !== null && <DeltaBadge delta={c.delta} />}
             {c.indicadoresConDisenso > 0 && <DisensoBadge compacto />}
           </div>
-          <h3 className="mt-1.5 font-serif text-xl font-medium">{c.nombre}</h3>
+          <h3 className="mt-1.5 text-xl font-medium">{c.nombre}</h3>
           <p className="mt-1 text-xs text-muted-2">
-            Componente EPG · {c.componenteEpg}
-            {c.docentesQueEvaluaron > 0 && ` · ${c.docentesQueEvaluaron} docente(s)`}
+            {c.componenteEpg}
+            {c.docentesQueEvaluaron > 0 && ` · ${c.docentesQueEvaluaron} ${c.docentesQueEvaluaron === 1 ? "docente" : "docentes"}`}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -76,7 +100,7 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
       </div>
 
       <div className="mt-4">
-        <LogroStackedBar counts={c.conteo} />
+        <LogroStackedBar counts={c.conteo} thin />
       </div>
 
       {/* La evidencia más débil: el dato con el que se toma la decisión */}
@@ -232,7 +256,7 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
               ¿El nivel está cumpliendo con sus competencias?
             </p>
             <p
-              className={`mt-2 font-serif text-2xl font-semibold ${
+              className={`mt-2 text-2xl font-semibold ${
                 informe.veredicto.cumple === "SI"
                   ? "text-logrado"
                   : informe.veredicto.cumple === "NO"
@@ -279,7 +303,7 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
             <Eyebrow>{c.codigo}</Eyebrow>
             <SeveridadBadge severidad={c.severidad} />
           </div>
-          <h3 className="mt-1.5 font-serif text-xl font-medium">{c.nombre}</h3>
+          <h3 className="mt-1.5 text-xl font-medium">{c.nombre}</h3>
 
           <p className="mt-3 text-sm leading-relaxed text-muted">{c.diagnostico}</p>
 
@@ -462,13 +486,14 @@ export default async function ResultadosPage({
   const consolidadas = conDatos.filter((c) => c.severidad === "CONSOLIDADO");
   const sinDatos = d.competencias.filter((c) => c.severidad === "SIN_DATOS");
   const atender = d.resumen.criticas + d.resumen.enRiesgo;
+  const primera = atencion[0] ?? null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Eyebrow>Sintetizar</Eyebrow>
-          <h1 className="mt-1.5 font-serif text-3xl font-semibold tracking-tight">
+          <Eyebrow>Reunión de cierre</Eyebrow>
+          <h1 className="mt-1.5 text-3xl font-semibold tracking-tight">
             Qué fortalecer
           </h1>
           <p className="mt-1.5 text-sm text-muted">
@@ -480,7 +505,7 @@ export default async function ResultadosPage({
           </p>
         </div>
         <Link href={`/niveles/${id}`}>
-          <Button variant="secondary">← Volver a configurar</Button>
+          <Button variant="secondary">Configurar</Button>
         </Link>
       </div>
 
@@ -488,54 +513,69 @@ export default async function ResultadosPage({
         <div className="min-w-0">
       {d.totalVotos === 0 ? (
         <Card className="text-sm leading-relaxed text-muted">
-          Todavía no hay evaluaciones registradas en esta reunión. Comparte el enlace para
-          docentes desde la pantalla de configuración y vuelve cuando hayan respondido.
+          Tus docentes todavía no han respondido. Manda el enlace desde «Configurar» y vuelve cuando hayan evaluado.
         </Card>
       ) : (
         <>
-          {/* Titular: cuántas competencias piden atención */}
-          <Card className="mb-10">
-            <div className="flex flex-wrap items-center justify-between gap-6">
-              <div>
-                <p className="font-serif text-2xl font-semibold leading-snug">
-                  {atender === 0
-                    ? "Ninguna competencia requiere intervención."
-                    : `${atender} de ${conDatos.length} competencias necesitan trabajo.`}
+          {/* Titular: el veredicto y, sobre todo, por dónde partir */}
+          <Card className="mb-4 !p-0">
+            <div className="flex flex-wrap items-start justify-between gap-6 p-6">
+              <div className="max-w-md">
+                <p className={CLASE_ROTULO}>¿El nivel está logrando sus competencias?</p>
+                <p
+                  className={`mt-2 text-[1.625rem] font-semibold tracking-tight ${
+                    atender === 0 ? "text-logrado" : d.resumen.criticas > 0 ? "text-incipiente" : "text-proceso"
+                  }`}
+                >
+                  {atender === 0 ? "Sí." : d.resumen.criticas > 0 ? "Todavía no." : "Solo en parte."}
                 </p>
-                <p className="mt-1.5 text-sm text-muted">
+                <p className="mt-2 text-[0.8125rem] text-muted">
                   {atender === 0
-                    ? "Todas las competencias evaluadas alcanzan el estándar. Sostener lo que está funcionando."
-                    : "Ordenadas de la más urgente a la menos urgente."}
+                    ? `Las ${conDatos.length} competencias evaluadas llegaron al estándar. Lo que toca ahora es sostenerlo.`
+                    : `${conDatos.length - atender} de las ${conDatos.length} competencias evaluadas llegaron al estándar. Las otras ${atender} se quedaron abajo.`}
                 </p>
               </div>
-              <dl className="flex gap-6">
-                <div>
-                  <dt className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-incipiente">
-                    Crítico
-                  </dt>
-                  <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
-                    {d.resumen.criticas}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-proceso">
-                    En riesgo
-                  </dt>
-                  <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
-                    {d.resumen.enRiesgo}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-logrado">
-                    Consolidado
-                  </dt>
-                  <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
-                    {d.resumen.consolidadas}
-                  </dd>
-                </div>
+              <dl className="flex gap-8">
+                <Cifra rotulo="Crítico" valor={d.resumen.criticas} apoyo="hay que actuar ya" tono="text-incipiente" />
+                <Cifra rotulo="En riesgo" valor={d.resumen.enRiesgo} apoyo="van lento" tono="text-proceso" />
+                <Cifra rotulo="Logrado" valor={d.resumen.consolidadas} apoyo="al día" tono="text-logrado" />
               </dl>
             </div>
+
+            {/* Un tablero que obliga a deducir el siguiente paso está a medio hacer. */}
+            {primera && (
+              <div className="border-t border-border bg-surface-muted p-6">
+                <p className={`${CLASE_ROTULO} !text-ua`}>Empieza por aquí</p>
+                <p className="mt-2 text-base font-medium">
+                  Competencia {primera.codigo} {primera.nombre}.
+                </p>
+                <p className="mt-1 text-[0.8125rem] text-muted">
+                  {primera.severidad === "CRITICO"
+                    ? "Es la más lejos del estándar"
+                    : "Es la que más lejos está del estándar"}
+                  {primera.delta !== null && Math.abs(primera.delta) < 1
+                    ? " y no se ha movido desde la primera reunión."
+                    : "."}{" "}
+                  {primera.indicadorMasDebil &&
+                    `Su evidencia más débil: «${primera.indicadorMasDebil.texto}»`}
+                </p>
+                <div className="mt-3.5 flex flex-wrap gap-2">
+                  <a href="#recomendaciones">
+                    <Button size="sm">Ver qué hacer en clases</Button>
+                  </a>
+                  <a href="#acuerdos">
+                    <Button size="sm" variant="secondary">
+                      Anotar un compromiso
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            )}
           </Card>
+
+          <div className="mb-10">
+            <MapaEvidencias competencias={d.competencias} />
+          </div>
 
           <div id="participacion" className="scroll-mt-24">
             <PanelParticipacion gente={d.participacion} />
@@ -544,7 +584,7 @@ export default async function ResultadosPage({
           {/* Acuerdos arrastrados: primer punto de tabla de la reunión */}
           {acuerdos.arrastrados.length > 0 && (
             <section className="mb-12">
-              <SectionLabel>Acuerdos pendientes de reuniones anteriores</SectionLabel>
+              <SectionLabel>Viene de la reunión anterior</SectionLabel>
               <div className="flex flex-col gap-3">
                 {acuerdos.arrastrados.map((a) => (
                   <FilaAcuerdo key={a.id} a={a} nivelId={id} />
@@ -556,7 +596,7 @@ export default async function ResultadosPage({
           {/* Recomendaciones */}
           <section id="recomendaciones" className="mb-12 scroll-mt-24">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <SectionLabel>Recomendaciones</SectionLabel>
+              <SectionLabel>Qué hacer en clases</SectionLabel>
             </div>
 
             {contenido ? (
@@ -564,8 +604,8 @@ export default async function ResultadosPage({
             ) : (
               <Card className="flex flex-col gap-4">
                 <div>
-                  <h2 className="font-serif text-xl font-medium">
-                    Convierte estos datos en un plan de trabajo
+                  <h2 className="text-xl font-medium">
+                    Pídele a la IA que proponga qué hacer
                   </h2>
                   <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">
                     Cruza el juicio de tus docentes, los comentarios que dejaron y el marco de
@@ -592,10 +632,10 @@ export default async function ResultadosPage({
 
           {/* Acuerdos de esta reunión */}
           <section id="acuerdos" className="mb-12 scroll-mt-24">
-            <SectionLabel>Acuerdos de esta reunión</SectionLabel>
+            <SectionLabel>Compromisos</SectionLabel>
             <p className="-mt-2 mb-4 max-w-prose text-sm leading-relaxed text-muted">
-              Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres
-              aquí aparecerá como primer punto de tabla en la reunión siguiente.
+              Una recomendación solo sirve si alguien se hace cargo. Lo que anotes aquí abre la
+              próxima reunión.
             </p>
             <div className="flex flex-col gap-4">
               {acuerdos.deEstaReunion.map((a) => (
@@ -616,7 +656,7 @@ export default async function ResultadosPage({
           {/* Evidencia */}
           <section id="evidencia" className="scroll-mt-24">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <SectionLabel>La evidencia</SectionLabel>
+              <SectionLabel>Competencia por competencia</SectionLabel>
               <LogroLegend />
             </div>
             <div className="flex flex-col gap-4">
@@ -670,10 +710,10 @@ export default async function ResultadosPage({
         {d.totalVotos > 0 && (
           <Indice
             secciones={[
-              { id: "participacion", texto: "Participación" },
-              { id: "recomendaciones", texto: "Recomendaciones" },
-              { id: "acuerdos", texto: "Acuerdos", cantidad: acuerdos.deEstaReunion.length },
-              { id: "evidencia", texto: "La evidencia", cantidad: conDatos.length },
+              { id: "participacion", texto: "Quién respondió" },
+              { id: "recomendaciones", texto: "Qué hacer en clases" },
+              { id: "acuerdos", texto: "Compromisos", cantidad: acuerdos.deEstaReunion.length },
+              { id: "evidencia", texto: "El detalle", cantidad: conDatos.length },
             ]}
           />
         )}

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
+import { Button, Card, CLASE_ROTULO, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
 import { identificarDocente, guardarEvaluacion } from "@/lib/actions/evaluar";
 import { subirActa } from "@/lib/actions/actas";
 
@@ -20,14 +20,14 @@ const FASE_LABEL = {
 function ErrorBanner({ error }: { error?: string }) {
   if (!error) return null;
   return (
-    <p className="rounded-xl border border-incipiente/30 bg-incipiente-tint px-4 py-2.5 text-sm text-incipiente">
+    <p className="rounded-[7px] border border-incipiente-line bg-incipiente-tint px-3.5 py-2.5 text-[0.8125rem] text-incipiente">
       {error}
     </p>
   );
 }
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Identificación", "Asignatura", "Rúbrica"];
+  const steps = ["Quién eres", "Qué asignatura", "Cómo ves al curso"];
   return (
     <div className="mb-8 flex items-center gap-2 text-xs text-muted-2">
       {steps.map((label, i) => {
@@ -37,15 +37,15 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
         return (
           <div key={label} className="flex items-center gap-2">
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[0.65rem] font-semibold ${
+              className={`grid h-[18px] w-[18px] place-items-center rounded-md font-mono text-[0.625rem] font-medium ${
                 active
-                  ? "bg-ua text-white"
+                  ? "bg-foreground text-surface"
                   : done
-                    ? "bg-ua-tint text-ua"
-                    : "bg-surface-muted text-muted-2"
+                    ? "border border-logrado-line bg-logrado-tint text-logrado"
+                    : "bg-surface-hover text-muted-2"
               }`}
             >
-              {n}
+              {done ? "✓" : n}
             </span>
             <span className={active ? "font-medium text-foreground" : ""}>{label}</span>
             {i < steps.length - 1 && <span className="mx-1 text-border-strong">—</span>}
@@ -93,7 +93,7 @@ export default async function EvaluarPage({
       <Eyebrow>
         {CICLO_LABEL[nivel.cicloTipo]} · {nivel.trimestre}
       </Eyebrow>
-      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
+      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-[2.125rem]">
         {nivel.nombre}
       </h1>
       {reunionActual && (
@@ -112,8 +112,9 @@ export default async function EvaluarPage({
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in">
-          <p className="mb-5 text-sm text-muted">
-            Ingresa tus datos para registrar tu evaluación como docente de este nivel.
+          <p className="mb-5 text-[0.8125rem] leading-relaxed text-muted">
+            Tu coordinación te pidió evaluar cómo ves al curso en las competencias de este nivel.
+            Son unas pocas preguntas y toma cerca de 5 minutos. No necesitas crear una cuenta.
           </p>
           <form action={action} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
@@ -184,8 +185,8 @@ export default async function EvaluarPage({
 
         {reunionActual && actaAction && (
           <div className="mt-10 border-t border-border pt-8">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-2">
-              Actas de la reunión {reunionActual.numero}
+            <h2 className={`${CLASE_ROTULO} mb-3 block`}>
+              Acta de la reunión {reunionActual.numero}
             </h2>
             {actaSubida && (
               <p className="mb-3 text-sm text-logrado">Acta subida correctamente.</p>
@@ -196,7 +197,7 @@ export default async function EvaluarPage({
                   type="file"
                   name="archivo"
                   required
-                  className="flex-1 text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-ua-tint file:px-3.5 file:py-1.5 file:text-xs file:font-medium file:text-ua"
+                  className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground"
                 />
                 <Button type="submit" size="sm" variant="secondary">
                   Subir acta
@@ -252,9 +253,9 @@ export default async function EvaluarPage({
       <Stepper step={3} />
 
       <div className="mb-6 flex items-center justify-between">
-        <p className="text-sm text-muted">
-          Evaluando <span className="font-medium text-foreground">{asignatura.nombre}</span> como{" "}
-          {docente.nombre}.
+        <p className="text-[0.8125rem] text-muted">
+          Estás evaluando <span className="font-medium text-foreground">{asignatura.nombre}</span>{" "}
+          como {docente.nombre}.
         </p>
         <Link
           href={`/evaluar/${nivel.id}?docente=${docente.id}`}
@@ -294,7 +295,7 @@ export default async function EvaluarPage({
                       <textarea
                         className={`${inputClass} min-h-16 text-sm`}
                         name={`comentario:${ind.id}`}
-                        placeholder="Comentario (opcional)"
+                        placeholder="¿Algo que quieras agregar? (opcional)"
                         defaultValue={previa?.comentario ?? ""}
                       />
                     </div>

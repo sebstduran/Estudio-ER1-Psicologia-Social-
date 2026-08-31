@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Button } from "@/components/ui";
+import { Button, CLASE_ROTULO, inputClass } from "@/components/ui";
 
 // El host solo existe en el navegador. useSyncExternalStore lo lee sin efectos
 // y da una instantánea vacía al servidor, así la hidratación no se desajusta.
@@ -26,12 +26,10 @@ export function EnlaceDocentes({ nivelId }: { nivelId: string }) {
 
   return (
     <div className="border-t border-border pt-5">
-      <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-        Enlace para docentes
-      </p>
-      <p className="mb-3 max-w-prose text-sm leading-relaxed text-muted">
-        Compártelo en la reunión o por correo. Cada docente se identifica con su nombre y
-        correo, elige su asignatura y evalúa solo las competencias que esa asignatura tributa.
+      <p className={`${CLASE_ROTULO} mb-2.5 block`}>2 · Mándales este enlace</p>
+      <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
+        Por correo o WhatsApp. Cada docente pone su nombre, elige su asignatura y evalúa solo
+        lo que le toca. No tiene que crear cuenta ni recordar contraseña.
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <input
@@ -39,14 +37,14 @@ export function EnlaceDocentes({ nivelId }: { nivelId: string }) {
           value={url}
           onFocus={(e) => e.currentTarget.select()}
           aria-label="Enlace para docentes"
-          className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2.5 font-mono text-xs text-muted"
+          className={`${inputClass} min-w-0 flex-1 font-mono !text-xs`}
         />
         <Button type="button" variant="secondary" size="sm" onClick={copiar}>
           {copiado ? "Copiado" : "Copiar"}
         </Button>
         <a href={`/evaluar/${nivelId}`} target="_blank" rel="noreferrer">
           <Button type="button" variant="ghost" size="sm">
-            Abrir ↗
+            Ver lo que verán
           </Button>
         </a>
       </div>

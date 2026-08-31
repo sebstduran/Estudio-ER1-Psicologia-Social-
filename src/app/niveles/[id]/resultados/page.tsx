@@ -614,12 +614,11 @@ export default async function ResultadosPage({
                     estándar del nivel.
                   </p>
                 </div>
-                {informe?.estado === "ERROR" && informe.error && (
-                  <p className="rounded-xl border border-incipiente/30 bg-incipiente-tint px-4 py-2.5 text-sm text-incipiente">
-                    {informe.error}
-                  </p>
-                )}
-                <InformeBoton nivelId={id} yaExiste={false} />
+                <InformeBoton
+                  nivelId={id}
+                  yaExiste={false}
+                  errorPrevio={informe?.estado === "ERROR" ? informe.error : null}
+                />
               </Card>
             )}
 

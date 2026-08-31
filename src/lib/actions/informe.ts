@@ -40,7 +40,7 @@ export async function generarInformeDelNivel(
   } catch (e) {
     const mensaje =
       e instanceof FaltaApiKey
-        ? "Falta configurar la clave de la API en las variables de entorno (ANTHROPIC_API_KEY)."
+        ? "Falta configurar GEMINI_API_KEY en las variables de entorno."
         : e instanceof Error
           ? e.message
           : "Error inesperado al generar el informe.";

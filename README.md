@@ -61,8 +61,9 @@ Esto crea el coordinador `demo@ua.cl` / `demo1234` con un nivel de ejemplo
    Variables), iguales a `.env.example`:
    - `AUTH_SECRET` (genera uno con `npx auth secret`)
    - `AUTH_TRUST_HOST=true`
-   - `ANTHROPIC_API_KEY` (habilita el botón "Generar recomendaciones"; si queda
-     vacía el resto de la app funciona igual)
+   - `GEMINI_API_KEY` (habilita el botón "Generar recomendaciones"; si queda
+     vacía el resto de la app funciona igual). Se obtiene gratis en
+     https://aistudio.google.com/apikey — ver la advertencia de datos más abajo.
 5. Deploy. El comando de build es `npm run vercel-build`, que ya deja
    `prisma migrate deploy` corriendo antes de `next build` — cada deploy
    aplica las migraciones pendientes automáticamente.
@@ -71,6 +72,35 @@ Esto crea el coordinador `demo@ua.cl` / `demo1234` con un nivel de ejemplo
    ```bash
    DATABASE_URL="<la url de Vercel>" npm run db:seed:demo
    ```
+
+## Las recomendaciones y tus datos
+
+El botón "Generar recomendaciones" usa **Gemini** (Google) a través de su capa
+gratuita, que es lo que hace viable la función sin presupuesto. Conviene tener
+presente qué se manda y bajo qué condiciones.
+
+**Qué se envía en cada petición:** los puntajes de la reunión, los nombres y
+códigos de las competencias, y los comentarios que escribieron las y los
+docentes, con el nombre de quien los escribió y su asignatura. No se envían
+correos, contraseñas ni las actas subidas.
+
+**La capa gratuita no es privada.** Google se reserva el derecho de revisar y
+usar el contenido enviado por la capa sin costo para mejorar sus productos —
+las condiciones vigentes están en https://ai.google.dev/gemini-api/terms. Los
+comentarios docentes son juicio profesional sobre cursos reales, identificado
+con nombre y apellido, así que la decisión de usar la capa gratuita es una
+decisión institucional, no técnica. Vale la pena que la tome quien corresponda
+y no que quede como un supuesto.
+
+**Si más adelante hace falta que no lo sea**, hay dos caminos sin reescribir la
+aplicación: activar facturación en el mismo proyecto de Google (la capa de pago
+no usa el contenido para entrenar), o cambiar `src/lib/ai/informe.ts` a otro
+proveedor — es el único archivo que habla con el modelo, y expone una sola
+función, `generarInforme(diagnostico)`.
+
+**Mientras tanto**, la vía corta para reducir la exposición es acordar con el
+equipo que los comentarios describan al curso y no a personas — que además es
+mejor práctica evaluativa por su cuenta.
 
 ## Scripts
 

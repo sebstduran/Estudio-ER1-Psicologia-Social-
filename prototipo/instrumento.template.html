@@ -33,12 +33,12 @@
   --ok:         #10714f;
   --ok-velo:    #eefaf4;
   --ok-linea:   #c6ead9;
-  --medio:      #96660a;
-  --medio-velo: #fdf6e8;
-  --medio-linea:#f0dfb4;
-  --bajo:       #bb2637;
-  --bajo-velo:  #fdf1f2;
-  --bajo-linea: #f3d0d4;
+  --medio:      #b3820f;
+  --medio-velo: #fdf7e9;
+  --medio-linea:#f0e0b6;
+  --bajo:       #a3182c;
+  --bajo-velo:  #fdf0f2;
+  --bajo-linea: #f2ccd2;
 
   --foco:       #9e1b32;
   color-scheme: light;
@@ -50,9 +50,9 @@
     --linea: #24272e; --linea-2: #343841;
     --tinta: #eceef2; --tinta-2: #9aa1ad; --tinta-3: #6b7280;
     --marca: #ef6d7f; --marca-2: #f79aa6; --marca-velo: #24151a;
-    --ok: #46b98b; --ok-velo: #10241d; --ok-linea: #1d3a30;
-    --medio: #d9a63f; --medio-velo: #241d0e; --medio-linea: #3c3117;
-    --bajo: #f0707e; --bajo-velo: #241418; --bajo-linea: #3d2027;
+    --ok: #2e9c72; --ok-velo: #0f231c; --ok-linea: #1c382e;
+    --medio: #b08526; --medio-velo: #241d0e; --medio-linea: #3b3018;
+    --bajo: #e15f7c; --bajo-velo: #251319; --bajo-linea: #3e1f29;
     --foco: #ef6d7f;
   }
 }
@@ -61,9 +61,9 @@
   --linea: #24272e; --linea-2: #343841;
   --tinta: #eceef2; --tinta-2: #9aa1ad; --tinta-3: #6b7280;
   --marca: #ef6d7f; --marca-2: #f79aa6; --marca-velo: #24151a;
-  --ok: #46b98b; --ok-velo: #10241d; --ok-linea: #1d3a30;
-  --medio: #d9a63f; --medio-velo: #241d0e; --medio-linea: #3c3117;
-  --bajo: #f0707e; --bajo-velo: #241418; --bajo-linea: #3d2027;
+  --ok: #2e9c72; --ok-velo: #0f231c; --ok-linea: #1c382e;
+  --medio: #b08526; --medio-velo: #241d0e; --medio-linea: #3b3018;
+  --bajo: #e15f7c; --bajo-velo: #251319; --bajo-linea: #3e1f29;
   --foco: #ef6d7f;
 }
 
@@ -183,6 +183,10 @@ button, input, textarea { font: inherit; color: inherit; }
 .lienzo { min-width: 0; }
 .hoja { max-width: 1080px; padding: 28px 28px 96px; }
 
+/* ── Agrupación de secciones ────────────────────────────────── */
+.seccion { display: flex; flex-direction: column; gap: 10px; }
+.seccion > .rot { padding-left: 2px; }
+
 /* ── Superficies ────────────────────────────────────────────── */
 .panel { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; }
 .p16 { padding: 16px } .p20 { padding: 20px } .p24 { padding: 24px }
@@ -195,12 +199,28 @@ button, input, textarea { font: inherit; color: inherit; }
 .panel-cpo { padding: 20px; }
 .regla { border-top: 1px solid var(--linea); }
 
+/* ── Ayuda plegable ─────────────────────────────────────────── */
+.ayuda { border-top: 1px solid var(--linea); }
+.ayuda summary {
+  display: flex; align-items: center; gap: 6px;
+  padding: 11px 20px; cursor: pointer; list-style: none;
+  font-size: .75rem; color: var(--tinta-3);
+}
+.ayuda summary::-webkit-details-marker { display: none; }
+.ayuda summary:hover { color: var(--tinta); }
+.ayuda summary::before { content: "?"; display: grid; place-items: center;
+  width: 15px; height: 15px; border-radius: 50%; border: 1px solid currentColor;
+  font-size: .625rem; font-weight: 600; }
+.ayuda[open] summary { color: var(--tinta); }
+.ayuda-cpo { padding: 0 20px 16px 41px; }
+
 /* ── Controles ──────────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 13px; border-radius: 7px;
   border: 1px solid transparent;
   font-size: .8125rem; font-weight: 500; white-space: nowrap; cursor: pointer;
+  text-decoration: none;
   transition: background .12s, border-color .12s, color .12s, opacity .12s;
 }
 .btn-p { background: var(--tinta); color: var(--panel); }
@@ -247,9 +267,9 @@ textarea.campo { color: var(--tinta); resize: vertical; width: 100%; }
 .rejilla-caja { overflow-x: auto; }
 .rejilla {
   display: grid;
-  grid-template-columns: minmax(178px, 1.5fr) repeat(3, minmax(104px, 1fr)) 104px;
+  grid-template-columns: minmax(168px, 1.4fr) repeat(3, minmax(100px, 1fr)) 132px;
   gap: 4px;
-  min-width: 660px;
+  min-width: 700px;
 }
 .rej-cab { padding: 0 4px 8px; }
 .rej-fila { display: contents; }
@@ -282,8 +302,8 @@ textarea.campo { color: var(--tinta); resize: vertical; width: 100%; }
 }
 
 .rej-punt {
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 5px;
-  padding: 10px 2px 10px 10px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 9px;
+  padding: 8px 2px 8px 10px;
 }
 .rej-punt b { font-family: "Geist Mono", monospace; font-size: 1.0625rem; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .rej-punt small { font-size: .6875rem; color: var(--tinta-3); }
@@ -291,6 +311,14 @@ textarea.campo { color: var(--tinta); resize: vertical; width: 100%; }
 .leyenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .6875rem; color: var(--tinta-3); }
 .leyenda span { display: inline-flex; align-items: center; gap: 5px; }
 .leyenda i { width: 9px; height: 9px; border-radius: 2px; border: 1px solid; flex: none; }
+
+/* ── Trayectoria entre reuniones ────────────────────────────────
+   Una línea de cuatro puntos: dice si la competencia se movió desde la
+   línea base, que es la pregunta del cierre. Trazo neutro y sólo el
+   último punto en color, para que el ojo caiga en el estado de hoy. */
+.tray { display: block; overflow: visible; }
+.tray-linea { fill: none; stroke: var(--tinta-3); stroke-width: 2; opacity: .75; stroke-linecap: round; stroke-linejoin: round; }
+.tray-fin { stroke: var(--panel); stroke-width: 2; }
 
 /* ── Cifras y barras ────────────────────────────────────────── */
 .cifra { font-family: "Geist Mono", monospace; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.03em; line-height: 1; }
@@ -442,7 +470,7 @@ textarea.campo { color: var(--tinta); resize: vertical; width: 100%; }
 <script>
 // ═══════════ Datos del nivel de ejemplo ═══════════
 const COMPS = [
-  { cod: "3.1", nom: "Evaluar", epg: "Instrumentos de evaluación", score: 25, sev: "bajo", docentes: 2, base: 25,
+  { cod: "3.1", nom: "Evaluar", epg: "Instrumentos de evaluación", score: 25, sev: "bajo", docentes: 2, base: 25, tray: [25, 25, 25, 25],
     ind: [
       { t: "Reconoce los principales enfoques teóricos de evaluación cognitivo-conductual.", s: 25, sev: "bajo" },
       { t: "Compara enfoques de evaluación según el fenómeno conductual a comprender.", s: 25, sev: "bajo",
@@ -452,7 +480,7 @@ const COMPS = [
     ],
     asig: [["Metodología de la Investigación I", "transversal", 50], ["Bases Biológicas de la Conducta", "directa", 0]] },
 
-  { cod: "1.1", nom: "Fundamentar", epg: "Elementos curriculares", score: 50, sev: "medio", docentes: 2, base: 0, disenso: 3,
+  { cod: "1.1", nom: "Fundamentar", epg: "Elementos curriculares", score: 50, sev: "medio", docentes: 2, base: 0, disenso: 3, tray: [0, 17, 33, 50],
     ind: [
       { t: "Identifica fundamentos psicobiológicos, socioculturales y epistemológicos pertinentes a un problema disciplinar.", s: 50, sev: "medio", dis: true,
         com: [{ q: "Cuesta que distingan el fundamento teórico de la opinión personal; en el control la mayoría describió sin fundamentar.", a: "Prof. Daniela Soto · Bases Biológicas de la Conducta" }] },
@@ -463,7 +491,7 @@ const COMPS = [
     ],
     asig: [["Psicología del Desarrollo I", "directa", 100], ["Bases Biológicas de la Conducta", "transversal", 0]] },
 
-  { cod: "2.1", nom: "Investigar", epg: "Estrategias metodológicas", score: 50, sev: "medio", docentes: 1, base: 50,
+  { cod: "2.1", nom: "Investigar", epg: "Estrategias metodológicas", score: 50, sev: "medio", docentes: 1, base: 50, tray: [50, 50, 33, 50],
     ind: [
       { t: "Analiza problemas psicosociales relevantes para delimitar un tema de investigación.", s: 50, sev: "medio",
         com: [{ q: "Avanzaron respecto del primer trabajo, pero la argumentación sigue siendo descriptiva.", a: "Prof. Matías Herrera · Metodología de la Investigación I" }] },
@@ -472,7 +500,7 @@ const COMPS = [
     ],
     asig: [["Metodología de la Investigación I", "directa", 50]] },
 
-  { cod: "4.1", nom: "Analizar", epg: "Estrategias metodológicas", score: 100, sev: "ok", docentes: 1, base: 0,
+  { cod: "4.1", nom: "Analizar", epg: "Estrategias metodológicas", score: 100, sev: "ok", docentes: 1, base: 0, tray: [0, 33, 67, 100],
     ind: [
       { t: "Describe la conducta humana en estudio desde más de un paradigma biopsicosocial.", s: 100, sev: "ok" },
       { t: "Contrasta críticamente las aproximaciones paradigmáticas utilizadas.", s: 100, sev: "ok" },
@@ -480,7 +508,7 @@ const COMPS = [
     ],
     asig: [["Psicología del Desarrollo I", "directa", 100]] },
 
-  { cod: "6.1", nom: "Autoexplorar", epg: "Seguimiento de resultados", score: 100, sev: "ok", docentes: 1, base: 0,
+  { cod: "6.1", nom: "Autoexplorar", epg: "Seguimiento de resultados", score: 100, sev: "ok", docentes: 1, base: 0, tray: [0, 50, 83, 100],
     ind: [
       { t: "Aplica técnicas de autoexploración a su propio desempeño académico y profesional.", s: 100, sev: "ok" },
       { t: "Valora fortalezas y áreas de mejora identificadas en el proceso.", s: 100, sev: "ok" },
@@ -488,7 +516,7 @@ const COMPS = [
     ],
     asig: [["Psicología del Desarrollo I", "transversal", 100]] },
 
-  { cod: "5.1", nom: "Intervenir", epg: "Derivación al SAAC", score: null, sev: "nulo", docentes: 0, base: null,
+  { cod: "5.1", nom: "Intervenir", epg: "Derivación al SAAC", score: null, sev: "nulo", docentes: 0, base: null, tray: null,
     ind: [
       { t: "Analiza críticamente la información disponible sobre una necesidad psicosocial.", s: null, sev: "nulo" },
       { t: "Formula objetivos y acciones de un proyecto de intervención pertinente.", s: null, sev: "nulo" },
@@ -524,8 +552,40 @@ function metrica(rot, cifra, apoyo, color) {
   </div>`;
 }
 
+/**
+ * Trayectoria de una competencia entre reuniones, como línea de cuatro
+ * puntos. El trazo va en gris y sólo el punto final lleva color: lo que
+ * se pregunta en el cierre es dónde quedó, y si venía subiendo o plano.
+ */
+function trayectoria(c) {
+  if (!c.tray) return `<span style="width:56px" aria-hidden="true"></span>`;
+  const v = c.tray, an = 56, al = 22, m = 4;
+  const x = (i) => m + (i * (an - 2 * m)) / (v.length - 1);
+  const y = (n) => al - m - (n / 100) * (al - 2 * m);
+  const linea = v.map((n, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(n).toFixed(1)}`).join(" ");
+  const rotulo = `Trayectoria: ${v.map((n, i) => `R${i + 1} ${n}`).join(", ")}`;
+
+  return `<svg class="tray" width="${an}" height="${al}" viewBox="0 0 ${an} ${al}"
+      role="img" aria-label="${rotulo}"><title>${rotulo}</title>
+    <path class="tray-linea" d="${linea}"/>
+    <circle class="tray-fin" cx="${x(v.length - 1).toFixed(1)}" cy="${y(v[v.length - 1]).toFixed(1)}"
+      r="3.5" fill="var(--${c.sev === "nulo" ? "tinta-3" : c.sev})"/>
+  </svg>`;
+}
+
 function panel(cab, cuerpo, extra = "") {
   return `<section class="panel entra"${extra}>${cab}${cuerpo}</section>`;
+}
+
+function ayuda(pregunta, respuesta) {
+  return `<details class="ayuda">
+    <summary>${pregunta}</summary>
+    <div class="ayuda-cpo t12 sec">${respuesta}</div>
+  </details>`;
+}
+
+function seccion(rotulo, contenido, extra = "") {
+  return `<section class="seccion"${extra}><p class="rot">${rotulo}</p>${contenido}</section>`;
 }
 
 function cabecera(titulo, apoyo, derecha = "") {
@@ -588,11 +648,13 @@ function vistaPanel() {
 }
 
 function vistaConfigurar() {
+  // Cada paso se nombra por lo que la persona hace, no por el objeto que
+  // el sistema guarda: «Dijiste quién hace clases», no «Docentes».
   const pasos = [
-    ["Competencias del ciclo", "6 competencias", "El Ciclo Inicial viene con sus seis competencias e indicadores ya cargados."],
-    ["Asignaturas del nivel", "3 asignaturas", ""],
-    ["Docentes", "3 docentes", ""],
-    ["Qué competencia tributa cada asignatura", "7 vínculos", ""],
+    ["Las 6 competencias del Ciclo Inicial", "Ya venían cargadas, no tuviste que hacer nada.", "6 competencias"],
+    ["Las asignaturas del nivel", "", "3 asignaturas"],
+    ["Quién hace clases en cada una", "", "3 docentes"],
+    ["Qué competencia trabaja cada asignatura", "Así cada docente evalúa solo lo que le toca.", "7 vínculos"],
   ];
 
   return `
@@ -603,18 +665,18 @@ function vistaConfigurar() {
     </div>
 
     ${panel(
-      cabecera("Configuración completa", "Los cuatro pasos están resueltos: el nivel puede evaluar.",
+      cabecera("Todo listo", "Los cuatro primeros pasos están hechos. Ya puedes pedirles a tus docentes que evalúen.",
         `<button class="btn btn-p btn-xs" data-ir="resultados">Ver qué fortalecer</button>`),
       `<div>
         ${pasos.map((p, i) => `
           <div class="paso paso-listo">
-            <span class="paso-n" aria-label="Paso ${i + 1}, listo">✓</span>
+            <span class="paso-n" aria-label="Paso ${i + 1}, hecho">✓</span>
             <div class="crece">
               <div class="fila entre g10">
                 <h3 class="t13">${p[0]}</h3>
-                <span class="t12 ter mono">${p[1]}</span>
+                <span class="t12 ter mono">${p[2]}</span>
               </div>
-              ${p[2] ? `<p class="t12 ter" style="margin-top:4px">${p[2]}</p>` : ""}
+              ${p[1] ? `<p class="t12 ter" style="margin-top:4px">${p[1]}</p>` : ""}
             </div>
           </div>`).join("")}
 
@@ -622,34 +684,36 @@ function vistaConfigurar() {
           <span class="paso-n">5</span>
           <div class="crece pila g20">
             <div>
-              <h3 class="t13">Reunión y evaluación</h3>
-              <p class="t12 ter" style="margin-top:4px">Elige la reunión en curso, comparte el enlace con tus docentes y guarda el acta.</p>
+              <h3 class="t13">Ahora: pídeles que evalúen</h3>
+              <p class="t12 ter" style="margin-top:4px">Copia el enlace y mándaselo por correo o WhatsApp. No necesitan crear una cuenta.</p>
             </div>
 
             <div>
-              <p class="rot" style="margin-bottom:8px">Reunión en curso</p>
+              <p class="rot" style="margin-bottom:8px">1 · Marca en qué reunión vas</p>
               <div class="fila g6">
-                ${[["R1", "Línea base"], ["R2", "Seguimiento"], ["R3", "Seguimiento"], ["R4", "Cierre"]].map(([r, f], i) => `
+                ${[["R1", "la primera"], ["R2", "seguimiento"], ["R3", "seguimiento"], ["R4", "cierre"]].map(([r, f], i) => `
                   <button class="btn ${i === 3 ? "btn-p" : "btn-s"} btn-xs"><b class="mono">${r}</b> <span style="font-weight:400;opacity:.7">${f}</span></button>`).join("")}
               </div>
             </div>
 
             <div>
-              <p class="rot" style="margin-bottom:8px">Enlace para docentes</p>
+              <p class="rot" style="margin-bottom:8px">2 · Mándales este enlace</p>
               <div class="fila g8">
                 <input readonly class="campo mono crece" style="min-width:200px;font-size:.75rem" value="instrumento-ccaa.cl/evaluar/nivel-1-temuco">
                 <button class="btn btn-s btn-xs" id="copiar">Copiar</button>
-                <button class="btn btn-f btn-xs" data-ir="evaluar">Ver como docente</button>
+                <button class="btn btn-f btn-xs" data-ir="evaluar">Ver lo que verán</button>
               </div>
             </div>
 
             <div>
-              <p class="rot" style="margin-bottom:8px">Actas de la reunión 4</p>
-              <p class="t13 sec">acta-ccaa-r4.pdf <span class="ter t12">· Coordinación</span></p>
+              <p class="rot" style="margin-bottom:8px">3 · Sube el acta cuando terminen</p>
+              <p class="t13 sec">acta-ccaa-r4.pdf <span class="ter t12">· subida por Coordinación</span></p>
             </div>
           </div>
         </div>
-      </div>`
+      </div>` +
+      ayuda("¿Y si quiero cambiar algo de los primeros pasos?",
+        "Haz clic en cualquiera de los pasos con ✓ para abrirlo de nuevo. Lo que ya evaluaron tus docentes no se pierde: los cambios valen desde la reunión en curso hacia adelante.")
     )}
   </div>`;
 }
@@ -661,7 +725,7 @@ function vistaEvaluar() {
     <div>
       <p class="rot">Vista del docente · Prof. Carla Vidal</p>
       <h1 class="d1" style="margin-top:6px">Psicología del Desarrollo I</h1>
-      <p class="t13 sec" style="margin-top:6px">Evalúas solo las competencias que tu asignatura tributa. Reunión 4 · cierre comparativo.</p>
+      <p class="t13 sec" style="margin-top:6px">Marca cómo ves al curso en cada punto. Son 3 preguntas y toma unos 5 minutos.</p>
     </div>
 
     ${panel(
@@ -677,13 +741,13 @@ function vistaEvaluar() {
                 ${["INCIPIENTE", "EN_PROCESO", "LOGRADO"].map((v) => `
                   <button data-v="${v}" aria-pressed="false">${v === "EN_PROCESO" ? "En proceso" : v[0] + v.slice(1).toLowerCase()}</button>`).join("")}
               </div>
-              <textarea rows="2" class="campo" style="margin-top:8px" placeholder="Comentario (opcional)"></textarea>
+              <textarea rows="2" class="campo" style="margin-top:8px" placeholder="¿Algo que quieras agregar? (opcional)"></textarea>
             </div>`).join("")}
         </div>
 
         <div class="fila g10 regla" style="margin-top:20px;padding-top:16px">
           <button class="btn btn-p" id="guardar-eval">Guardar evaluación</button>
-          <span class="t12 ter">Prototipo: las respuestas no se guardan.</span>
+          <span class="t12 ter">En este prototipo las respuestas no se guardan.</span>
         </div>
       </div>`
     )}
@@ -703,149 +767,157 @@ function vistaResultados() {
   const ok = COMPS.filter((c) => c.sev === "ok");
 
   return `
-  <div class="pila g24">
+  <div class="pila g32">
     <div class="fila entre g16">
       <div>
-        <p class="rot">Sintetizar · Reunión 4</p>
+        <p class="rot">Reunión 4 de 4 · cierre</p>
         <h1 class="d1" style="margin-top:6px">Qué fortalecer</h1>
-        <p class="t13 sec" style="margin-top:6px">Nivel 1 · Sede Temuco — cierre comparativo contra la línea base.</p>
+        <p class="t13 sec" style="margin-top:6px">Nivel 1 · Sede Temuco</p>
       </div>
       <button class="btn btn-s btn-xs" onclick="window.print()">Imprimir para la reunión</button>
     </div>
 
-    <!-- Veredicto -->
+    <!-- ══ Titular: el veredicto y, sobre todo, por dónde partir ══ -->
     ${panel(
       "",
       `<div class="panel-cpo p24 fila entre alto g24">
-        <div style="max-width:400px">
-          <p class="rot">¿El nivel cumple con sus competencias?</p>
-          <p class="d2" style="margin-top:8px;color:var(--medio)">Parcialmente.</p>
-          <p class="t13 sec" style="margin-top:8px">Dos de cinco competencias evaluadas alcanzan el estándar. <b class="med" style="color:var(--tinta)">3.1 Evaluar</b> sigue en 25 y no ha variado desde la línea base; <b class="med" style="color:var(--tinta)">1.1 Fundamentar</b> subió 50 puntos, pero con criterio no compartido entre docentes.</p>
+        <div style="max-width:420px">
+          <p class="rot">¿El nivel está logrando sus competencias?</p>
+          <p class="d2" style="margin-top:8px;color:var(--medio)">Solo en parte.</p>
+          <p class="t13 sec" style="margin-top:8px">2 de las 5 competencias evaluadas llegaron al estándar. Las otras 3 se quedaron abajo.</p>
         </div>
         <div class="fila g32">
-          ${metrica("Crítico", "1", "de 6", "var(--bajo)")}
-          ${metrica("En riesgo", "2", "de 6", "var(--medio)")}
-          ${metrica("Consolidado", "2", "de 6", "var(--ok)")}
+          ${metrica("Crítico", "1", "hay que actuar ya", "var(--bajo)")}
+          ${metrica("En riesgo", "2", "van lento", "var(--medio)")}
+          ${metrica("Logrado", "2", "al día", "var(--ok)")}
+        </div>
+      </div>
+
+      <div class="panel-cpo p24 regla" style="background:var(--panel-2);border-radius:0 0 9px 9px">
+        <p class="rot" style="color:var(--marca)">Empieza por aquí</p>
+        <p class="t16 med" style="margin-top:8px">Competencia 3.1 Evaluar.</p>
+        <p class="t13 sec" style="margin-top:5px">Es la única en rojo y lleva cuatro reuniones sin moverse. Más abajo tienes dos actividades concretas para tus docentes.</p>
+        <div class="fila g8" style="margin-top:14px">
+          <a class="btn btn-p btn-xs" href="#que-hacer">Ver qué hacer en clases</a>
+          <button class="btn btn-s btn-xs">Anotar un compromiso</button>
         </div>
       </div>`
     )}
 
-    <!-- ══ Rejilla de evidencias: la pieza central ══ -->
-    ${panel(
-      cabecera("Mapa de evidencias", "Cada celda es un indicador observable. El puntaje y el medidor dicen lo mismo que el color.",
-        `<div class="leyenda">
-          <span><i style="background:var(--bajo-velo);border-color:var(--bajo-linea)"></i>Crítico</span>
-          <span><i style="background:var(--medio-velo);border-color:var(--medio-linea)"></i>En riesgo</span>
-          <span><i style="background:var(--ok-velo);border-color:var(--ok-linea)"></i>Consolidado</span>
-          <span><b style="font-size:.75rem;color:var(--tinta-2)">⇄</b> Disenso</span>
-        </div>`),
-      `<div class="panel-cpo">
-        <div class="rejilla-caja">
-          <div class="rejilla">
-            <div class="rej-cab rot"></div>
-            <div class="rej-cab rot">Evidencia 1</div>
-            <div class="rej-cab rot">Evidencia 2</div>
-            <div class="rej-cab rot">Evidencia 3</div>
-            <div class="rej-cab rot" style="text-align:right">Puntaje</div>
-            ${COMPS.map((c) => `
-              <div class="rej-fila">
-                <div class="rej-tit"><b>${c.cod}</b><span>${c.nom}</span></div>
-                ${c.ind.map(celda).join("")}
-                <div class="rej-punt">
-                  <b${c.score === null ? ' style="color:var(--tinta-3)"' : ""}>${c.score === null ? "—" : c.score}</b><small>/100</small>
-                </div>
-              </div>`).join("")}
+    <!-- ══ El diagnóstico ══ -->
+    ${seccion("El diagnóstico", `
+      ${panel(
+        cabecera("Dónde está el problema", "Cada cuadro es una evidencia que evaluaron tus docentes.",
+          `<div class="leyenda">
+            <span><i style="background:var(--bajo-velo);border-color:var(--bajo-linea)"></i>Crítico</span>
+            <span><i style="background:var(--medio-velo);border-color:var(--medio-linea)"></i>En riesgo</span>
+            <span><i style="background:var(--ok-velo);border-color:var(--ok-linea)"></i>Logrado</span>
+          </div>`),
+        `<div class="panel-cpo">
+          <div class="rejilla-caja">
+            <div class="rejilla">
+              <div class="rej-cab rot"></div>
+              <div class="rej-cab rot">Evidencia 1</div>
+              <div class="rej-cab rot">Evidencia 2</div>
+              <div class="rej-cab rot">Evidencia 3</div>
+              <div class="rej-cab rot" style="text-align:right">R1 → R4</div>
+              ${COMPS.map((c) => `
+                <div class="rej-fila">
+                  <div class="rej-tit"><b>${c.cod}</b><span>${c.nom}</span></div>
+                  ${c.ind.map(celda).join("")}
+                  <div class="rej-punt">
+                    ${trayectoria(c)}
+                    <b${c.score === null ? ' style="color:var(--tinta-3)"' : ""}>${c.score === null ? "—" : c.score}</b>
+                  </div>
+                </div>`).join("")}
+            </div>
           </div>
-        </div>
-      </div>`,
-      ' style="animation-delay:40ms"'
-    )}
+        </div>` +
+        ayuda("¿Cómo se lee esta tabla?",
+          "El número va de 0 a 100 y resume cómo evaluaron tus docentes esa evidencia: 100 es que todos la dieron por lograda, 0 que ninguno. Las barritas repiten lo mismo sin depender del color. La línea de la derecha muestra si la competencia subió, bajó o quedó igual desde la primera reunión del trimestre. El signo ⇄ marca las evidencias donde tus docentes no coincidieron.")
+      )}
 
-    <!-- Participación -->
-    ${panel(
-      cabecera("Participación", "3 de 3 docentes respondieron el total de sus indicadores."),
-      `<div class="panel-cpo">
-        <ul>
-          ${GENTE.map((p, i) => `
-            <li class="fila g12" style="padding:10px 0${i ? ";border-top:1px solid var(--linea)" : ""}">
-              <span class="dist dist-ok">${medidor("ok")}Completo</span>
-              <div class="crece"><p class="t13 med">${p.n}</p><p class="t12 ter">${p.a}</p></div>
-              <span class="mono t12 ter">${p.r}/${p.e}</span>
-            </li>`).join("")}
-        </ul>
-      </div>`,
-      ' style="animation-delay:80ms"'
-    )}
+      ${panel(
+        cabecera("Quién respondió", "Los 3 docentes contestaron todo lo que les tocaba."),
+        `<div class="panel-cpo">
+          <ul>
+            ${GENTE.map((p, i) => `
+              <li class="fila g12" style="padding:10px 0${i ? ";border-top:1px solid var(--linea)" : ""}">
+                <span class="dist dist-ok">${medidor("ok")}Completo</span>
+                <div class="crece"><p class="t13 med">${p.n}</p><p class="t12 ter">${p.a}</p></div>
+                <span class="mono t12 ter">${p.r}/${p.e}</span>
+              </li>`).join("")}
+          </ul>
+        </div>`
+      )}`, ' style="animation-delay:60ms" class="seccion entra"')}
 
-    <!-- Recomendaciones -->
-    ${panel(
-      cabecera("Cómo fortalecerlo", "Propuestas generadas con IA a partir de la evidencia y los comentarios del equipo.",
-        `<span class="dist dist-marca">Foco 1 de 3</span>`),
-      `<div class="panel-cpo pila g16">
-        <div>
-          <p class="rot" style="color:var(--bajo)">3.1 Evaluar · Instrumentos de evaluación</p>
-          <p class="t13" style="margin-top:8px">Los tres indicadores están en 25 y ningún docente reporta logro. Los comentarios apuntan a que reconocen los enfoques pero no logran contrastarlos: es un problema de aplicación, no de cobertura de contenido.</p>
-        </div>
-
-        ${[
-          ["Instrucción entre pares",
-           "En la semana 5, presentar dos casos donde el mismo comportamiento admita lectura conductual y cognitiva. Votación individual, discusión en parejas, revotación y cierre del docente sobre el criterio de contraste.",
-           "Los comentarios muestran una concepción errónea compartida sobre los niveles de análisis, y ese es justamente el caso donde la discusión entre pares supera a la exposición."],
-          ["Ejemplos resueltos",
-           "Antes de pedir el análisis autónomo, modelar un caso completo mostrando el razonamiento de selección del enfoque, y luego entregar dos casos retirando el andamiaje de forma progresiva.",
-           "«Necesitan más práctica guiada antes de trabajar solos» describe exactamente una carga cognitiva excesiva para la tarea planteada."],
-        ].map(([tec, acc, por]) => `
-          <div style="background:var(--panel-2);border:1px solid var(--linea);border-radius:8px;padding:16px">
-            <span class="dist dist-marca">${tec}</span>
-            <p class="t13" style="margin-top:10px">${acc}</p>
-            <p class="t12 ter" style="margin-top:8px"><b class="med">Por qué:</b> ${por}</p>
-          </div>`).join("")}
-      </div>`,
-      ' style="animation-delay:120ms"'
-    )}
-
-    <!-- Disenso -->
-    ${panel(
-      cabecera(`<span class="fila g8">Criterios que el equipo no comparte <span class="dist dist-medio">3 evidencias</span></span>`,
-        "1.1 Fundamentar — hubo docentes que calificaron logrado y docentes que calificaron incipiente sobre la misma evidencia."),
-      `<div class="panel-cpo">
-        <p class="t13 sec">Antes de intervenir con las y los estudiantes, conviene acordar qué cuenta como logro: mientras el criterio no sea común, el puntaje mide dos cosas distintas.</p>
-        <p class="t13" style="margin-top:12px"><b class="med">Cómo resolverlo:</b> calibrar con tres trabajos de muestra. Cada docente los califica por separado y luego se discuten las diferencias hasta fijar el descriptor de «logrado».</p>
-      </div>`,
-      ' style="animation-delay:160ms"'
-    )}
-
-    <!-- Acuerdos -->
-    ${panel(
-      cabecera("Acuerdos de esta reunión", "Una recomendación solo mejora algo si alguien se hace cargo. Lo que registres aquí abre la tabla de la reunión siguiente.",
-        `<button class="btn btn-s btn-xs">Nuevo acuerdo</button>`),
-      `<div class="panel-cpo fila entre alto g16">
-        <div class="crece">
-          <div class="fila g8" style="margin-bottom:8px">
-            <span class="dist dist-medio">En curso</span>
-            <span class="mono t12 ter">1.1 · R4</span>
+    <!-- ══ Las decisiones ══ -->
+    ${seccion("Qué hacer con esto", `
+      ${panel(
+        cabecera("Qué hacer en clases", "Actividades propuestas por la IA a partir de lo que evaluaron y comentaron tus docentes.",
+          `<span class="dist dist-marca">1 de 3 focos</span>`),
+        `<div class="panel-cpo pila g16">
+          <div>
+            <p class="rot" style="color:var(--bajo)">Foco 1 · 3.1 Evaluar</p>
+            <p class="t13" style="margin-top:8px">Las tres evidencias están en 25 y ningún docente la dio por lograda. Por los comentarios, el problema no es que falte pasar materia: reconocen los enfoques, pero no logran compararlos.</p>
           </div>
-          <p class="t13">Calibrar el criterio de logro de 1.1 con tres trabajos de muestra.</p>
-          <p class="t12 ter" style="margin-top:6px">Carla Vidal y Daniela Soto · antes de R3</p>
-        </div>
-        <button class="btn btn-s btn-xs">Marcar cumplido</button>
-      </div>`,
-      ' style="animation-delay:200ms"'
-    )}
 
-    <!-- Evidencia detallada -->
-    <section class="pila g12 entra" style="animation-delay:240ms">
-      <p class="rot">La evidencia</p>
+          ${[
+            ["Instrucción entre pares", "2 sesiones · semana 5",
+             "Presenta dos casos donde la misma conducta admita una lectura conductual y una cognitiva. Cada estudiante vota en silencio, discute en parejas, vuelve a votar, y el docente cierra explicando el criterio para comparar.",
+             "Los comentarios muestran que se equivocan todos en lo mismo, y ese es el caso donde discutir entre pares funciona mejor que volver a explicar."],
+            ["Ejemplos resueltos", "3 sesiones · semanas 6 a 8",
+             "Antes de pedir el análisis solos, resuelve un caso completo en voz alta mostrando cómo eliges el enfoque. Después entrega dos casos más, quitando la ayuda de a poco.",
+             "«Necesitan más práctica guiada antes de trabajar solos» es exactamente lo que pasa cuando la tarea exige demasiado de una vez."],
+          ].map(([tec, cuando, acc, por]) => `
+            <div style="background:var(--panel-2);border:1px solid var(--linea);border-radius:8px;padding:16px">
+              <div class="fila entre g10">
+                <span class="dist dist-marca">${tec}</span>
+                <span class="mono t12 ter">${cuando}</span>
+              </div>
+              <p class="t13" style="margin-top:10px">${acc}</p>
+              <p class="t12 ter" style="margin-top:8px"><b class="med">Por qué esta y no otra:</b> ${por}</p>
+            </div>`).join("")}
+        </div>`,
+        ' id="que-hacer"'
+      )}
+
+      ${panel(
+        cabecera(`<span class="fila g8">Tus docentes no están midiendo igual <span class="dist dist-medio">3 evidencias</span></span>`,
+          "En la competencia 1.1, unos calificaron «logrado» y otros «incipiente» sobre la misma evidencia."),
+        `<div class="panel-cpo">
+          <p class="t13 sec">Mientras no se pongan de acuerdo en qué cuenta como logrado, el puntaje de 1.1 está midiendo dos cosas distintas. Conviene resolver esto antes de cambiar algo en clases.</p>
+          <p class="t13" style="margin-top:12px"><b class="med">Cómo resolverlo en una reunión:</b> lleva tres trabajos de estudiantes. Cada docente los califica por su cuenta, y después comparan hasta acordar qué es «logrado».</p>
+        </div>`
+      )}
+
+      ${panel(
+        cabecera("Compromisos", "Una recomendación solo sirve si alguien se hace cargo. Lo que anotes aquí abre la próxima reunión.",
+          `<button class="btn btn-s btn-xs">Anotar compromiso</button>`),
+        `<div class="panel-cpo fila entre alto g16">
+          <div class="crece">
+            <div class="fila g8" style="margin-bottom:8px">
+              <span class="dist dist-medio">En curso</span>
+              <span class="mono t12 ter">1.1 · desde R4</span>
+            </div>
+            <p class="t13">Calibrar con tres trabajos de muestra qué cuenta como «logrado» en 1.1.</p>
+            <p class="t12 ter" style="margin-top:6px">Carla Vidal y Daniela Soto · antes de la próxima reunión</p>
+          </div>
+          <button class="btn btn-s btn-xs">Marcar cumplido</button>
+        </div>`
+      )}`, ' style="animation-delay:120ms" class="seccion entra"')}
+
+    <!-- ══ El detalle ══ -->
+    ${seccion("Competencia por competencia", `
       ${atencion.map(tarjetaComp).join("")}
       <details class="panel">
         <summary class="fila entre g10 p16" style="cursor:pointer;list-style:none">
-          <span class="fila g10 t13">${distintivo("ok")}<b class="med">2 competencias alcanzan el estándar</b>
+          <span class="fila g10 t13">${distintivo("ok")}<b class="med">2 competencias ya están logradas</b>
             <span class="ter mono t12">${ok.map((c) => c.cod).join(" · ")}</span></span>
           <span class="t12 ter">Ver</span>
         </summary>
         <div class="pila g12 p16" style="padding-top:0">${ok.map(tarjetaComp).join("")}</div>
-      </details>
-    </section>
+      </details>`, ' style="animation-delay:180ms" class="seccion entra"')}
   </div>`;
 }
 

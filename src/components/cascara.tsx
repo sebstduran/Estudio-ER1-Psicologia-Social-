@@ -4,14 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { ESTILO_RAIL, Rail } from "@/components/rail";
 
 /**
- * Marco de la aplicación. Con sesión iniciada monta la barra lateral; sin
- * sesión —portada, login, registro, y el formulario que abren los docentes—
- * la página se dibuja sola, porque ahí no hay dónde navegar todavía.
+ * Marco de las pantallas del coordinador: monta la barra lateral con sus
+ * niveles. Sólo lo usa el grupo de rutas (app); la portada, el ingreso y el
+ * formulario del docente cuelgan del layout raíz y se dibujan solos.
+ *
+ * Sin sesión devuelve la página tal cual: quien llegue aquí sin haber entrado
+ * será redirigido al ingreso por la propia página, y mientras tanto no tiene
+ * sentido pintarle una barra con niveles que no son suyos.
  */
 export async function Cascara({ children }: { children: ReactNode }) {
   const sesion = await auth();
 
-  if (!sesion?.user) return <main className="min-h-screen">{children}</main>;
+  if (!sesion?.user) return <>{children}</>;
 
   const niveles = await prisma.nivel.findMany({
     where: { coordinadorId: sesion.user.id },

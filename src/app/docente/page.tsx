@@ -19,8 +19,9 @@ export default async function DocentePage({
     <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Entrar como docente</h1>
-        <p className="mt-1.5 text-sm text-muted">
-          No necesitas cuenta ni contraseña. Toma unos 5 minutos.
+        <p className="mt-1.5 text-sm leading-relaxed text-muted">
+          Vas a contar cómo ves a tu curso en las competencias que trabaja tu asignatura.
+          Toma unos 5 minutos y no necesitas cuenta ni contraseña.
         </p>
       </div>
 

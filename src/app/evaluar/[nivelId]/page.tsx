@@ -112,9 +112,42 @@ export default async function EvaluarPage({
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in">
-          <p className="mb-5 text-[0.8125rem] leading-relaxed text-muted">
-            Tu coordinación te pidió evaluar cómo ves al curso en las competencias de este nivel.
-            Son unas pocas preguntas y toma cerca de 5 minutos. No necesitas crear una cuenta.
+          <p className="text-[0.8125rem] leading-relaxed text-muted">
+            Tu coordinación te pidió evaluar cómo ves al curso en las competencias de este
+            nivel. Toma cerca de 5 minutos y no necesitas crear una cuenta.
+          </p>
+
+          {/* Qué va a pasar, antes de pedirle el primer dato. Quien entra por un
+              enlace que le llegó por WhatsApp no sabe en qué se está metiendo, y
+              esa incertidumbre es la que hace que lo deje para después. */}
+          <ol className="my-5 flex flex-col gap-3 border-y border-border py-5">
+            {[
+              ["Dices quién eres", "Tu nombre y tu correo. No hay contraseña que recordar."],
+              [
+                "Eliges tu asignatura",
+                "Si haces más de una en este nivel, respondes una por una.",
+              ],
+              [
+                "Cuentas cómo ves al curso",
+                "Solo las competencias que trabaja tu asignatura, y al final dos preguntas abiertas.",
+              ],
+            ].map(([titulo, detalle], i) => (
+              <li key={titulo} className="flex gap-3">
+                <span className="mt-px grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ua-tint font-mono text-[0.625rem] font-medium text-ua">
+                  {i + 1}
+                </span>
+                <span className="text-[0.8125rem] leading-relaxed">
+                  <span className="font-medium">{titulo}.</span>{" "}
+                  <span className="text-muted">{detalle}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <p className="mb-5 text-xs leading-relaxed text-muted-2">
+            Puedes volver a entrar por el mismo enlace y cambiar lo que respondiste. Si una
+            evidencia todavía no la trabajas en tu asignatura, hay una opción para decirlo:
+            no cuenta en contra del nivel.
           </p>
           <form action={action} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">

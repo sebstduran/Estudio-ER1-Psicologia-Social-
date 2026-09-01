@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Instrument_Sans } from "next/font/google";
 import Script from "next/script";
-import { Cascara } from "@/components/cascara";
 import "./globals.css";
 
 // Una sola familia para toda la interfaz y una monoespaciada para cifras,
@@ -45,8 +44,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {THEME_INIT_SCRIPT}
         </Script>
       </head>
+      {/* La barra lateral la monta el grupo (app), sólo en las pantallas del
+          coordinador. Aquí abajo cuelgan también la portada, el ingreso y el
+          formulario del docente, que se dibujan solos. */}
       <body className="min-h-full bg-background font-sans text-foreground">
-        <Cascara>{children}</Cascara>
+        <main className="min-h-screen">{children}</main>
       </body>
     </html>
   );

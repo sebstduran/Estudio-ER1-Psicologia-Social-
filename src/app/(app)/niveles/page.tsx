@@ -153,6 +153,66 @@ function TarjetaNivel({ n }: { n: ResumenNivel }) {
   );
 }
 
+/**
+ * Los tres pasos del instrumento, siempre a la vista. Quien coordina entra unas
+ * pocas veces por trimestre: entre una reunión y la siguiente pasan semanas y
+ * no tiene por qué recordar el orden. Se queda fijo y compacto en vez de
+ * esconderse tras un "¿cómo funciona?", que nadie abre.
+ */
+const PASOS = [
+  {
+    titulo: "Configura el nivel",
+    cuando: "Una vez por trimestre",
+    texto:
+      "Declara el ciclo y la modalidad, agrega las asignaturas y quién hace clases en cada una, y marca qué competencia trabaja cada asignatura.",
+  },
+  {
+    titulo: "Pide a tus docentes que respondan",
+    cuando: "Antes de cada reunión",
+    texto:
+      "Mándales el enlace o dicta el código del nivel. Cada docente califica solo lo que le toca, en unos 5 minutos y sin crear cuenta.",
+  },
+  {
+    titulo: "Mira qué fortalecer y anota los acuerdos",
+    cuando: "En la reunión",
+    texto:
+      "Ves qué competencias están abajo y por qué, pides las recomendaciones, y dejas cada acuerdo con responsable y plazo.",
+  },
+] as const;
+
+function ComoFunciona() {
+  return (
+    <section aria-labelledby="como-funciona" className="mb-10">
+      <h2
+        id="como-funciona"
+        className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-2"
+      >
+        Cómo funciona
+      </h2>
+      <ol className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
+        {PASOS.map((p, i) => (
+          <li key={p.titulo} className="flex flex-col bg-surface p-5">
+            <div className="mb-2.5 flex items-center gap-2">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ua-tint font-mono text-[0.7rem] font-medium text-ua">
+                {i + 1}
+              </span>
+              <span className="text-[0.68rem] font-medium uppercase tracking-[0.08em] text-muted-2">
+                {p.cuando}
+              </span>
+            </div>
+            <h3 className="text-[0.95rem] font-medium leading-snug">{p.titulo}</h3>
+            <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted">{p.texto}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-3 text-[0.8125rem] leading-relaxed text-muted-2">
+        Los pasos 2 y 3 se repiten en cada reunión del trimestre. La primera queda como
+        línea base y todo se compara contra ella, así se ve si algo se movió.
+      </p>
+    </section>
+  );
+}
+
 export default async function NivelesPage() {
   const user = await requireCoordinador();
   const niveles = await resumenNiveles(user.id);
@@ -181,6 +241,8 @@ export default async function NivelesPage() {
         </div>
         {niveles.length > 0 && <NuevoNivelPanel />}
       </div>
+
+      <ComoFunciona />
 
       {niveles.length === 0 ? (
         <Card className="flex flex-col items-start gap-5 p-8">

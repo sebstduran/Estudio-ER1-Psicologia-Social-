@@ -80,16 +80,18 @@ gratuita, que es lo que hace viable la función sin presupuesto. Conviene tener
 presente qué se manda y bajo qué condiciones.
 
 **Qué se envía en cada petición:** los puntajes de la reunión, los nombres y
-códigos de las competencias, y los comentarios que escribieron las y los
-docentes, con el nombre de quien los escribió y su asignatura. No se envían
-correos, contraseñas ni las actas subidas.
+códigos de las competencias, los comentarios que escribieron las y los docentes
+en la rúbrica, y sus respuestas a las dos preguntas abiertas del final ("qué te
+está costando" y "qué crees que ayudaría") — en ambos casos con el nombre de
+quien las escribió y su asignatura. No se envían correos, contraseñas ni las
+actas subidas.
 
 **La capa gratuita no es privada.** Google se reserva el derecho de revisar y
 usar el contenido enviado por la capa sin costo para mejorar sus productos —
 las condiciones vigentes están en https://ai.google.dev/gemini-api/terms. Los
-comentarios docentes son juicio profesional sobre cursos reales, identificado
-con nombre y apellido, así que la decisión de usar la capa gratuita es una
-decisión institucional, no técnica. Vale la pena que la tome quien corresponda
+comentarios y percepciones docentes son juicio profesional sobre cursos reales,
+identificado con nombre y apellido, así que la decisión de usar la capa gratuita
+es una decisión institucional, no técnica. Vale la pena que la tome quien corresponda
 y no que quede como un supuesto.
 
 **Si más adelante hace falta que no lo sea**, hay dos caminos sin reescribir la
@@ -124,12 +126,13 @@ NextAuth (Credentials). Ver el schema completo en `prisma/schema.prisma`.
       paleta institucional UA.
 - [x] M1 — Configurar: Niveles, competencias del Ciclo Inicial precargadas,
       Asignaturas, matriz de mapeo Asignatura × Competencia.
-- [x] M2 — Evaluar: Docentes, rúbrica por indicador (sin cuenta, vía enlace),
-      subida de actas.
+- [x] M2 — Evaluar: Docentes, rúbrica por indicador (sin cuenta, vía enlace o
+      código de nivel), opción "aún no lo trabajo" fuera del puntaje, dos
+      preguntas abiertas al cierre, subida de actas.
 - [x] M3 — Sintetizar: competencias priorizadas por urgencia (crítico / en
       riesgo / consolidado), evidencia más débil, comentarios de los docentes,
       apertura por asignatura y comparación línea base vs. cierre.
-- [x] M4 — Recomendaciones generadas con la API de Anthropic: diagnóstico por
+- [x] M4 — Recomendaciones generadas con Gemini: diagnóstico por
       competencia, decisión EPG a activar, acciones concretas para que las y los
       estudiantes alcancen el estándar, recomendaciones por asignatura y alertas
       de cara al Hito de Evaluación de Ciclo.

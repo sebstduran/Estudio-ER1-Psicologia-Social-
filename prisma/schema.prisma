@@ -7,7 +7,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // En ejecución, la conexión agrupada: las funciones de Vercel abren y cierran
+  // muchas conexiones cortas y el pooler es justo lo que evita agotar la base.
   url      = env("DATABASE_URL")
+  // Para migrar, la conexión DIRECTA. `prisma migrate deploy` toma un cerrojo
+  // de sesión (pg_advisory_lock) y el pooler de Neon trabaja por transacción,
+  // así que el cerrojo expira: el despliegue falla con P1002 de forma
+  // intermitente. Neon publica esta variable junto a DATABASE_URL.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // ─── Identidad ───────────────────────────────────────────────

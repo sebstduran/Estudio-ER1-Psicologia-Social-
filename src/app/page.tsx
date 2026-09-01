@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 /**
@@ -8,25 +7,39 @@ import { auth } from "@/lib/auth";
  * dos personas con tareas distintas, y lo único que necesita es reconocerse.
  * Por eso las dos puertas van en la misma pantalla que el escudo: una portada
  * que solo dice "pasa" añade un clic sin responder "¿qué hago ahora?".
+ *
+ * La elección se muestra SIEMPRE, también con la sesión iniciada. Antes se
+ * saltaba directo a /niveles, y eso rompía las dos cosas que esta pantalla
+ * existe para resolver: en el computador de la sala —donde la coordinación deja
+ * su sesión abierta— el docente no encontraba su puerta, y peor, aterrizaba
+ * dentro de la cuenta ajena viendo un análisis que no le corresponde. A quien
+ * ya inició sesión no se le pregunta quién es: su puerta dice su nombre.
  */
-const PUERTAS = [
-  {
-    href: "/login",
-    titulo: "Coordinación",
-    detalle: "Configuro el nivel, veo el análisis y registro los acuerdos.",
-    pie: "Con tu cuenta",
-  },
-  {
-    href: "/docente",
-    titulo: "Docente",
-    detalle: "Respondo cómo veo al curso en las competencias de mi asignatura.",
-    pie: "Sin cuenta · unos 5 minutos",
-  },
-] as const;
-
 export default async function PortadaPage() {
   const session = await auth();
-  if (session?.user) redirect("/niveles");
+  const nombre = session?.user?.name ?? null;
+
+  const puertas = [
+    nombre
+      ? {
+          href: "/niveles",
+          titulo: "Coordinación",
+          detalle: "Configuro el nivel, veo el análisis y registro los acuerdos.",
+          pie: `Seguir como ${nombre}`,
+        }
+      : {
+          href: "/login",
+          titulo: "Coordinación",
+          detalle: "Configuro el nivel, veo el análisis y registro los acuerdos.",
+          pie: "Con tu cuenta",
+        },
+    {
+      href: "/docente",
+      titulo: "Docente",
+      detalle: "Respondo cómo veo al curso en las competencias de mi asignatura.",
+      pie: "Sin cuenta · unos 5 minutos",
+    },
+  ];
 
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-center overflow-hidden">
@@ -68,7 +81,7 @@ export default async function PortadaPage() {
         </h2>
 
         <div className="mt-4 grid w-full gap-3 sm:grid-cols-2">
-          {PUERTAS.map((p) => (
+          {puertas.map((p) => (
             <Link
               key={p.href}
               href={p.href}
@@ -91,12 +104,14 @@ export default async function PortadaPage() {
           ))}
         </div>
 
-        <p className="mt-8 text-[0.8125rem] text-muted-2">
-          ¿Coordinas y aún no tienes cuenta?{" "}
-          <Link href="/registro" className="font-medium text-ua underline underline-offset-2">
-            Crear una
-          </Link>
-        </p>
+        {!nombre && (
+          <p className="mt-8 text-[0.8125rem] text-muted-2">
+            ¿Coordinas y aún no tienes cuenta?{" "}
+            <Link href="/registro" className="font-medium text-ua underline underline-offset-2">
+              Crear una
+            </Link>
+          </p>
+        )}
       </main>
     </div>
   );

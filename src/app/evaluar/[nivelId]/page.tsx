@@ -245,6 +245,18 @@ export default async function EvaluarPage({
     : [];
   const previaPorIndicador = new Map(evaluacionesPrevias.map((e) => [e.indicadorId, e]));
 
+  const percepcionPrevia = reunionActual
+    ? await prisma.percepcion.findUnique({
+        where: {
+          reunionId_docenteId_asignaturaId: {
+            reunionId: reunionActual.id,
+            docenteId: docente.id,
+            asignaturaId: asignatura.id,
+          },
+        },
+      })
+    : null;
+
   const guardarAction = guardarEvaluacion.bind(null, nivel.id, docente.id, asignatura.id);
 
   return (
@@ -304,6 +316,53 @@ export default async function EvaluarPage({
               </div>
             </Card>
           ))}
+
+          {/* Dos preguntas dirigidas, no una caja en blanco: una caja en blanco
+              se devuelve en blanco. Esto es lo que antes se decía en la reunión
+              y se perdía en el acta, así que va aquí, mientras la persona
+              todavía tiene el curso en la cabeza. */}
+          <Card className="animate-fade-in">
+            <Eyebrow>Lo que no cabe en la rúbrica</Eyebrow>
+            <h3 className="mt-3 text-lg font-medium">Cuéntanos cómo lo ves tú</h3>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              Opcional, pero es lo que más ayuda a decidir qué hacer. Lo lee quien coordina
+              y alimenta las recomendaciones.
+            </p>
+
+            <div className="mt-5 flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="dificultad" className="text-sm font-medium">
+                  ¿Qué te está costando más con este curso?
+                </label>
+                <p className="text-xs leading-relaxed text-muted-2">
+                  Lo que ves en clases y no aparece en la rúbrica.
+                </p>
+                <textarea
+                  id="dificultad"
+                  name="dificultad"
+                  className={`${inputClass} min-h-20 text-sm`}
+                  placeholder="Ej. Llegan sin lectura previa, así que la clase se va en explicar lo básico."
+                  defaultValue={percepcionPrevia?.dificultad ?? ""}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="sugerencia" className="text-sm font-medium">
+                  ¿Qué crees que ayudaría?
+                </label>
+                <p className="text-xs leading-relaxed text-muted-2">
+                  Aunque no dependa de ti.
+                </p>
+                <textarea
+                  id="sugerencia"
+                  name="sugerencia"
+                  className={`${inputClass} min-h-20 text-sm`}
+                  placeholder="Ej. Un control de lectura corto al inicio, o coordinar la pauta con Metodología."
+                  defaultValue={percepcionPrevia?.sugerencia ?? ""}
+                />
+              </div>
+            </div>
+          </Card>
 
           <Button type="submit" size="md" className="self-start">
             Guardar evaluación

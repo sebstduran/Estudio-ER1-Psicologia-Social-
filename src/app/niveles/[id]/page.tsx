@@ -373,7 +373,7 @@ export default async function NivelDetallePage({
 
             {pasoActual === 5 && (
               <>
-                <EnlaceDocentes nivelId={nivel.id} />
+                <EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} />
 
                 {/* Actas */}
                 {reunionActual && (

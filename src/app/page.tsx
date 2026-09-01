@@ -2,12 +2,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { Button } from "@/components/ui";
 
-const ETAPAS = [
-  ["Configurar", "Declaras el nivel, sus asignaturas y qué competencia tributa cada una."],
-  ["Evaluar", "Cada docente califica, por un enlace y sin crear cuenta, las evidencias de su asignatura."],
-  ["Fortalecer", "Ves qué competencias están en riesgo y recibes cómo reforzarlas."],
+/**
+ * La portada es un cruce de caminos, no un folleto. Quien llega aquí es una de
+ * dos personas con tareas distintas, y lo único que necesita es reconocerse.
+ * Por eso las dos puertas van en la misma pantalla que el escudo: una portada
+ * que solo dice "pasa" añade un clic sin responder "¿qué hago ahora?".
+ */
+const PUERTAS = [
+  {
+    href: "/login",
+    titulo: "Coordinación",
+    detalle: "Configuro el nivel, veo el análisis y registro los acuerdos.",
+    pie: "Con tu cuenta",
+  },
+  {
+    href: "/docente",
+    titulo: "Docente",
+    detalle: "Respondo cómo veo al curso en las competencias de mi asignatura.",
+    pie: "Sin cuenta · unos 5 minutos",
+  },
 ] as const;
 
 export default async function PortadaPage() {
@@ -44,34 +58,45 @@ export default async function PortadaPage() {
           Instrumento de Competencias <span className="text-ua">CCAA</span>
         </h1>
 
-        <p className="mt-5 max-w-lg text-[1.02rem] leading-relaxed text-muted">
-          Diagnostica el logro de las competencias del nivel a partir del juicio de tus
-          docentes, y convierte cada hallazgo en una decisión de Estrategia Pedagógica Global.
+        <p className="mt-5 max-w-md text-[1.02rem] leading-relaxed text-muted">
+          Convierte la conversación de la comunidad académica en un diagnóstico con
+          evidencia y en decisiones con responsable.
         </p>
 
-        <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/registro">
-            <Button className="px-7 py-3">Comenzar</Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="ghost" className="px-5 py-3">
-              Ya tengo una cuenta
-            </Button>
-          </Link>
+        <h2 className="mt-12 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-muted-2">
+          ¿Cómo entras?
+        </h2>
+
+        <div className="mt-4 grid w-full gap-3 sm:grid-cols-2">
+          {PUERTAS.map((p) => (
+            <Link
+              key={p.href}
+              href={p.href}
+              className="group flex flex-col rounded-2xl border border-border bg-surface p-6 text-left transition-colors hover:border-ua focus-visible:border-ua focus-visible:outline-none"
+            >
+              <span className="text-lg font-medium">{p.titulo}</span>
+              <span className="mt-2 flex-1 text-[0.875rem] leading-relaxed text-muted">
+                {p.detalle}
+              </span>
+              <span className="mt-4 flex items-center gap-1.5 text-[0.75rem] font-medium text-muted-2">
+                {p.pie}
+                <span
+                  aria-hidden="true"
+                  className="transition-transform group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5"
+                >
+                  →
+                </span>
+              </span>
+            </Link>
+          ))}
         </div>
 
-        {/* Las tres etapas, para que se sepa qué viene antes de registrarse */}
-        <ol className="mt-16 grid w-full gap-px overflow-hidden rounded-2xl border border-border bg-border text-left sm:grid-cols-3">
-          {ETAPAS.map(([titulo, texto], i) => (
-            <li key={titulo} className="bg-surface p-5">
-              <span className="mb-3 grid h-7 w-7 place-items-center rounded-full bg-ua-tint font-mono text-xs font-medium text-ua">
-                {i + 1}
-              </span>
-              <h2 className="text-base font-medium">{titulo}</h2>
-              <p className="mt-1.5 text-[0.85rem] leading-relaxed text-muted">{texto}</p>
-            </li>
-          ))}
-        </ol>
+        <p className="mt-8 text-[0.8125rem] text-muted-2">
+          ¿Coordinas y aún no tienes cuenta?{" "}
+          <Link href="/registro" className="font-medium text-ua underline underline-offset-2">
+            Crear una
+          </Link>
+        </p>
       </main>
     </div>
   );

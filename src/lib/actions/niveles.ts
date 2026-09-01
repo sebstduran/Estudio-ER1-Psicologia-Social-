@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -29,6 +30,28 @@ const nivelSchema = z.object({
 
 export type FormState = { error?: string } | undefined;
 
+// Hexadecimal en mayúsculas a propósito: 0-9 y A-F no incluyen O, I ni l, así
+// que no hay caracteres que se confundan al dictar el código por teléfono.
+const ALFABETO_CODIGO = "0123456789ABCDEF";
+
+function codigoAlAzar(largo = 6) {
+  const bytes = randomBytes(largo);
+  let salida = "";
+  for (const b of bytes) salida += ALFABETO_CODIGO[b % ALFABETO_CODIGO.length];
+  return salida;
+}
+
+/** Código único de nivel. Reintenta ante la colisión, que es improbable. */
+async function generarCodigoUnico(): Promise<string> {
+  for (let intento = 0; intento < 10; intento++) {
+    const codigo = codigoAlAzar();
+    const tomado = await prisma.nivel.findUnique({ where: { codigo }, select: { id: true } });
+    if (!tomado) return codigo;
+  }
+  // Con 16^6 combinaciones esto no debería ocurrir; si ocurre, alargamos.
+  return codigoAlAzar(8);
+}
+
 export async function crearNivel(
   _prevState: FormState,
   formData: FormData
@@ -52,6 +75,7 @@ export async function crearNivel(
   const nivel = await prisma.nivel.create({
     data: {
       nombre,
+      codigo: await generarCodigoUnico(),
       cicloTipo,
       modalidad,
       trimestre,

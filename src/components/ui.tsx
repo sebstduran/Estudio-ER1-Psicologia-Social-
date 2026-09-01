@@ -155,12 +155,15 @@ export const inputClass =
 export function NivelLogroBadge({
   nivel,
 }: {
-  nivel: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE";
+  nivel: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE" | "NO_TRABAJADO";
 }) {
   const map = {
     LOGRADO: { text: "Logrado", cls: "border-logrado-line bg-logrado-tint text-logrado", lleno: 3 },
     EN_PROCESO: { text: "En proceso", cls: "border-proceso-line bg-proceso-tint text-proceso", lleno: 2 },
     INCIPIENTE: { text: "Incipiente", cls: "border-incipiente-line bg-incipiente-tint text-incipiente", lleno: 1 },
+    // Gris y con el medidor vacío: no es una severidad más, es la ausencia de
+    // juicio. Si compartiera la paleta de severidad se leería como un resultado.
+    NO_TRABAJADO: { text: "Aún no se trabaja", cls: "border-border-strong bg-surface-muted text-muted", lleno: 0 },
   } as const;
   const { text, cls, lleno } = map[nivel];
   return (
@@ -193,41 +196,65 @@ const RUBRICA_OPCIONES = [
   },
 ] as const;
 
-// Rúbrica de 3 niveles como radios nativos estilizados (sin JS): funciona
-// con progressive enhancement y encaja con Server Actions basadas en <form>.
+// Rúbrica como radios nativos estilizados (sin JS): funciona con progressive
+// enhancement y encaja con Server Actions basadas en <form>.
+//
+// Los tres juicios van juntos en una fila; "aún no lo trabajo" va debajo,
+// separado y en gris. La jerarquía es deliberada: son tres grados de logro más
+// una salida honesta, no cuatro opciones equivalentes.
 export function RubricaControl({
   name,
   defaultValue,
 }: {
   name: string;
-  defaultValue?: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE";
+  defaultValue?: "LOGRADO" | "EN_PROCESO" | "INCIPIENTE" | "NO_TRABAJADO";
 }) {
   return (
-    <div className="grid grid-cols-3 gap-1.5">
-      {RUBRICA_OPCIONES.map((opt) => (
-        <label
-          key={opt.value}
-          className={cx(
-            "cursor-pointer select-none rounded-[7px] border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-colors hover:border-muted-2 hover:text-foreground",
-            opt.active
-          )}
-        >
-          <input
-            type="radio"
-            name={name}
-            value={opt.value}
-            defaultChecked={defaultValue === opt.value}
-            required
-            className="sr-only"
-          />
-          {opt.label}
-        </label>
-      ))}
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-3 gap-1.5">
+        {RUBRICA_OPCIONES.map((opt) => (
+          <label
+            key={opt.value}
+            className={cx(
+              "cursor-pointer select-none rounded-[7px] border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-colors hover:border-muted-2 hover:text-foreground",
+              opt.active
+            )}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={opt.value}
+              defaultChecked={defaultValue === opt.value}
+              required
+              className="sr-only"
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+      <label className="flex cursor-pointer select-none items-center justify-center gap-2 rounded-[7px] border border-dashed border-border-strong px-2 py-2 text-center text-[0.6875rem] font-medium text-muted-2 transition-colors hover:border-muted-2 hover:text-muted has-[:checked]:border-solid has-[:checked]:border-muted-2 has-[:checked]:bg-surface-muted has-[:checked]:text-foreground">
+        <input
+          type="radio"
+          name={name}
+          value="NO_TRABAJADO"
+          defaultChecked={defaultValue === "NO_TRABAJADO"}
+          required
+          className="sr-only"
+        />
+        Aún no lo trabajo en esta asignatura
+      </label>
     </div>
   );
 }
 
-type ConteoLogro = { LOGRADO: number; EN_PROCESO: number; INCIPIENTE: number };
+// NO_TRABAJADO viaja en el conteo pero no se dibuja: la barra representa el
+// reparto del juicio de logro, y "aún no se trabaja" no es un juicio.
+type ConteoLogro = {
+  LOGRADO: number;
+  EN_PROCESO: number;
+  INCIPIENTE: number;
+  NO_TRABAJADO: number;
+};
 
 // Orden de lectura izquierda→derecha: incipiente → en proceso → logrado,
 // como una barra de progreso que "se llena" hacia el logro.

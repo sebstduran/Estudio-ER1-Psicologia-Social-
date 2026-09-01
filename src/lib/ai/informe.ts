@@ -253,6 +253,11 @@ Cómo trabajas:
 - Los comentarios que los docentes escribieron en la rúbrica son tu mejor pista sobre la
   causa. Úsalos: si un docente dice que llegan sin la lectura hecha, eso apunta a aula
   invertida o a control de lectura, no a más contenido en clase.
+- El bloque "LO QUE DICEN LAS Y LOS DOCENTES" tiene prioridad sobre tu repertorio de
+  técnicas. Si alguien ya nombró la dificultad o propuso una salida, tu trabajo es
+  recogerla, nombrar a quien la dijo y convertirla en algo accionable — no reemplazarla
+  por una técnica genérica. Que el equipo se reconozca en la recomendación es lo que hace
+  que la cumpla.
 - Escribes para una reunión de trabajo, no para un informe de acreditación. Frases
   directas, sin relleno institucional.
 - Cada afirmación se apoya en los datos que recibes. Cuando la evidencia es escasa
@@ -263,8 +268,14 @@ Cómo trabajas:
   aparecen en los datos.
 - Escribes en español de Chile, tratando de "tú" a quien coordina.`;
 
-function describirConteo(c: { LOGRADO: number; EN_PROCESO: number; INCIPIENTE: number }) {
-  return `logrado ${c.LOGRADO}, en proceso ${c.EN_PROCESO}, incipiente ${c.INCIPIENTE}`;
+function describirConteo(c: {
+  LOGRADO: number;
+  EN_PROCESO: number;
+  INCIPIENTE: number;
+  NO_TRABAJADO: number;
+}) {
+  const base = `logrado ${c.LOGRADO}, en proceso ${c.EN_PROCESO}, incipiente ${c.INCIPIENTE}`;
+  return c.NO_TRABAJADO > 0 ? `${base}; ${c.NO_TRABAJADO} aún no lo trabaja` : base;
 }
 
 /** Convierte el diagnóstico en el texto que lee el modelo. */
@@ -281,6 +292,21 @@ export function construirPrompt(d: Diagnostico): string {
     ""
   );
 
+  if (d.percepciones.length > 0) {
+    partes.push(
+      "LO QUE DICEN LAS Y LOS DOCENTES (dos preguntas abiertas al final de su rúbrica).",
+      "Es juicio profesional de primera mano sobre por qué pasa lo que pasa: aquí está la",
+      "causa que los números solos no muestran. Apóyate en esto para elegir la técnica.",
+      ""
+    );
+    for (const p of d.percepciones) {
+      partes.push(`· ${p.docente} (${p.asignatura}):`);
+      if (p.dificultad) partes.push(`    qué le cuesta: "${p.dificultad}"`);
+      if (p.sugerencia) partes.push(`    qué cree que ayudaría: "${p.sugerencia}"`);
+    }
+    partes.push("");
+  }
+
   const faltantes = d.participacion.filter((p) => !p.completo);
   if (d.participacion.length > 0) {
     partes.push(
@@ -296,6 +322,10 @@ export function construirPrompt(d: Diagnostico): string {
     "ESCALA: cada indicador se califica Logrado / En proceso / Incipiente.",
     "El puntaje va de 0 a 100 (Logrado=1, En proceso=0,5, Incipiente=0).",
     "Bajo 40 se considera crítico; entre 40 y 69, en riesgo; 70 o más, consolidado.",
+    'Un docente también puede responder "aún no lo trabaja": significa que esa evidencia',
+    "todavía no se ve en su asignatura. NO es un juicio de logro y queda fuera del puntaje.",
+    "Si muchos responden eso, el dato es de secuencia curricular (cuándo se enseña), no de",
+    "desempeño: no recomiendes reforzar algo que sencillamente aún no se ha enseñado.",
     ""
   );
 

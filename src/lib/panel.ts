@@ -23,7 +23,7 @@ export type ResumenNivel = {
 };
 
 function conteoVacio(): ConteoLogro {
-  return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0 };
+  return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0, NO_TRABAJADO: 0 };
 }
 
 /**

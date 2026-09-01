@@ -581,6 +581,45 @@ export default async function ResultadosPage({
             <PanelParticipacion gente={d.participacion} />
           </div>
 
+          {/* La voz de los docentes, con nombre y asignatura. Va ANTES de las
+              recomendaciones a propósito: primero lo que dijo el equipo, y
+              recién después lo que propone la máquina a partir de eso. */}
+          {d.percepciones.length > 0 && (
+            <section id="voces" className="mb-12 scroll-mt-24">
+              <SectionLabel>Lo que dicen tus docentes</SectionLabel>
+              <p className="mb-4 max-w-prose text-[0.8125rem] leading-relaxed text-muted">
+                Lo que ven en clases y no cabe en la rúbrica. Es la materia prima de la
+                reunión: léelo antes de decidir.
+              </p>
+              <div className="flex flex-col gap-3">
+                {d.percepciones.map((p, i) => (
+                  <Card key={`${p.docente}-${p.asignatura}-${i}`}>
+                    <p className="text-sm font-medium">{p.docente}</p>
+                    <p className="text-xs text-muted-2">{p.asignatura}</p>
+                    <div className="mt-3 flex flex-col gap-3">
+                      {p.dificultad && (
+                        <div>
+                          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
+                            Qué le está costando
+                          </p>
+                          <p className="mt-1 text-sm leading-relaxed">{p.dificultad}</p>
+                        </div>
+                      )}
+                      {p.sugerencia && (
+                        <div>
+                          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
+                            Qué cree que ayudaría
+                          </p>
+                          <p className="mt-1 text-sm leading-relaxed">{p.sugerencia}</p>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Acuerdos arrastrados: primer punto de tabla de la reunión */}
           {acuerdos.arrastrados.length > 0 && (
             <section className="mb-12">
@@ -710,6 +749,15 @@ export default async function ResultadosPage({
           <Indice
             secciones={[
               { id: "participacion", texto: "Quién respondió" },
+              ...(d.percepciones.length > 0
+                ? [
+                    {
+                      id: "voces",
+                      texto: "Lo que dicen tus docentes",
+                      cantidad: d.percepciones.length,
+                    },
+                  ]
+                : []),
               { id: "recomendaciones", texto: "Qué hacer en clases" },
               { id: "acuerdos", texto: "Compromisos", cantidad: acuerdos.deEstaReunion.length },
               { id: "evidencia", texto: "El detalle", cantidad: conDatos.length },

@@ -51,6 +51,9 @@ enum Modalidad {
 model Nivel {
   id                  String    @id @default(cuid())
   nombre              String
+  // Código corto que el coordinador comparte con sus docentes. Existe para que
+  // quien perdió el enlace pueda entrar igual, sin cuenta ni contraseña.
+  codigo              String    @unique
   cicloTipo           CicloTipo
   modalidad           Modalidad
   trimestre           String // ej. "2026-T3"
@@ -119,6 +122,7 @@ model Asignatura {
   mapeos            MapeoAsignaturaCompetencia[]
   docenteAsignaturas DocenteAsignatura[]
   evaluaciones      Evaluacion[]
+  percepciones      Percepcion[]
 
   @@index([nivelId])
 }
@@ -154,6 +158,7 @@ model Docente {
 
   asignaturas  DocenteAsignatura[]
   evaluaciones Evaluacion[]
+  percepciones Percepcion[]
 
   @@unique([nivelId, email])
   @@index([nivelId])
@@ -196,6 +201,7 @@ model Reunion {
   actas        Acta[]
   informes     Informe[]
   acuerdos     Acuerdo[]
+  percepciones Percepcion[]
 
   @@unique([nivelId, numero])
   @@index([nivelId])
@@ -205,6 +211,12 @@ enum NivelLogro {
   LOGRADO
   EN_PROCESO
   INCIPIENTE
+  // "Aún no lo trabajo": la evidencia todavía no se ve en esa asignatura.
+  // No es un juicio de logro, así que queda FUERA del denominador del puntaje
+  // (ver totalDe en src/lib/diagnostico.ts). Forzar un juicio sobre contenido
+  // no tratado fabrica datos y puede hundir una competencia a CRÍTICO por algo
+  // que sencillamente no tocaba todavía.
+  NO_TRABAJADO
 }
 
 // Un voto: un docente, para una asignatura, sobre un indicador, en una reunión.
@@ -246,6 +258,31 @@ model Acta {
   reunionId String
   reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
 
+  @@index([reunionId])
+}
+
+// Lo que el docente ve en clases y no cabe en la rúbrica. Son dos preguntas
+// dirigidas y no una caja en blanco a propósito: una caja en blanco se devuelve
+// en blanco. Es la materia prima que antes se perdía en el acta, así que se
+// muestra al coordinador con nombre y asignatura, y alimenta el informe de IA.
+model Percepcion {
+  id         String   @id @default(cuid())
+  dificultad String? // ¿Qué te está costando más con este curso?
+  sugerencia String? // ¿Qué crees que ayudaría?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  reunionId String
+  reunion   Reunion @relation(fields: [reunionId], references: [id], onDelete: Cascade)
+
+  docenteId String
+  docente   Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+
+  asignaturaId String
+  asignatura   Asignatura @relation(fields: [asignaturaId], references: [id], onDelete: Cascade)
+
+  // Una respuesta por docente, asignatura y reunión; puede editarla.
+  @@unique([reunionId, docenteId, asignaturaId])
   @@index([reunionId])
 }
 

@@ -1,14 +1,30 @@
 import { prisma } from "@/lib/prisma";
 
-export type ConteoLogro = { LOGRADO: number; EN_PROCESO: number; INCIPIENTE: number };
+export type ConteoLogro = {
+  LOGRADO: number;
+  EN_PROCESO: number;
+  INCIPIENTE: number;
+  NO_TRABAJADO: number;
+};
 export type Severidad = "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS";
 
 function conteoVacio(): ConteoLogro {
-  return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0 };
+  return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0, NO_TRABAJADO: 0 };
 }
 
+/**
+ * Denominador del puntaje: SOLO los juicios de logro. "Aún no lo trabajo" no es
+ * un juicio —es la ausencia de uno— así que no entra ni arriba ni abajo. Si
+ * entrara, una asignatura que va en la semana 4 hundiría una competencia por
+ * contenido que todavía no le tocaba, y el diagnóstico dejaría de ser creíble.
+ */
 export function totalDe(c: ConteoLogro) {
   return c.LOGRADO + c.EN_PROCESO + c.INCIPIENTE;
+}
+
+/** Cuántas personas respondieron, hayan emitido juicio o no. */
+export function totalRespuestas(c: ConteoLogro) {
+  return totalDe(c) + c.NO_TRABAJADO;
 }
 
 // Puntaje 0-100: Logrado pesa 1, En proceso 0.5, Incipiente 0.
@@ -97,12 +113,21 @@ export type ParticipacionDocente = {
   completo: boolean;
 };
 
+/** Lo que el docente escribió fuera de la rúbrica, en la reunión en curso. */
+export type PercepcionDocente = {
+  docente: string;
+  asignatura: string;
+  dificultad: string | null;
+  sugerencia: string | null;
+};
+
 export type Diagnostico = {
   nivel: { id: string; nombre: string; ciclo: string; modalidad: string; trimestre: string };
   reunionActual: { id: string; numero: number; fase: string } | null;
   reunionBase: { id: string; numero: number } | null;
   competencias: CompetenciaDiagnostico[];
   participacion: ParticipacionDocente[];
+  percepciones: PercepcionDocente[];
   totalVotos: number;
   resumen: {
     criticas: number;
@@ -153,6 +178,26 @@ export async function construirDiagnostico(
   });
 
   const deLaReunion = reunionActual ? evaluaciones.filter((e) => e.reunionId === reunionActual.id) : [];
+
+  // Las percepciones de la reunión en curso: solo las que traen texto, para no
+  // llenar la pantalla del coordinador con filas vacías.
+  const percepciones: PercepcionDocente[] = reunionActual
+    ? (
+        await prisma.percepcion.findMany({
+          where: {
+            reunionId: reunionActual.id,
+            OR: [{ dificultad: { not: null } }, { sugerencia: { not: null } }],
+          },
+          include: { docente: true, asignatura: true },
+          orderBy: { createdAt: "asc" },
+        })
+      ).map((p) => ({
+        docente: p.docente.nombre,
+        asignatura: p.asignatura.nombre,
+        dificultad: p.dificultad,
+        sugerencia: p.sugerencia,
+      }))
+    : [];
 
   // Agregaciones de la reunión en curso.
   const porCompetencia = new Map<string, ConteoLogro>();
@@ -316,6 +361,7 @@ export async function construirDiagnostico(
     reunionBase: reunionBase ? { id: reunionBase.id, numero: reunionBase.numero } : null,
     competencias,
     participacion,
+    percepciones,
     totalVotos: deLaReunion.length,
     resumen: {
       criticas: competencias.filter((c) => c.severidad === "CRITICO").length,

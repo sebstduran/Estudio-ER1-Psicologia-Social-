@@ -9,7 +9,7 @@ const sinSuscripcion = () => () => {};
 const enCliente = () => window.location.origin;
 const enServidor = () => "";
 
-export function EnlaceDocentes({ nivelId }: { nivelId: string }) {
+export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: string }) {
   const origen = useSyncExternalStore(sinSuscripcion, enCliente, enServidor);
   const url = origen ? `${origen}/evaluar/${nivelId}` : "";
   const [copiado, setCopiado] = useState(false);
@@ -47,6 +47,22 @@ export function EnlaceDocentes({ nivelId }: { nivelId: string }) {
             Ver lo que verán
           </Button>
         </a>
+      </div>
+
+      {/* El enlace se pierde: se borra el WhatsApp, se cambia de teléfono. El
+          código es la red de seguridad, y solo sirve si se dicta en voz alta en
+          la reunión, así que se muestra grande y no escondido en un menú. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[9px] border border-dashed border-border-strong bg-surface-muted px-4 py-3">
+        <div>
+          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
+            O que escriban este código
+          </p>
+          <p className="mt-0.5 font-mono text-xl font-semibold tracking-[0.2em]">{codigo}</p>
+        </div>
+        <p className="max-w-xs text-xs leading-relaxed text-muted-2">
+          Para quien perdió el enlace: entra en <span className="font-medium">Docente</span>{" "}
+          desde la portada y lo escribe. Puedes dictarlo en la reunión.
+        </p>
       </div>
     </div>
   );

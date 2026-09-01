@@ -44,6 +44,7 @@ async function main() {
   const nivel = await prisma.nivel.create({
     data: {
       nombre: "Nivel 1 · Sede Temuco",
+      codigo: "DEM0A1",
       cicloTipo: "INICIAL",
       modalidad: "DIURNO",
       trimestre: "2026-T3",
@@ -196,9 +197,50 @@ async function main() {
   // (transversal, la califica incipiente). Es el caso que el instrumento debe
   // distinguir del bajo logro: el equipo no comparte el criterio.
 
+  // Percepciones de la reunión de cierre: lo que antes se decía en voz alta y
+  // se perdía en el acta. Alimentan la pantalla del coordinador y el informe.
+  const PERCEPCIONES = [
+    {
+      docenteIdx: 0,
+      asigIdx: 0,
+      dificultad:
+        "Llegan sin la lectura hecha. Termino usando media clase en cubrir lo que debían traer leído, y el trabajo de análisis queda para el final apurado.",
+      sugerencia:
+        "Un control de lectura breve al inicio, aunque valga poco. Y que Metodología pida la misma norma de citación que pido yo: hoy les damos instrucciones distintas.",
+    },
+    {
+      docenteIdx: 1,
+      asigIdx: 1,
+      dificultad:
+        "Confunden pregunta de investigación con tema. Cuando les pido delimitar, entregan un título amplio y se frustran al corregir.",
+      sugerencia:
+        "Trabajar con ejemplos ya resueltos antes de que escriban el suyo. Ver tres preguntas buenas y tres malas discutidas en clase.",
+    },
+    {
+      docenteIdx: 2,
+      asigIdx: 2,
+      dificultad:
+        "Mi asignatura tributa de forma transversal y creo que evalúo con una vara distinta a la de mis colegas. No tengo claro qué es 'logrado' para el nivel.",
+      sugerencia:
+        "Sentarnos una vez con trabajos reales sobre la mesa y acordar el estándar. Media hora de la próxima CCAA bastaría.",
+    },
+  ];
+  for (const p of PERCEPCIONES) {
+    await prisma.percepcion.create({
+      data: {
+        reunionId: reunionCierre.id,
+        docenteId: docentes[p.docenteIdx].id,
+        asignaturaId: asignaturas[p.asigIdx].id,
+        dificultad: p.dificultad,
+        sugerencia: p.sugerencia,
+      },
+    });
+  }
+
   console.log("Demo lista:");
   console.log(`  Coordinador: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
   console.log(`  Nivel: ${nivel.nombre} (${nivel.id})`);
+  console.log(`  Código para docentes: ${nivel.codigo}`);
 }
 
 main()

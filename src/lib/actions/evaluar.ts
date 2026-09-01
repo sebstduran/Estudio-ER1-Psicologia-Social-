@@ -5,6 +5,31 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
+/**
+ * Puerta de entrada del docente que no tiene el enlace a mano. El código va en
+ * el cuerpo del formulario y no en la URL, para que no quede en el historial
+ * del navegador ni en los registros del servidor.
+ */
+export async function entrarPorCodigo(formData: FormData) {
+  const crudo = formData.get("codigo");
+  const codigo = typeof crudo === "string" ? crudo.trim().toUpperCase().replace(/[\s-]/g, "") : "";
+
+  if (!codigo) {
+    redirect(`/docente?error=${encodeURIComponent("Escribe el código que te dio tu coordinación.")}`);
+  }
+
+  const nivel = await prisma.nivel.findUnique({ where: { codigo }, select: { id: true } });
+  if (!nivel) {
+    redirect(
+      `/docente?error=${encodeURIComponent(
+        "No encontramos ese código. Revísalo con tu coordinación: son 6 caracteres."
+      )}`
+    );
+  }
+
+  redirect(`/evaluar/${nivel.id}`);
+}
+
 const identificarDocenteSchema = z.object({
   nombre: z.string().trim().min(1, "Ingresa tu nombre."),
   email: z.string().trim().toLowerCase().email("Correo inválido."),
@@ -37,7 +62,14 @@ export async function identificarDocente(nivelId: string, formData: FormData) {
   redirect(`/evaluar/${nivelId}?docente=${docente.id}`);
 }
 
-const NIVEL_LOGRO = ["LOGRADO", "EN_PROCESO", "INCIPIENTE"] as const;
+const NIVEL_LOGRO = ["LOGRADO", "EN_PROCESO", "INCIPIENTE", "NO_TRABAJADO"] as const;
+
+/** Recorta un texto libre; devuelve null si quedó vacío. */
+function textoLibre(valor: FormDataEntryValue | null, maximo = 2000): string | null {
+  if (typeof valor !== "string") return null;
+  const limpio = valor.trim();
+  return limpio ? limpio.slice(0, maximo) : null;
+}
 
 export async function guardarEvaluacion(
   nivelId: string,
@@ -114,6 +146,20 @@ export async function guardarEvaluacion(
   if (operaciones.length === 0) {
     redirect(`/evaluar/${nivelId}?docente=${docenteId}&asignatura=${asignaturaId}&error=Completa la rúbrica de al menos un indicador.`);
   }
+
+  // Las dos preguntas abiertas del final. Se guardan junto con la rúbrica y no
+  // en un paso aparte: si fueran otra pantalla, casi nadie llegaría.
+  const dificultad = textoLibre(formData.get("dificultad"));
+  const sugerencia = textoLibre(formData.get("sugerencia"));
+  operaciones.push(
+    prisma.percepcion.upsert({
+      where: {
+        reunionId_docenteId_asignaturaId: { reunionId: reunion.id, docenteId, asignaturaId },
+      },
+      update: { dificultad, sugerencia },
+      create: { reunionId: reunion.id, docenteId, asignaturaId, dificultad, sugerencia },
+    })
+  );
 
   await prisma.$transaction(operaciones);
   revalidatePath(`/niveles/${nivelId}`);

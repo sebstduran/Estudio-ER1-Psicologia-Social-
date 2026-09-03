@@ -3,6 +3,7 @@ import { requireCoordinador } from "@/lib/require-coordinador";
 import { resumenNiveles, type ResumenNivel } from "@/lib/panel";
 import { Button, Card } from "@/components/ui";
 import { NuevoNivelPanel } from "./nuevo-nivel-panel";
+import { CompetenciasDelCiclo } from "./competencias-del-ciclo";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
@@ -93,20 +94,33 @@ function TarjetaNivel({ n }: { n: ResumenNivel }) {
 
         <p className={`mt-3 text-sm font-medium ${titular.tono}`}>{titular.texto}</p>
 
-        <div className="mt-4">
-          {enConfiguracion ? (
-            <div className="flex gap-1.5" aria-label={`Paso ${n.pasoConfiguracion} de 4`}>
-              {[1, 2, 3, 4].map((p) => (
-                <span
-                  key={p}
-                  className={`h-2 flex-1 rounded-full ${p < n.pasoConfiguracion ? "bg-ua" : "bg-surface-muted"}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <BarraSalud s={n.severidades} />
-          )}
-        </div>
+        {/* La barra apilada sólo mientras no hay gráfico: cuando lo hay, repite
+            peor lo que el gráfico ya dice competencia por competencia. */}
+        {(enConfiguracion || !n.evaluado) && (
+          <div className="mt-4">
+            {enConfiguracion ? (
+              <div className="flex gap-1.5" aria-label={`Paso ${n.pasoConfiguracion} de 4`}>
+                {[1, 2, 3, 4].map((p) => (
+                  <span
+                    key={p}
+                    className={`h-2 flex-1 rounded-full ${p < n.pasoConfiguracion ? "bg-ua" : "bg-surface-muted"}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <BarraSalud s={n.severidades} />
+            )}
+          </div>
+        )}
+
+        {/* El gráfico es el centro de la tarjeta: la barra de arriba dice cuánto
+            hay de cada color, pero no cuál competencia está mal. Esto sí. */}
+        {!enConfiguracion && n.evaluado && (
+          <CompetenciasDelCiclo
+            competencias={n.competenciasDelCiclo}
+            hayLineaBase={n.reunionFase !== "BASE"}
+          />
+        )}
 
         <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t border-border pt-4 text-xs">
           <div>
@@ -257,7 +271,10 @@ export default async function NivelesPage() {
           <NuevoNivelPanel abiertoPorDefecto />
         </Card>
       ) : (
-        <div className={`grid gap-4 ${niveles.length > 1 ? "sm:grid-cols-2" : ""}`}>
+        // Una columna: la tarjeta ahora lleva el gráfico de competencias dentro,
+        // y a media pantalla los nombres se truncan y las barras dejan de ser
+        // comparables entre sí.
+        <div className="flex flex-col gap-4">
           {niveles.map((n) => (
             <TarjetaNivel key={n.id} n={n} />
           ))}

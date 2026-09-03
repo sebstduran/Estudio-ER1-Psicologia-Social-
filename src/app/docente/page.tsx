@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { entrarPorCodigo } from "@/lib/actions/evaluar";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 
 /**
@@ -14,6 +16,18 @@ export default async function DocentePage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+
+  // Quien coordina no tiene por qué andar buscando su propio código para mirar
+  // lo que verán sus docentes. Son sus niveles: ya los puede ver enteros desde
+  // su casilla, así que enseñárselos aquí no revela nada que no fuera suyo.
+  const sesion = await auth();
+  const misNiveles = sesion?.user?.id
+    ? await prisma.nivel.findMany({
+        where: { coordinadorId: sesion.user.id },
+        select: { id: true, nombre: true, codigo: true },
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
 
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
@@ -54,6 +68,32 @@ export default async function DocentePage({
           </Button>
         </form>
       </Card>
+
+      {misNiveles.length > 0 && (
+        <Card className="border-dashed">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
+            Porque estás coordinando
+          </p>
+          <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted">
+            Entra directo a ver lo que verán tus docentes, sin escribir el código.
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {misNiveles.map((n) => (
+              <li key={n.id}>
+                <Link
+                  href={`/evaluar/${n.id}`}
+                  className="flex items-center justify-between gap-3 rounded-[9px] border border-border px-3.5 py-2.5 transition-colors hover:border-ua"
+                >
+                  <span className="min-w-0 truncate text-[0.8125rem] font-medium">{n.nombre}</span>
+                  <span className="shrink-0 font-mono text-[0.7rem] tracking-[0.12em] text-muted-2">
+                    {n.codigo}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <p className="text-center text-sm text-muted">
         ¿Tienes el enlace que te mandaron? Ábrelo y entras directo.

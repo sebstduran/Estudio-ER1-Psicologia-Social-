@@ -25,6 +25,7 @@ import {
 } from "@/components/ui";
 import { InformeBoton } from "./informe-boton";
 import { AcuerdoForm } from "./acuerdo-form";
+import { ResumenSimple } from "./resumen-simple";
 import { Indice } from "./indice";
 import { MapaEvidencias } from "./mapa-evidencias";
 
@@ -531,8 +532,8 @@ export default async function ResultadosPage({
                 </p>
                 <p className="mt-2 text-[0.8125rem] text-muted">
                   {atender === 0
-                    ? `Las ${conDatos.length} competencias evaluadas llegaron al estándar. Lo que toca ahora es sostenerlo.`
-                    : `${conDatos.length - atender} de las ${conDatos.length} competencias evaluadas llegaron al estándar. Las otras ${atender} se quedaron abajo.`}
+                    ? `Las ${conDatos.length} competencias evaluadas llegaron a lo esperado.`
+                    : `${conDatos.length - atender} de ${conDatos.length} llegaron a lo esperado.`}
                 </p>
               </div>
               <dl className="flex gap-8">
@@ -572,6 +573,11 @@ export default async function ResultadosPage({
               </div>
             )}
           </Card>
+
+          {/* Lo que el coordinador necesita ver primero: qué va bien, qué falta,
+              y cuánto falta. El mapa de evidencias queda debajo, para quien
+              quiera entrar al detalle indicador por indicador. */}
+          <ResumenSimple competencias={d.competencias} />
 
           <div className="mb-10">
             <MapaEvidencias competencias={d.competencias} />

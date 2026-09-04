@@ -47,11 +47,22 @@ export function BarraSuperior({
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur print:hidden">
       <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
-        <Link href="/niveles" className="flex items-center gap-2.5">
+        {/* El logotipo vuelve a la PORTADA, no al panel: es el único camino de
+            regreso a la elección coordinación / docente una vez dentro. */}
+        <Link href="/" className="flex items-center gap-2.5">
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-ua text-[0.6875rem] font-semibold text-white">
             UA
           </span>
           <span className="text-[0.9375rem] font-medium tracking-tight">Instrumento CCAA</span>
+        </Link>
+
+        <Link
+          href="/niveles"
+          className={`rounded-lg px-2.5 py-1.5 text-[0.8125rem] transition-colors hover:bg-surface-hover ${
+            ruta === "/niveles" ? "font-medium text-foreground" : "text-muted"
+          }`}
+        >
+          Mis niveles
         </Link>
 
         <div className="ml-auto flex items-center gap-1.5">

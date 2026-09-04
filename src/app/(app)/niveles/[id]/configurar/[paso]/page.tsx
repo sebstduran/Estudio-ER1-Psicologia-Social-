@@ -1,9 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { Button, Eyebrow, TipoMapeoBadge } from "@/components/ui";
-import { eliminarAsignatura, ciclarMapeo } from "@/lib/actions/asignaturas";
+import { Button, Eyebrow } from "@/components/ui";
+import { eliminarAsignatura, guardarCompetenciasDeAsignatura } from "@/lib/actions/asignaturas";
 import { eliminarCompetencia } from "@/lib/actions/competencias";
 import { eliminarDocente } from "@/lib/actions/docentes";
 import { AsignaturaForm } from "../../asignatura-form";
@@ -21,8 +21,19 @@ import { DocenteForm } from "../../docente-form";
  * hecho y no hace falta decirlo con palabras.
  */
 
-const PASOS = ["competencias", "asignaturas", "docentes", "vinculos"] as const;
-type PasoId = (typeof PASOS)[number];
+const TODOS_LOS_PASOS = ["competencias", "asignaturas", "docentes", "vinculos"] as const;
+
+/**
+ * En Ciclo Inicial las seis competencias vienen cargadas por el instrumento, así
+ * que ese paso no pide nada: era una pantalla donde sólo cabía pulsar
+ * «siguiente». Se salta, y el recorrido empieza donde hay algo que hacer.
+ */
+function pasosDe(ciclo: "INICIAL" | "INTERMEDIO" | "FINAL"): readonly PasoId[] {
+  return ciclo === "INICIAL"
+    ? (["asignaturas", "docentes", "vinculos"] as const)
+    : TODOS_LOS_PASOS;
+}
+type PasoId = (typeof TODOS_LOS_PASOS)[number];
 
 const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }> = {
   competencias: {
@@ -42,7 +53,7 @@ const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }
   },
   vinculos: {
     titulo: "Qué competencia trabaja cada asignatura",
-    ayuda: "Haz clic en cada casilla para cambiarla. Así cada docente evalúa solo lo suyo.",
+    ayuda: "Marca lo que trabaja cada una. Así cada docente evalúa solo lo suyo.",
     pendiente: "Marca al menos un vínculo para terminar.",
   },
 };
@@ -51,9 +62,8 @@ export default async function ConfigurarPasoPage({
   params,
 }: PageProps<"/niveles/[id]/configurar/[paso]">) {
   const { id, paso } = await params;
-  if (!PASOS.includes(paso as PasoId)) notFound();
+  if (!TODOS_LOS_PASOS.includes(paso as PasoId)) notFound();
   const pasoId = paso as PasoId;
-  const numero = PASOS.indexOf(pasoId) + 1;
 
   const user = await requireCoordinador();
 
@@ -88,16 +98,22 @@ export default async function ConfigurarPasoPage({
     vinculos: totalMapeos > 0,
   };
 
-  const siguiente = numero < PASOS.length ? `/niveles/${id}/configurar/${PASOS[numero]}` : `/niveles/${id}`;
+  // El recorrido depende del ciclo: Inicial no pasa por «competencias».
+  const PASOS = pasosDe(nivel.cicloTipo);
+  const indice = PASOS.indexOf(pasoId);
+  if (indice === -1) redirect(`/niveles/${id}/configurar/${PASOS[0]}`);
+  const numero = indice + 1;
+  const total = PASOS.length;
+
+  const siguiente =
+    numero < total ? `/niveles/${id}/configurar/${PASOS[numero]}` : `/niveles/${id}`;
   const atras = numero > 1 ? `/niveles/${id}/configurar/${PASOS[numero - 2]}` : `/niveles`;
 
-  // La tabla de vínculos necesita ancho; los formularios se leen mejor estrechos.
-  const ancho = pasoId === "vinculos" ? "max-w-4xl" : "max-w-2xl";
 
   return (
-    <div className={`mx-auto ${ancho} px-6 py-12`}>
+    <div className="mx-auto max-w-2xl px-6 py-12">
       {/* Dónde estás, sin palabras de más */}
-      <div className="mb-8 flex items-center gap-2" role="img" aria-label={`Paso ${numero} de 4`}>
+      <div className="mb-8 flex items-center gap-2" role="img" aria-label={`Paso ${numero} de ${total}`}>
         {PASOS.map((p, i) => (
           <span
             key={p}
@@ -108,7 +124,7 @@ export default async function ConfigurarPasoPage({
         ))}
       </div>
 
-      <Eyebrow>Paso {numero} de 4</Eyebrow>
+      <Eyebrow>Paso {numero} de {total}</Eyebrow>
       <h1 className="mt-2 text-[1.75rem] font-semibold leading-tight tracking-tight">
         {TEXTO[pasoId].titulo}
       </h1>
@@ -221,53 +237,78 @@ export default async function ConfigurarPasoPage({
         {pasoId === "vinculos" &&
           (nivel.asignaturas.length === 0 || nivel.competencias.length === 0 ? (
             <p className="text-sm text-muted">
-              Necesitas al menos una asignatura y una competencia para armar esta tabla.
+              Necesitas al menos una asignatura y una competencia.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border bg-surface">
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr>
-                    <th className="sticky left-0 bg-surface p-3 text-left font-medium text-muted-2">
-                      Asignatura
-                    </th>
-                    {nivel.competencias.map((c) => (
-                      <th
-                        key={c.id}
-                        className="min-w-[110px] border-l border-border p-3 text-left font-medium text-muted-2"
-                      >
-                        {c.codigo}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {nivel.asignaturas.map((a) => (
-                    <tr key={a.id} className="border-t border-border">
-                      <td className="sticky left-0 bg-surface p-3 font-medium">{a.nombre}</td>
+            <div className="flex flex-col gap-4">
+              {nivel.asignaturas.map((a) => {
+                const guardar = guardarCompetenciasDeAsignatura.bind(null, nivel.id, a.id);
+                const tipoDe = (cid: string) => mapeoPorPar.get(`${a.id}:${cid}`) ?? "NADA";
+                const marcadas = nivel.competencias.filter((c) => tipoDe(c.id) !== "NADA").length;
+
+                return (
+                  <form
+                    key={a.id}
+                    action={guardar}
+                    className="rounded-xl border border-border bg-surface p-5"
+                  >
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h2 className="text-[1.0625rem] font-medium">{a.nombre}</h2>
+                      <span className="text-[0.8125rem] text-muted-2">
+                        {marcadas === 0
+                          ? "sin competencias marcadas"
+                          : `trabaja ${marcadas} ${marcadas === 1 ? "competencia" : "competencias"}`}
+                      </span>
+                    </div>
+
+                    <ul className="mt-4 flex flex-col divide-y divide-border">
                       {nivel.competencias.map((c) => {
-                        const tipo = mapeoPorPar.get(`${a.id}:${c.id}`) ?? null;
-                        const action = async () => {
-                          "use server";
-                          await ciclarMapeo(nivel.id, a.id, c.id);
-                        };
+                        const actual = tipoDe(c.id);
                         return (
-                          <td key={c.id} className="border-l border-border p-2 text-center">
-                            <form action={action}>
-                              <button
-                                type="submit"
-                                className="w-full rounded-lg p-1.5 transition-colors hover:bg-surface-hover"
-                              >
-                                <TipoMapeoBadge tipo={tipo} />
-                              </button>
-                            </form>
-                          </td>
+                          <li
+                            key={c.id}
+                            className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5"
+                          >
+                            <span className="flex min-w-0 items-baseline gap-2.5">
+                              <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
+                                {c.codigo}
+                              </span>
+                              <span className="truncate text-[0.9375rem]">{c.nombre}</span>
+                            </span>
+                            <div className="flex shrink-0 gap-1">
+                              {(
+                                [
+                                  ["NADA", "No la trabaja"],
+                                  ["DIRECTA", "Directa"],
+                                  ["TRANSVERSAL", "Transversal"],
+                                ] as const
+                              ).map(([valor, etiqueta]) => (
+                                <label
+                                  key={valor}
+                                  className="cursor-pointer select-none rounded-[7px] border border-border-strong px-2.5 py-1 text-xs text-muted transition-colors hover:border-muted-2 hover:text-foreground has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua"
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`tipo:${c.id}`}
+                                    value={valor}
+                                    defaultChecked={actual === valor}
+                                    className="sr-only"
+                                  />
+                                  {etiqueta}
+                                </label>
+                              ))}
+                            </div>
+                          </li>
                         );
                       })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </ul>
+
+                    <Button type="submit" size="sm" variant="secondary" className="mt-4">
+                      Guardar {a.nombre}
+                    </Button>
+                  </form>
+                );
+              })}
             </div>
           ))}
       </div>
@@ -280,7 +321,7 @@ export default async function ConfigurarPasoPage({
         </Link>
         {resuelto[pasoId] ? (
           <Link href={siguiente}>
-            <Button>{numero < PASOS.length ? "Listo, siguiente" : "Terminar"}</Button>
+            <Button>{numero < total ? "Listo, siguiente" : "Terminar"}</Button>
           </Link>
         ) : (
           <span className="text-[0.8125rem] text-muted-2">{TEXTO[pasoId].pendiente}</span>

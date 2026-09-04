@@ -69,3 +69,57 @@ export async function ciclarMapeo(
 
   revalidatePath(`/niveles/${nivelId}`);
 }
+
+/**
+ * Fija de una vez las competencias que trabaja una asignatura.
+ *
+ * Sustituye a recorrer una cuadrícula de competencias × asignaturas haciendo
+ * clic en cada celda hasta que aparece el valor buscado. Con seis competencias
+ * y cinco asignaturas eran treinta celdas de tres estados, y nada del
+ * instrumento funcionaba hasta terminarla: era el peor momento de la
+ * aplicación y además obligatorio.
+ *
+ * Ahora se declara asignatura por asignatura y se lee como una frase: «esta
+ * asignatura trabaja 1.1 de forma directa y 4.1 de forma transversal».
+ */
+export async function guardarCompetenciasDeAsignatura(
+  nivelId: string,
+  asignaturaId: string,
+  formData: FormData
+) {
+  const user = await requireCoordinador();
+  await nivelDelCoordinador(nivelId, user.id);
+
+  const asignatura = await prisma.asignatura.findFirst({
+    where: { id: asignaturaId, nivelId },
+    select: { id: true },
+  });
+  if (!asignatura) return;
+
+  const competencias = await prisma.competencia.findMany({
+    where: { nivelId },
+    select: { id: true },
+  });
+
+  // Cada competencia llega como "tipo:<id>" con valor NADA | DIRECTA | TRANSVERSAL.
+  const deseado = new Map<string, "DIRECTA" | "TRANSVERSAL">();
+  for (const c of competencias) {
+    const valor = formData.get(`tipo:${c.id}`);
+    if (valor === "DIRECTA" || valor === "TRANSVERSAL") deseado.set(c.id, valor);
+  }
+
+  await prisma.$transaction([
+    prisma.mapeoAsignaturaCompetencia.deleteMany({
+      where: { asignaturaId, competenciaId: { notIn: [...deseado.keys()] } },
+    }),
+    ...[...deseado.entries()].map(([competenciaId, tipo]) =>
+      prisma.mapeoAsignaturaCompetencia.upsert({
+        where: { asignaturaId_competenciaId: { asignaturaId, competenciaId } },
+        update: { tipo },
+        create: { asignaturaId, competenciaId, tipo },
+      })
+    ),
+  ]);
+
+  revalidatePath(`/niveles/${nivelId}`);
+}

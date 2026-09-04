@@ -26,7 +26,7 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
 
   return (
     <div className="border-t border-border pt-5">
-      <p className={`${CLASE_ROTULO} mb-2.5 block`}>2 · Mándales este enlace</p>
+      <p className={`${CLASE_ROTULO} mb-2.5 block`}>Mándales este enlace</p>
       <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
         Por correo o WhatsApp. Cada docente pone su nombre, elige su asignatura y evalúa solo
         lo que le toca. No tiene que crear cuenta ni recordar contraseña.

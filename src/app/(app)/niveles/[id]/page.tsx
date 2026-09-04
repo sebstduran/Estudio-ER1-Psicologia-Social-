@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
-import { Button, Card, CLASE_ROTULO, Eyebrow, Paso, TipoMapeoBadge } from "@/components/ui";
+import { Button, CLASE_ROTULO, Eyebrow, Paso, TipoMapeoBadge } from "@/components/ui";
 import { eliminarAsignatura, ciclarMapeo } from "@/lib/actions/asignaturas";
 import { eliminarCompetencia } from "@/lib/actions/competencias";
 import { eliminarDocente } from "@/lib/actions/docentes";
@@ -75,6 +75,16 @@ export default async function NivelDetallePage({
     nivel.asignaturas.flatMap((a) => a.mapeos.map((m) => [`${a.id}:${m.competenciaId}`, m.tipo] as const))
   );
 
+  // Una frase por paso, en imperativo y sin jerga: es la única instrucción que
+  // la persona necesita leer al entrar.
+  const AHORA_TE_TOCA: Record<number, string> = {
+    1: "Agrega las competencias del nivel",
+    2: "Agrega las asignaturas del nivel",
+    3: "Di quién hace clases en cada asignatura",
+    4: "Marca qué competencia trabaja cada asignatura",
+    5: "Manda el enlace a tus docentes y sube el acta",
+  };
+
   // El paso en curso lo define el estado de los datos, no una navegación aparte.
   const hecho = {
     competencias: nivel.competencias.length > 0,
@@ -106,32 +116,37 @@ export default async function NivelDetallePage({
         </p>
       </div>
 
-      {/* Progreso */}
-      <Card className="mb-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className={CLASE_ROTULO}>Configuración</p>
-            <p className="mt-1 text-base font-semibold">
-              {pasoActual === 5 ? "Todo listo" : `Paso ${pasoActual} de 4`}
-            </p>
+      {/* Lo que toca ahora, dicho en una frase. Antes decía «Paso 3 de 4», que
+          informa de dónde estás pero no de qué tienes que hacer — y ahí es
+          exactamente donde la gente se queda parada. */}
+      <div className="mb-6 rounded-2xl border border-border bg-surface p-6">
+        <p className={CLASE_ROTULO}>Ahora te toca</p>
+        <p className="mt-2 text-[1.375rem] font-semibold leading-snug tracking-tight">
+          {AHORA_TE_TOCA[pasoActual]}
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <div
+            className="flex gap-1.5"
+            role="img"
+            aria-label={`${completados} de 4 pasos completados`}
+          >
+            {[1, 2, 3, 4].map((n) => (
+              <span
+                key={n}
+                className={`h-1.5 w-10 rounded-full ${n <= completados ? "bg-logrado" : "bg-border"}`}
+              />
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1.5" role="img" aria-label={`${completados} de 4 pasos completados`}>
-              {[1, 2, 3, 4].map((n) => (
-                <span
-                  key={n}
-                  className={`h-1 w-9 rounded-full ${n <= completados ? "bg-logrado" : "bg-border"}`}
-                />
-              ))}
-            </div>
-            {pasoActual === 5 && (
-              <Link href={`/niveles/${nivel.id}/resultados`}>
-                <Button>Ver qué fortalecer</Button>
-              </Link>
-            )}
-          </div>
+          <span className="text-[0.8125rem] text-muted-2">
+            {pasoActual === 5 ? "Configuración lista" : `${completados} de 4 listos`}
+          </span>
+          {pasoActual === 5 && (
+            <Link href={`/niveles/${nivel.id}/resultados`} className="ml-auto">
+              <Button>Ver el análisis</Button>
+            </Link>
+          )}
         </div>
-      </Card>
+      </div>
 
       {aviso && (
         <p className="mb-5 rounded-[7px] border border-incipiente-line bg-incipiente-tint px-3.5 py-2.5 text-[0.8125rem] text-incipiente">
@@ -155,7 +170,7 @@ export default async function NivelDetallePage({
               : "Agrega las competencias de este ciclo con su código, descriptor, tres indicadores observables y el componente EPG al que se vinculan."
           }
           estado={estadoDe(1)}
-          colapsar={pasoActual === 5}
+          colapsar
           resumen={plural(nivel.competencias.length, "competencia", "competencias")}
         >
           <div className="flex flex-col gap-3">
@@ -201,7 +216,7 @@ export default async function NivelDetallePage({
           titulo="Las asignaturas del nivel"
           descripcion="Las que se dictan en este nivel durante el trimestre."
           estado={estadoDe(2)}
-          colapsar={pasoActual === 5}
+          colapsar
           resumen={plural(nivel.asignaturas.length, "asignatura", "asignaturas")}
         >
           <div className="flex flex-col gap-4">
@@ -235,7 +250,7 @@ export default async function NivelDetallePage({
           titulo="Quién hace clases en cada una"
           descripcion="No necesitan crear una cuenta: entran por un enlace que tú les mandas."
           estado={estadoDe(3)}
-          colapsar={pasoActual === 5}
+          colapsar
           resumen={plural(nivel.docentes.length, "docente", "docentes")}
         >
           <div className="flex flex-col gap-5">
@@ -278,7 +293,7 @@ export default async function NivelDetallePage({
           titulo="Qué competencia trabaja cada asignatura"
           descripcion="Haz clic en cada celda para cambiarla: sin relación, directa o transversal. Así cada docente evalúa solo lo que le toca."
           estado={estadoDe(4)}
-          colapsar={pasoActual === 5}
+          colapsar
           resumen={plural(totalMapeos, "vínculo", "vínculos")}
         >
           {nivel.asignaturas.length === 0 || nivel.competencias.length === 0 ? (
@@ -340,7 +355,7 @@ export default async function NivelDetallePage({
           titulo="Ahora: pídeles que evalúen"
           descripcion="Marca en qué reunión vas, manda el enlace y sube el acta cuando terminen."
           estado={pasoActual === 5 ? "actual" : "pendiente"}
-          colapsar={pasoActual === 5}
+          colapsar
         >
           <div className="flex flex-col gap-6">
             {/* Reunión en curso */}

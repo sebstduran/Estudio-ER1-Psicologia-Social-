@@ -1,16 +1,15 @@
 import type { ReactNode } from "react";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ESTILO_RAIL, Rail } from "@/components/rail";
+import { BarraSuperior } from "@/components/barra-superior";
 
 /**
- * Marco de las pantallas del coordinador: monta la barra lateral con sus
- * niveles. Sólo lo usa el grupo de rutas (app); la portada, el ingreso y el
- * formulario del docente cuelgan del layout raíz y se dibujan solos.
+ * Marco de las pantallas del coordinador.
  *
- * Sin sesión devuelve la página tal cual: quien llegue aquí sin haber entrado
- * será redirigido al ingreso por la propia página, y mientras tanto no tiene
- * sentido pintarle una barra con niveles que no son suyos.
+ * La navegación va arriba y no en una columna lateral: la lateral gastaba una
+ * columna entera en tres enlaces y se leía como un menú, cuando aquí no hay
+ * nada que elegir — hay un orden que seguir. Arriba cabe como ruta numerada y
+ * deja todo el ancho a lo único que importa, que es el contenido.
  */
 export async function Cascara({ children }: { children: ReactNode }) {
   const sesion = await auth();
@@ -24,8 +23,8 @@ export async function Cascara({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div className="lg:grid lg:grid-cols-[236px_minmax(0,1fr)]">
-      <Rail
+    <>
+      <BarraSuperior
         niveles={niveles}
         nombre={sesion.user.name ?? "Coordinación"}
         salir={
@@ -35,27 +34,13 @@ export async function Cascara({ children }: { children: ReactNode }) {
               await signOut({ redirectTo: "/login" });
             }}
           >
-            <button className={ESTILO_RAIL}>
-              <span className="shrink-0 opacity-75">
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M15 17l5-5-5-5M20 12H9M12 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" />
-                </svg>
-              </span>
-              <span className="hidden lg:inline">Salir</span>
+            <button className="rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-muted transition-colors hover:bg-surface-hover hover:text-foreground">
+              Salir
             </button>
           </form>
         }
       />
       <main className="min-w-0">{children}</main>
-    </div>
+    </>
   );
 }

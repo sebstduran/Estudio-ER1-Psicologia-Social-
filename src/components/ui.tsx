@@ -375,9 +375,12 @@ export function Paso({
   estado: "listo" | "actual" | "pendiente";
   resumen?: React.ReactNode;
   /**
-   * Un paso ya resuelto solo se pliega cuando toda la configuración está lista.
-   * Mientras se configura conviene dejarlo abierto: quien agrega una asignatura
-   * casi siempre va a agregar la siguiente, y plegarlo obligaría a reabrirlo.
+   * Un paso ya resuelto se pliega tras un «Editar ▾» reabrible. Antes se
+   * quedaba abierto mientras durase la configuración, con el argumento de que
+   * quien agrega una asignatura suele agregar otra — pero eso deja seis
+   * competencias con sus indicadores desplegados encima del paso que toca, y la
+   * pantalla pasa a ser un muro de texto donde no se ve qué hacer. Mientras
+   * estás EN el paso sigue abierto; se pliega recién al pasar al siguiente.
    */
   colapsar?: boolean;
   children?: React.ReactNode;

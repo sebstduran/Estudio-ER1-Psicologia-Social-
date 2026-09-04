@@ -530,9 +530,16 @@ export default async function ResultadosPage({
               }`}
           </p>
         </div>
-        <Link href={`/niveles/${id}`}>
-          <Button variant="secondary">Configurar</Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {d.totalVotos > 0 && (
+            <Link href={`/reunion/${id}`}>
+              <Button>Presentar la reunión</Button>
+            </Link>
+          )}
+          <Link href={`/niveles/${id}`}>
+            <Button variant="secondary">Configurar</Button>
+          </Link>
+        </div>
       </div>
 
       {d.totalVotos > 0 && (

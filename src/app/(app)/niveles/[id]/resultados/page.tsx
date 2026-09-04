@@ -26,7 +26,6 @@ import {
 import { InformeBoton } from "./informe-boton";
 import { AcuerdoForm } from "./acuerdo-form";
 import { ResumenSimple } from "./resumen-simple";
-import { Indice } from "./indice";
 import { MapaEvidencias } from "./mapa-evidencias";
 
 const FASE_LABEL = {
@@ -469,10 +468,36 @@ function FilaAcuerdo({ a, nivelId }: { a: AcuerdoFila; nivelId: string }) {
   );
 }
 
+/**
+ * El análisis, partido en los tres momentos de una reunión de CCAA.
+ *
+ * Medido antes de tocarlo: una sola pantalla con 1.859 palabras, 9.179 píxeles
+ * de alto —doce pantallas de scroll— y quince encabezados. Veinticinco veces el
+ * texto del resto de la aplicación junta, y es la que se proyecta en la
+ * reunión. El problema no era «hay mucho texto»: era que una pantalla intentaba
+ * ser toda la reunión.
+ *
+ * Los tres momentos son los del instrumento: cómo vamos (el diagnóstico), qué
+ * dice el equipo (la voz docente), y qué hacemos (recomendaciones y acuerdos).
+ * Cada uno cabe en una pantalla. El índice lateral desaparece: navegar por
+ * anclas dentro de un documento de doce pantallas era un parche a este mismo
+ * problema.
+ */
+const VISTAS = [
+  { id: "como-vamos", texto: "Cómo vamos" },
+  { id: "docentes", texto: "Qué dice el equipo" },
+  { id: "decisiones", texto: "Qué hacemos" },
+] as const;
+type Vista = (typeof VISTAS)[number]["id"];
+
 export default async function ResultadosPage({
   params,
+  searchParams,
 }: PageProps<"/niveles/[id]/resultados">) {
   const { id } = await params;
+  const sp = await searchParams;
+  const pedida = typeof sp.vista === "string" ? sp.vista : "";
+  const vista: Vista = VISTAS.some((v) => v.id === pedida) ? (pedida as Vista) : "como-vamos";
   const user = await requireCoordinador();
 
   const d = await construirDiagnostico(id, user.id);
@@ -510,7 +535,29 @@ export default async function ResultadosPage({
         </Link>
       </div>
 
-      <div className="lg:grid lg:grid-cols-[1fr_190px] lg:items-start lg:gap-12">
+      {d.totalVotos > 0 && (
+        <nav
+          aria-label="Momentos de la reunión"
+          className="mb-8 flex gap-1 border-b border-border"
+        >
+          {VISTAS.map((v) => (
+            <Link
+              key={v.id}
+              href={`/niveles/${id}/resultados?vista=${v.id}`}
+              aria-current={v.id === vista ? "page" : undefined}
+              className={`-mb-px border-b-2 px-3.5 py-2.5 text-[0.9375rem] transition-colors ${
+                v.id === vista
+                  ? "border-ua font-medium text-foreground"
+                  : "border-transparent text-muted hover:text-foreground"
+              }`}
+            >
+              {v.texto}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      <div>
         <div className="min-w-0">
       {d.totalVotos === 0 ? (
         <Card className="text-sm leading-relaxed text-muted">
@@ -518,6 +565,7 @@ export default async function ResultadosPage({
         </Card>
       ) : (
         <>
+          {vista === "como-vamos" && (<>
           {/* Titular: el veredicto y, sobre todo, por dónde partir */}
           <Card className="mb-4 !p-0">
             <div className="flex flex-wrap items-start justify-between gap-6 p-6">
@@ -561,10 +609,10 @@ export default async function ResultadosPage({
                     `Su evidencia más débil: «${primera.indicadorMasDebil.texto}»`}
                 </p>
                 <div className="mt-3.5 flex flex-wrap gap-2">
-                  <a href="#recomendaciones">
+                  <a href={`/niveles/${id}/resultados?vista=decisiones#recomendaciones`}>
                     <Button size="sm">Ver qué hacer en clases</Button>
                   </a>
-                  <a href="#acuerdos">
+                  <a href={`/niveles/${id}/resultados?vista=decisiones#acuerdos`}>
                     <Button size="sm" variant="secondary">
                       Anotar un compromiso
                     </Button>
@@ -602,6 +650,9 @@ export default async function ResultadosPage({
             </div>
           </details>
 
+          </>)}
+
+          {vista === "docentes" && (<>
           <div id="participacion" className="scroll-mt-24">
             <PanelParticipacion gente={d.participacion} />
           </div>
@@ -646,6 +697,9 @@ export default async function ResultadosPage({
           )}
 
           {/* Acuerdos arrastrados: primer punto de tabla de la reunión */}
+          </>)}
+
+          {vista === "decisiones" && (<>
           {acuerdos.arrastrados.length > 0 && (
             <section className="mb-12">
               <SectionLabel>Viene de la reunión anterior</SectionLabel>
@@ -717,6 +771,12 @@ export default async function ResultadosPage({
           </section>
 
           {/* Evidencia */}
+          </>)}
+
+          {/* El detalle competencia por competencia pertenece al diagnóstico,
+              así que se pinta en «Cómo vamos» aunque en el código venga al
+              final: el orden de la fuente no manda sobre el de la pantalla. */}
+          {vista === "como-vamos" && (<>
           <section id="evidencia" className="scroll-mt-24">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <SectionLabel>Competencia por competencia</SectionLabel>
@@ -766,29 +826,10 @@ export default async function ResultadosPage({
               </Card>
             )}
           </section>
+          </>)}
         </>
       )}
         </div>
-
-        {d.totalVotos > 0 && (
-          <Indice
-            secciones={[
-              { id: "participacion", texto: "Quién respondió" },
-              ...(d.percepciones.length > 0
-                ? [
-                    {
-                      id: "voces",
-                      texto: "Lo que dicen tus docentes",
-                      cantidad: d.percepciones.length,
-                    },
-                  ]
-                : []),
-              { id: "recomendaciones", texto: "Qué hacer en clases" },
-              { id: "acuerdos", texto: "Compromisos", cantidad: acuerdos.deEstaReunion.length },
-              { id: "evidencia", texto: "El detalle", cantidad: conDatos.length },
-            ]}
-          />
-        )}
       </div>
     </div>
   );

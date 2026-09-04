@@ -579,9 +579,28 @@ export default async function ResultadosPage({
               quiera entrar al detalle indicador por indicador. */}
           <ResumenSimple competencias={d.competencias} />
 
-          <div className="mb-10">
-            <MapaEvidencias competencias={d.competencias} />
-          </div>
+          {/* El mapa de evidencias sigue completo, pero plegado: es la pieza que
+              permite ver QUÉ evidencia concreta falla, no sólo qué competencia.
+              Abierto por defecto convertía la pantalla en una hoja de cálculo. */}
+          <details className="group mb-10">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-5 py-4 transition-colors hover:border-border-strong">
+              <span>
+                <span className="block text-[0.9375rem] font-medium">Ver el detalle por evidencia</span>
+                <span className="mt-0.5 block text-[0.8125rem] text-muted">
+                  Cada competencia abierta en sus tres evidencias, con su trayectoria
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-muted-2 transition-transform group-open:rotate-180"
+              >
+                ▾
+              </span>
+            </summary>
+            <div className="mt-4">
+              <MapaEvidencias competencias={d.competencias} />
+            </div>
+          </details>
 
           <div id="participacion" className="scroll-mt-24">
             <PanelParticipacion gente={d.participacion} />

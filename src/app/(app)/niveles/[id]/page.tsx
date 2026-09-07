@@ -41,7 +41,10 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
       asignaturas: { select: { id: true, _count: { select: { mapeos: true } } } },
       competencias: { select: { id: true } },
       docentes: { select: { id: true } },
-      reuniones: { orderBy: { numero: "asc" } },
+      reuniones: {
+        orderBy: { numero: "asc" },
+        include: { _count: { select: { evaluaciones: true, actas: true, informes: true } } },
+      },
     },
   });
   if (!nivel) notFound();
@@ -60,19 +63,23 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         orderBy: { createdAt: "desc" },
       })
     : [];
-  const totalEvaluaciones = reunionActual
-    ? await prisma.evaluacion.count({ where: { reunionId: reunionActual.id } })
-    : 0;
+  const totalEvaluaciones = reunionActual?._count.evaluaciones ?? 0;
+  const esCierre = reunionActual?.fase === "CIERRE";
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
-      <div className="mb-8">
-        <Eyebrow>Tu reunión de hoy</Eyebrow>
+    <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+        <div>
+        <Eyebrow>Comunidad académica</Eyebrow>
         <h1 className="mt-1.5 text-[2.125rem] font-semibold tracking-tight">{nivel.nombre}</h1>
         <p className="mt-1.5 text-sm text-muted">
           {MODALIDAD_LABEL[nivel.modalidad]} · {nivel.trimestre} ·{" "}
           {plural(nivel.reuniones.length, "reunión", "reuniones")}
         </p>
+        </div>
+        <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="text-sm font-medium text-ua hover:underline">
+          Editar nivel
+        </Link>
       </div>
 
       {aviso && (
@@ -86,12 +93,16 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </p>
       )}
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
-        <p className={CLASE_ROTULO}>1 · Prepara la reunión</p>
-        <p className="mt-1 text-sm text-muted">Elige la reunión que vas a trabajar hoy.</p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      <section className="mb-6 rounded-[1.75rem] border border-border bg-surface/90 p-5 shadow-[0_20px_60px_-48px_rgba(31,20,25,.45)] sm:p-7">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><p className={CLASE_ROTULO}>RECORRIDO DEL PERÍODO</p><h2 className="mt-1 text-xl font-semibold">Elige la reunión de hoy</h2></div>
+          <p className="text-xs text-muted">{nivel.modalidad === "DIURNO" ? "4 reuniones · cierre en R4" : "3 reuniones · cierre en R3"}</p>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {nivel.reuniones.map((r) => {
             const activa = r.numero === nivel.reunionActualNumero;
+            const tieneDatos = r._count.evaluaciones > 0;
+            const tieneActa = r._count.actas > 0;
             const action = async () => {
               "use server";
               await actualizarReunionActual(nivel.id, r.numero);
@@ -99,53 +110,58 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
             return (
               <form action={action} key={r.id}>
                 <button
-                  className={`inline-flex items-center gap-1.5 rounded-[7px] border px-3 py-1.5 text-[0.8125rem] font-medium transition-colors ${
+                  className={`w-full rounded-2xl border p-4 text-left transition-all ${
                     activa
-                      ? "border-transparent bg-foreground text-surface"
-                      : "border-border-strong text-muted hover:border-muted-2 hover:text-foreground"
+                      ? "border-transparent bg-[#12141b] text-white shadow-lg"
+                      : "border-border bg-surface-muted/55 text-foreground hover:-translate-y-0.5 hover:border-border-strong"
                   }`}
                 >
-                  <b className="font-mono">R{r.numero}</b>
-                  <span className="font-normal opacity-70">{FASE_LABEL[r.fase]}</span>
+                  <span className="flex items-center justify-between"><b className="font-mono text-lg">R{r.numero}</b><i className={`h-2 w-2 rounded-full ${tieneActa ? "bg-logrado" : tieneDatos ? "bg-proceso" : "bg-border-strong"}`} /></span>
+                  <span className="mt-1 block text-xs opacity-65">{FASE_LABEL[r.fase]}</span>
+                  <span className="mt-3 block text-[0.68rem] opacity-55">{tieneDatos ? `${r._count.evaluaciones} respuestas` : "Sin respuestas"} · {tieneActa ? "Acta lista" : "Sin acta"}</span>
                 </button>
               </form>
             );
           })}
         </div>
+      </section>
 
-        <div className="mt-7 border-t border-border pt-5">
-          <p className={CLASE_ROTULO}>2 · Pide las respuestas</p>
-          <p className="mb-3 mt-1 text-sm text-muted">Comparte este enlace con el equipo docente.</p>
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-ua-tint font-mono text-xs font-semibold text-ua">01</span>
+          <h2 className="mt-4 font-semibold">Recibe respuestas</h2>
+          <p className="mb-4 mt-1 text-sm leading-relaxed text-muted">Comparte el enlace. Cada docente verá solo sus asignaturas.</p>
           <EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} />
         </div>
-      </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
-        <p className={CLASE_ROTULO}>3 · Conversa y decide</p>
-        <p className="text-[0.9375rem] text-muted">
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-proceso-tint font-mono text-xs font-semibold text-proceso">02</span>
+          <h2 className="mt-4 font-semibold">Revisa y decide</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
           {totalEvaluaciones === 0
-            ? "Todavía nadie ha respondido en esta reunión."
+            ? "Aún no hay respuestas en esta reunión."
             : `${plural(totalEvaluaciones, "respuesta recibida", "respuestas recibidas")}.`}
-        </p>
+          </p>
         {totalEvaluaciones > 0 ? (
           <Link className="mt-4 inline-block" href={`/niveles/${nivel.id}/resultados`}>
-            <Button>Ver y conducir la reunión</Button>
+            <Button>{esCierre ? "Ver cierre del período" : "Ver resultados"}</Button>
           </Link>
         ) : null}
-      </div>
+        </div>
 
       {reunionActual && (
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
-          <p className={CLASE_ROTULO}>4 · Cierra la reunión</p>
-          <p className="mb-4 mt-1 text-sm text-muted">
-            Cuando terminen, guarda el acta como respaldo. No necesitas subirla para ver el análisis.
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-logrado-tint font-mono text-xs font-semibold text-logrado">03</span>
+          <h2 className="mt-4 font-semibold">Guarda el acta de R{reunionActual.numero}</h2>
+          <p className="mb-4 mt-1 text-sm leading-relaxed text-muted">
+            Queda unida a las respuestas de esta reunión.
           </p>
           <form
             action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")}
-            className="flex flex-wrap items-center gap-3"
+            className="flex flex-col items-stretch gap-3"
           >
             <input type="file" name="archivo" required className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground" />
-            <Button type="submit" size="sm" variant="secondary">Subir acta</Button>
+            <Button type="submit" size="sm" variant="secondary">Subir acta de R{reunionActual.numero}</Button>
           </form>
           {actas.length > 0 && (
             <ul className="mt-3 flex flex-col gap-1.5 text-sm">
@@ -154,16 +170,17 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           )}
         </div>
       )}
+      </section>
 
-      <p className="mt-8 text-[0.8125rem] text-muted-2">
-        ¿Cambió algo del nivel?{" "}
-        <Link
-          href={`/niveles/${nivel.id}/configurar/competencias`}
-          className="text-ua hover:underline"
-        >
-          Volver a la configuración
-        </Link>
-      </p>
+      {esCierre && totalEvaluaciones > 0 && (
+        <section className="mt-6 overflow-hidden rounded-[1.75rem] bg-[#12141b] p-6 text-white sm:p-7">
+          <p className="font-mono text-[0.68rem] tracking-[.14em] text-[#75d9ca]">CIERRE DEL PERÍODO</p>
+          <h2 className="mt-2 text-2xl font-semibold">Convierte el recorrido en un punto de partida</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">El cierre reúne la evolución, la voz docente y los acuerdos para dejar prioridades claras al próximo período académico.</p>
+          <Link className="mt-5 inline-block" href={`/niveles/${nivel.id}/resultados?vista=decisiones`}><Button>Preparar conclusiones finales</Button></Link>
+        </section>
+      )}
+
     </div>
   );
 }

@@ -215,7 +215,7 @@ function PanelParticipacion({ gente }: { gente: ParticipacionDocente[] }) {
 }
 
 /* ── Informe generado con IA ── */
-function VistaInforme({ informe }: { informe: TipoInforme }) {
+function VistaInforme({ informe, esCierre = false }: { informe: TipoInforme; esCierre?: boolean }) {
   return (
     <div className="flex flex-col gap-6">
       <Card className="relative overflow-hidden !border-white/10 !bg-[#12141b] !p-6 text-white sm:!p-8">
@@ -223,7 +223,7 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
         <div className="relative">
         {informe.veredicto && (
           <div className="mb-5 border-b border-white/10 pb-5">
-            <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#f0a4b2]">DECISIÓN DE LA REUNIÓN</p>
+            <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#f0a4b2]">{esCierre ? "CONCLUSIÓN DEL PERÍODO" : "DECISIÓN DE LA REUNIÓN"}</p>
             <p
               className={`mt-2 text-2xl font-semibold ${
                 informe.veredicto.cumple === "SI"
@@ -244,16 +244,16 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
             </p>
           </div>
         )}
-        <p className="font-mono text-[0.68rem] tracking-[0.14em] text-white/45">LECTURA DEL EQUIPO</p>
-        <p className="mt-2.5 max-w-3xl text-[1.05rem] leading-relaxed text-white/85">{informe.sintesis}</p>
+        <p className="font-mono text-[0.68rem] tracking-[0.14em] text-white/45">{esCierre ? "BALANCE FINAL" : "LECTURA DEL EQUIPO"}</p>
+        <p className="mt-2.5 max-w-3xl text-lg font-medium leading-[1.65] text-white/85">{informe.sintesis}</p>
 
         {informe.prioridades.length > 0 && (
           <div className="mt-6 border-t border-white/10 pt-5">
-            <p className="mb-3 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-white/45">TRES MOVIMIENTOS</p>
+            <p className="mb-3 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-white/45">{esCierre ? "PRIORIDADES PARA EL PRÓXIMO PERÍODO" : "TRES MOVIMIENTOS"}</p>
             <ol className="grid gap-3 lg:grid-cols-3">
               {informe.prioridades.map((p, i) => (
                 <li key={i} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm leading-relaxed text-white/80 backdrop-blur-sm">
-                  <span className="mb-3 grid h-8 w-8 place-items-center rounded-xl bg-white/10 font-mono text-xs font-semibold text-white">0{i + 1}</span>{p}
+                  <span className="mb-3 grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-[#75d9ca] to-[#4f83d1] font-mono text-xs font-semibold text-[#10131a]">0{i + 1}</span><p className="leading-[1.65]">{p}</p>
                 </li>
               ))}
             </ol>
@@ -272,13 +272,13 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
 
           <div className="mt-5 rounded-2xl border border-ua/10 bg-gradient-to-br from-ua-tint to-surface p-4 sm:p-5">
             <p className="font-mono text-[0.66rem] font-medium uppercase tracking-[0.13em] text-ua">ACCIÓN PRINCIPAL · {c.decisionEpg.componente}</p>
-            <p className="mt-2 text-base font-medium leading-relaxed">{c.decisionEpg.decision}</p>
+            <p className="mt-2 text-base font-semibold leading-[1.65]">{c.decisionEpg.decision}</p>
           </div>
 
           <details className="group mt-4">
             <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-surface-muted"><span>Ver cómo aplicarlo</span><span className="text-muted-2 transition-transform group-open:rotate-180">▾</span></summary>
             <div className="mt-4 border-t border-border pt-4">
-          <p className="text-sm leading-relaxed text-muted">{c.diagnostico}</p>
+          <div className="rounded-xl bg-surface-muted/70 p-4"><p className="font-mono text-[0.64rem] font-medium uppercase tracking-[.12em] text-muted-2">QUÉ NOS DICE LA EVIDENCIA</p><p className="mt-2 text-sm leading-[1.7] text-muted">{c.diagnostico}</p></div>
 
           {c.accionesParaEstudiantes.length > 0 && (
             <div className="mt-5">
@@ -291,8 +291,8 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
                     <span className="inline-block rounded-full bg-ua-tint px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-wide text-ua">
                       {a.tecnica}
                     </span>
-                    <p className="mt-2.5 text-sm leading-relaxed">{a.accion}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-2">
+                    <p className="mt-2.5 text-sm font-medium leading-[1.65]">{a.accion}</p>
+                    <p className="mt-3 border-t border-border pt-3 text-xs leading-[1.65] text-muted-2">
                       Por qué: {a.porQue}
                     </p>
                   </li>
@@ -624,7 +624,7 @@ export default async function ResultadosPage({
             </div>
 
             {contenido ? (
-              <VistaInforme informe={contenido} />
+              <VistaInforme informe={contenido} esCierre={d.reunionActual?.fase === "CIERRE"} />
             ) : (
               <Card className="flex flex-col gap-4">
                 <div>
@@ -655,10 +655,11 @@ export default async function ResultadosPage({
 
           {/* Acuerdos de esta reunión */}
           <section id="acuerdos" className="mb-12 scroll-mt-24">
-            <SectionLabel>Compromisos</SectionLabel>
+            <SectionLabel>{d.reunionActual?.fase === "CIERRE" ? "Acuerdos para el próximo período" : "Compromisos"}</SectionLabel>
             <p className="-mt-2 mb-4 max-w-prose text-sm leading-relaxed text-muted">
-              Una recomendación solo sirve si alguien se hace cargo. Lo que anotes aquí abre la
-              próxima reunión.
+              {d.reunionActual?.fase === "CIERRE"
+                ? "Deja responsables y plazos para que el próximo período no empiece desde cero."
+                : "Elige qué harán, quién se hará cargo y cuándo lo revisarán."}
             </p>
             <div className="flex flex-col gap-4">
               {acuerdos.deEstaReunion.map((a) => (

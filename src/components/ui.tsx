@@ -112,10 +112,10 @@ export function Button({
   size?: "sm" | "md";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-[7px] border border-transparent font-medium no-underline transition-colors duration-150 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ua";
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent font-medium no-underline shadow-sm transition-all duration-200 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ua active:translate-y-px";
   const sizes = {
     sm: "px-2.5 py-[5px] text-xs",
-    md: "px-3.5 py-[7px] text-[0.8125rem]",
+    md: "px-4 py-2.5 text-[0.8125rem]",
   };
   const variants = {
     primary: "bg-foreground text-surface hover:opacity-90",
@@ -150,7 +150,7 @@ export function Field({
 }
 
 export const inputClass =
-  "rounded-[7px] border border-border-strong bg-surface-muted px-3 py-[7px] text-[0.8125rem] text-foreground placeholder:text-muted-2 transition-colors focus:border-ua focus:outline-none";
+  "rounded-xl border border-border-strong bg-surface/80 px-3.5 py-2.5 text-[0.8125rem] text-foreground shadow-sm backdrop-blur-sm placeholder:text-muted-2 transition-all focus:border-ua focus:outline-none focus:ring-4 focus:ring-ua-tint";
 
 export function NivelLogroBadge({
   nivel,
@@ -216,7 +216,7 @@ export function RubricaControl({
           <label
             key={opt.value}
             className={cx(
-              "cursor-pointer select-none rounded-[7px] border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-colors hover:border-muted-2 hover:text-foreground",
+              "cursor-pointer select-none rounded-xl border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-all hover:-translate-y-px hover:border-muted-2 hover:text-foreground",
               opt.active
             )}
           >
@@ -232,7 +232,7 @@ export function RubricaControl({
           </label>
         ))}
       </div>
-      <label className="flex cursor-pointer select-none items-center justify-center gap-2 rounded-[7px] border border-dashed border-border-strong px-2 py-2 text-center text-[0.6875rem] font-medium text-muted-2 transition-colors hover:border-muted-2 hover:text-muted has-[:checked]:border-solid has-[:checked]:border-muted-2 has-[:checked]:bg-surface-muted has-[:checked]:text-foreground">
+      <label className="flex cursor-pointer select-none items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong px-2 py-2 text-center text-[0.6875rem] font-medium text-muted-2 transition-all hover:border-muted-2 hover:text-muted has-[:checked]:border-solid has-[:checked]:border-muted-2 has-[:checked]:bg-surface-muted has-[:checked]:text-foreground">
         <input
           type="radio"
           name={name}

@@ -18,7 +18,6 @@ import {
   LogroLegend,
   LogroStackedBar,
   SectionLabel,
-  CLASE_ROTULO,
   SeveridadBadge,
   Trayectoria,
   franjaSeveridad,
@@ -33,28 +32,6 @@ const FASE_LABEL = {
   SEGUIMIENTO: "seguimiento",
   CIERRE: "cierre comparativo",
 } as const;
-
-function Cifra({
-  rotulo,
-  valor,
-  apoyo,
-  tono,
-}: {
-  rotulo: string;
-  valor: number;
-  apoyo: string;
-  tono: string;
-}) {
-  return (
-    <div className="min-w-[88px]">
-      <dt className={`${CLASE_ROTULO} ${tono}`}>{rotulo}</dt>
-      <dd className={`mt-1.5 font-mono text-[1.75rem] font-medium leading-none tabular-nums tracking-tight ${tono}`}>
-        {valor}
-      </dd>
-      <dd className="mt-1.5 text-xs text-muted-2">{apoyo}</dd>
-    </div>
-  );
-}
 
 function Puntaje({ score }: { score: number | null }) {
   if (score === null) return <span className="text-sm text-muted-2">Sin evaluar</span>;
@@ -511,8 +488,6 @@ export default async function ResultadosPage({
   const atencion = conDatos.filter((c) => c.severidad !== "CONSOLIDADO");
   const consolidadas = conDatos.filter((c) => c.severidad === "CONSOLIDADO");
   const sinDatos = d.competencias.filter((c) => c.severidad === "SIN_DATOS");
-  const atender = d.resumen.criticas + d.resumen.enRiesgo;
-  const primera = atencion[0] ?? null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
@@ -573,62 +548,6 @@ export default async function ResultadosPage({
       ) : (
         <>
           {vista === "como-vamos" && (<>
-          {/* Titular: el veredicto y, sobre todo, por dónde partir */}
-          <Card className="mb-4 !p-0">
-            <div className="flex flex-wrap items-start justify-between gap-6 p-6">
-              <div className="max-w-md">
-                <p className={CLASE_ROTULO}>¿El nivel está logrando sus competencias?</p>
-                <p
-                  className={`mt-2 text-[1.625rem] font-semibold tracking-tight ${
-                    atender === 0 ? "text-logrado" : d.resumen.criticas > 0 ? "text-incipiente" : "text-proceso"
-                  }`}
-                >
-                  {atender === 0 ? "Sí." : d.resumen.criticas > 0 ? "Todavía no." : "Solo en parte."}
-                </p>
-                <p className="mt-2 text-[0.8125rem] text-muted">
-                  {atender === 0
-                    ? `Las ${conDatos.length} competencias evaluadas llegaron a lo esperado.`
-                    : `${conDatos.length - atender} de ${conDatos.length} llegaron a lo esperado.`}
-                </p>
-              </div>
-              <dl className="flex gap-8">
-                <Cifra rotulo="Crítico" valor={d.resumen.criticas} apoyo="hay que actuar ya" tono="text-incipiente" />
-                <Cifra rotulo="En riesgo" valor={d.resumen.enRiesgo} apoyo="van lento" tono="text-proceso" />
-                <Cifra rotulo="Logrado" valor={d.resumen.consolidadas} apoyo="al día" tono="text-logrado" />
-              </dl>
-            </div>
-
-            {/* Un tablero que obliga a deducir el siguiente paso está a medio hacer. */}
-            {primera && (
-              <div className="border-t border-border bg-surface-muted p-6">
-                <p className={`${CLASE_ROTULO} !text-ua`}>Empieza por aquí</p>
-                <p className="mt-2 text-base font-medium">
-                  Competencia {primera.codigo} {primera.nombre}.
-                </p>
-                <p className="mt-1 text-[0.8125rem] text-muted">
-                  {primera.severidad === "CRITICO"
-                    ? "Es la más lejos del estándar"
-                    : "Es la que más lejos está del estándar"}
-                  {primera.delta !== null && Math.abs(primera.delta) < 1
-                    ? " y no se ha movido desde la primera reunión."
-                    : "."}{" "}
-                  {primera.indicadorMasDebil &&
-                    `Su evidencia más débil: «${primera.indicadorMasDebil.texto}»`}
-                </p>
-                <div className="mt-3.5 flex flex-wrap gap-2">
-                  <a href={`/niveles/${id}/resultados?vista=decisiones#recomendaciones`}>
-                    <Button size="sm">Ver qué hacer en clases</Button>
-                  </a>
-                  <a href={`/niveles/${id}/resultados?vista=decisiones#acuerdos`}>
-                    <Button size="sm" variant="secondary">
-                      Anotar un compromiso
-                    </Button>
-                  </a>
-                </div>
-              </div>
-            )}
-          </Card>
-
           {/* Lo que el coordinador necesita ver primero: qué va bien, qué falta,
               y cuánto falta. El mapa de evidencias queda debajo, para quien
               quiera entrar al detalle indicador por indicador. */}

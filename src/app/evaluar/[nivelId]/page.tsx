@@ -113,26 +113,9 @@ export default async function EvaluarPage({
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in">
-          {/* Tres pasos, tres frases. Quien abre un enlace que le llegó por
-              WhatsApp necesita saber en qué se mete, no leer un instructivo. */}
-          <ol className="mb-5 flex flex-col gap-2.5">
-            {[
-              "Dices quién eres",
-              "Eliges tu asignatura",
-              "Cuentas cómo ves al curso",
-            ].map((paso, i) => (
-              <li key={paso} className="flex items-center gap-3">
-                <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ua-tint font-mono text-[0.625rem] font-medium text-ua">
-                  {i + 1}
-                </span>
-                <span className="text-[0.875rem]">{paso}</span>
-              </li>
-            ))}
-          </ol>
-
-          <p className="mb-5 text-xs text-muted-2">
-            Unos 5 minutos. Sin cuenta ni contraseña, y puedes volver a cambiar tus
-            respuestas.
+          <h2 className="text-xl font-semibold tracking-tight">Comparte cómo ves al curso</h2>
+          <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
+            Te tomará unos 5 minutos. No necesitas cuenta ni contraseña.
           </p>
           <form action={action} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">

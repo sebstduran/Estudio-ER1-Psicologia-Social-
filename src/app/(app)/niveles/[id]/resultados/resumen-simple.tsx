@@ -8,12 +8,23 @@ function PulsoDelNivel({ competencias }: { competencias: CompetenciaDiagnostico[
     ? Math.round(conDatos.reduce((total, c) => total + (c.score ?? 0), 0) / conDatos.length)
     : 0;
   const avance = Math.min(100, (promedio / ESPERADO) * 100);
+  const radio = 54;
+  const largo = Math.PI * radio;
+  const progreso = (avance / 100) * largo;
   return (
     <section className="relative overflow-hidden rounded-[1.75rem] border border-border bg-surface/90 p-6 shadow-[0_24px_60px_-42px_rgba(31,20,25,0.42)] backdrop-blur-sm sm:p-7">
       <div aria-hidden="true" className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-ua-tint-strong/70 blur-3xl" />
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
-        <div className="relative grid h-36 w-36 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(var(--ua) ${avance * 3.6}deg, var(--surface-muted) 0deg)` }}>
-          <div className="grid h-[106px] w-[106px] place-items-center rounded-full border border-border bg-surface text-center shadow-sm"><span className="font-mono text-3xl font-semibold tracking-tight">{promedio}</span><span className="-mt-5 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-muted-2">de 100</span></div>
+        <div className="relative h-36 w-[174px] shrink-0">
+          <svg viewBox="0 0 180 132" className="h-full w-full" role="img" aria-label={`Promedio del nivel: ${promedio} de 100. Meta: ${ESPERADO}.`}>
+            <defs><linearGradient id="pulso" x1="0" x2="1"><stop stopColor="var(--ua-soft)" /><stop offset="1" stopColor="var(--ua)" /></linearGradient></defs>
+            <path d="M 36 108 A 54 54 0 0 1 144 108" fill="none" stroke="var(--surface-muted)" strokeWidth="16" strokeLinecap="round" />
+            <path d="M 36 108 A 54 54 0 0 1 144 108" fill="none" stroke="url(#pulso)" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${progreso} ${largo}`} />
+            <line x1="122" y1="47" x2="128" y2="41" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+            <text x="132" y="42" fill="var(--muted-2)" fontSize="9" fontFamily="var(--font-geist-mono)">META 70</text>
+            <text x="90" y="93" textAnchor="middle" fill="var(--foreground)" fontSize="31" fontWeight="650" fontFamily="var(--font-geist-mono)">{promedio}</text>
+            <text x="90" y="112" textAnchor="middle" fill="var(--muted-2)" fontSize="9" letterSpacing="1.2">PROMEDIO</text>
+          </svg>
         </div>
         <div className="min-w-0"><p className="font-mono text-xs font-medium tracking-[0.14em] text-ua">PULSO DEL NIVEL</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">{promedio >= ESPERADO ? "El nivel alcanzó lo esperado" : `Faltan ${ESPERADO - promedio} puntos para lo esperado`}</h2><p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">El anillo muestra el promedio de las competencias evaluadas. La meta del ciclo es {ESPERADO} puntos.</p></div>
       </div>

@@ -465,7 +465,7 @@ export function Trayectoria({
 
   const d = conDatos.map((p, i) => `${i === 0 ? "M" : "L"} ${x(p.numero)} ${y(p.score!)}`).join(" ");
   const ultimo = conDatos[conDatos.length - 1];
-  const sube = ultimo.score! >= conDatos[0].score!;
+  const area = `${d} L ${x(ultimo.numero)} ${H - P} L ${x(conDatos[0].numero)} ${H - P} Z`;
 
   return (
     <svg
@@ -476,21 +476,28 @@ export function Trayectoria({
       role="img"
       aria-label={`Trayectoria: ${conDatos.map((p) => `reunión ${p.numero}, ${Math.round(p.score!)} de 100`).join("; ")}`}
     >
+      <defs>
+        <linearGradient id="trayectoria-area" x1="0" x2="0" y1="0" y2="1">
+          <stop stopColor="var(--ua)" stopOpacity="0.18" />
+          <stop offset="1" stopColor="var(--ua)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
       <line x1={P} y1={y(70)} x2={W - P} y2={y(70)} className="stroke-border" strokeDasharray="2 3" strokeWidth="1" />
+      <path d={area} fill="url(#trayectoria-area)" />
       <path
         d={d}
         fill="none"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="stroke-muted-2 opacity-75"
+        className="stroke-ua opacity-85"
       />
       <circle
         cx={x(ultimo.numero)}
         cy={y(ultimo.score!)}
         r="3.5"
         strokeWidth="2"
-        className={cx("stroke-surface", sube ? "fill-logrado" : "fill-incipiente")}
+        className="fill-ua stroke-surface"
       />
     </svg>
   );

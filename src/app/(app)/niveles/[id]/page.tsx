@@ -7,12 +7,6 @@ import { actualizarReunionActual } from "@/lib/actions/niveles";
 import { subirActaCoordinador } from "@/lib/actions/actas";
 import { EnlaceDocentes } from "./enlace-docentes";
 
-const CICLO_LABEL = {
-  INICIAL: "Ciclo Inicial",
-  INTERMEDIO: "Ciclo Intermedio",
-  FINAL: "Ciclo Final",
-} as const;
-
 const MODALIDAD_LABEL = { DIURNO: "Diurno", VESPERTINO_TECH: "Vespertino/TECH" } as const;
 
 const FASE_LABEL = {
@@ -73,7 +67,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
       <div className="mb-8">
-        <Eyebrow>{CICLO_LABEL[nivel.cicloTipo]}</Eyebrow>
+        <Eyebrow>Tu reunión de hoy</Eyebrow>
         <h1 className="mt-1.5 text-[2.125rem] font-semibold tracking-tight">{nivel.nombre}</h1>
         <p className="mt-1.5 text-sm text-muted">
           {MODALIDAD_LABEL[nivel.modalidad]} · {nivel.trimestre} ·{" "}
@@ -93,7 +87,8 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
       )}
 
       <div className="rounded-2xl border border-border bg-surface p-6">
-        <p className={CLASE_ROTULO}>En qué reunión vas</p>
+        <p className={CLASE_ROTULO}>1 · Prepara la reunión</p>
+        <p className="mt-1 text-sm text-muted">Elige la reunión que vas a trabajar hoy.</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {nivel.reuniones.map((r) => {
             const activa = r.numero === nivel.reunionActualNumero;
@@ -118,62 +113,47 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           })}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-7 border-t border-border pt-5">
+          <p className={CLASE_ROTULO}>2 · Pide las respuestas</p>
+          <p className="mb-3 mt-1 text-sm text-muted">Comparte este enlace con el equipo docente.</p>
           <EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} />
         </div>
-
-        {reunionActual && (
-          <div className="mt-6 border-t border-border pt-5">
-            <p className={`${CLASE_ROTULO} mb-2.5 block`}>
-              El acta de la reunión {reunionActual.numero}
-            </p>
-            <form
-              action={subirActaCoordinador.bind(
-                null,
-                nivel.id,
-                reunionActual.id,
-                user.name ?? "Coordinación"
-              )}
-              className="flex flex-wrap items-center gap-3"
-            >
-              <input
-                type="file"
-                name="archivo"
-                required
-                className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground"
-              />
-              <Button type="submit" size="sm" variant="secondary">
-                Subir acta
-              </Button>
-            </form>
-            {actas.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-                {actas.map((a) => (
-                  <li key={a.id}>
-                    <a href={a.url} target="_blank" className="text-ua hover:underline">
-                      {a.nombreArchivo}
-                    </a>
-                    <span className="ml-2 text-xs text-muted-2">· {a.subidoPor}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
+        <p className={CLASE_ROTULO}>3 · Conversa y decide</p>
         <p className="text-[0.9375rem] text-muted">
           {totalEvaluaciones === 0
             ? "Todavía nadie ha respondido en esta reunión."
             : `${plural(totalEvaluaciones, "respuesta recibida", "respuestas recibidas")}.`}
         </p>
-        {totalEvaluaciones > 0 && (
-          <Link href={`/niveles/${nivel.id}/resultados`}>
-            <Button>Ver el análisis</Button>
+        {totalEvaluaciones > 0 ? (
+          <Link className="mt-4 inline-block" href={`/niveles/${nivel.id}/resultados`}>
+            <Button>Ver y conducir la reunión</Button>
           </Link>
-        )}
+        ) : null}
       </div>
+
+      {reunionActual && (
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
+          <p className={CLASE_ROTULO}>4 · Cierra la reunión</p>
+          <p className="mb-4 mt-1 text-sm text-muted">
+            Cuando terminen, guarda el acta como respaldo. No necesitas subirla para ver el análisis.
+          </p>
+          <form
+            action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")}
+            className="flex flex-wrap items-center gap-3"
+          >
+            <input type="file" name="archivo" required className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground" />
+            <Button type="submit" size="sm" variant="secondary">Subir acta</Button>
+          </form>
+          {actas.length > 0 && (
+            <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+              {actas.map((a) => <li key={a.id}><a href={a.url} target="_blank" className="text-ua hover:underline">{a.nombreArchivo}</a><span className="ml-2 text-xs text-muted-2">· {a.subidoPor}</span></li>)}
+            </ul>
+          )}
+        </div>
+      )}
 
       <p className="mt-8 text-[0.8125rem] text-muted-2">
         ¿Cambió algo del nivel?{" "}

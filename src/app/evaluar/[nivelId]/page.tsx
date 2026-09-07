@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Button, Card, CLASE_ROTULO, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
+import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
 import { identificarDocente, guardarEvaluacion } from "@/lib/actions/evaluar";
-import { subirActa } from "@/lib/actions/actas";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
@@ -71,7 +70,6 @@ export default async function EvaluarPage({
   const docenteId = get("docente");
   const asignaturaId = get("asignatura");
   const guardado = get("guardado") === "1";
-  const actaSubida = get("acta") === "1";
 
   const nivel = await prisma.nivel.findUnique({
     where: { id: nivelId },
@@ -85,7 +83,10 @@ export default async function EvaluarPage({
   const reunionActual = nivel.reuniones.find((r) => r.numero === nivel.reunionActualNumero);
 
   const docente = docenteId
-    ? await prisma.docente.findFirst({ where: { id: docenteId, nivelId } })
+    ? await prisma.docente.findFirst({
+        where: { id: docenteId, nivelId },
+        include: { asignaturas: { include: { asignatura: true } } },
+      })
     : null;
 
   const shellHeader = (
@@ -152,18 +153,16 @@ export default async function EvaluarPage({
     );
   }
 
-  // ── Paso 2: elegir asignatura + actas ──────────────────────────
+  // ── Paso 2: elegir asignatura ──────────────────────────────────
   const asignatura = asignaturaId
-    ? nivel.asignaturas.find((a) => a.id === asignaturaId)
+    ? nivel.asignaturas.find(
+        (a) =>
+          a.id === asignaturaId && docente.asignaturas.some((item) => item.asignaturaId === a.id)
+      )
     : undefined;
 
   if (!asignatura) {
-    const actas = reunionActual
-      ? await prisma.acta.findMany({ where: { reunionId: reunionActual.id }, orderBy: { createdAt: "desc" } })
-      : [];
-    const actaAction = reunionActual
-      ? subirActa.bind(null, nivel.id, reunionActual.id, docente.nombre, docente.id)
-      : undefined;
+    const asignaturasDelDocente = docente.asignaturas.map((item) => item.asignatura);
 
     return (
       <div className="mx-auto max-w-2xl px-6 py-16">
@@ -183,7 +182,7 @@ export default async function EvaluarPage({
         )}
 
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
-          {nivel.asignaturas.map((a) => (
+          {asignaturasDelDocente.map((a) => (
             <Link
               key={a.id}
               href={`/evaluar/${nivel.id}?docente=${docente.id}&asignatura=${a.id}`}
@@ -193,48 +192,13 @@ export default async function EvaluarPage({
               </Card>
             </Link>
           ))}
-          {nivel.asignaturas.length === 0 && (
+          {asignaturasDelDocente.length === 0 && (
             <Card className="text-sm text-muted sm:col-span-2">
-              El coordinador aún no ha configurado asignaturas en este nivel.
+              Aún no tienes una asignatura asignada en este nivel. Escríbele a quien coordina
+              para que la agregue antes de responder.
             </Card>
           )}
         </div>
-
-        {reunionActual && actaAction && (
-          <div className="mt-10 border-t border-border pt-8">
-            <h2 className={`${CLASE_ROTULO} mb-3 block`}>
-              Acta de la reunión {reunionActual.numero}
-            </h2>
-            {actaSubida && (
-              <p className="mb-3 text-sm text-logrado">Acta subida correctamente.</p>
-            )}
-            <Card className="flex flex-col gap-3">
-              <form action={actaAction} className="flex flex-wrap items-center gap-3">
-                <input
-                  type="file"
-                  name="archivo"
-                  required
-                  className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground"
-                />
-                <Button type="submit" size="sm" variant="secondary">
-                  Subir acta
-                </Button>
-              </form>
-              {actas.length > 0 && (
-                <ul className="flex flex-col gap-1.5 text-sm">
-                  {actas.map((a) => (
-                    <li key={a.id}>
-                      <a href={a.url} target="_blank" className="text-ua hover:underline">
-                        {a.nombreArchivo}
-                      </a>
-                      <span className="ml-2 text-xs text-muted-2">· {a.subidoPor}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-          </div>
-        )}
       </div>
     );
   }

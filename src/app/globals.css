@@ -108,10 +108,19 @@ html.dark {
 }
 
 body {
-  background: var(--color-background);
+  background:
+    radial-gradient(circle at 88% -10%, color-mix(in srgb, var(--ua-tint-strong) 72%, transparent), transparent 32rem),
+    radial-gradient(circle at -8% 72%, color-mix(in srgb, #e6efff 65%, transparent), transparent 26rem),
+    var(--color-background);
   color: var(--color-foreground);
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at 88% -10%, color-mix(in srgb, var(--ua-tint-strong) 70%, transparent), transparent 32rem),
+    var(--color-background);
 }
 
 /* Los titulares van ajustados: a este tamaño el espaciado por defecto se ve

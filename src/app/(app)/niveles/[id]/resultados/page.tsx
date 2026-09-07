@@ -169,56 +169,48 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
       antes de la reunión, para poder ir a buscar a quien no ha respondido. ── */
 function PanelParticipacion({ gente }: { gente: ParticipacionDocente[] }) {
   if (gente.length === 0) return null;
-  const faltan = gente.filter((p) => !p.completo);
+  const habilitados = gente.filter((p) => p.esperadas > 0);
+  const sinAsignatura = gente.filter((p) => p.esperadas === 0);
+  const faltan = habilitados.filter((p) => !p.completo);
+  const completos = habilitados.length - faltan.length;
+  const porcentaje = habilitados.length > 0 ? Math.round((completos / habilitados.length) * 100) : 0;
 
   return (
-    <Card className="mb-10">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-          Participación
-        </p>
-        <p className="text-sm text-muted">
-          {gente.length - faltan.length} de {gente.length} respondieron completo
-        </p>
-      </div>
+    <section className="relative mb-10 overflow-hidden rounded-[2rem] bg-[#12141b] p-6 text-white shadow-[0_30px_80px_-38px_rgba(14,16,20,0.7)] sm:p-8">
+      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(49,172,159,0.24),transparent_32%),radial-gradient(circle_at_92%_90%,rgba(178,58,74,0.3),transparent_34%)]" />
+      <div className="relative grid gap-7 lg:grid-cols-[0.55fr_1.45fr] lg:items-center">
+        <div className="flex items-center gap-5 lg:flex-col lg:items-start">
+          <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full p-2" style={{ background: `conic-gradient(#32b39f ${porcentaje * 3.6}deg, rgba(255,255,255,.11) 0deg)` }}>
+            <div className="grid h-full w-full place-items-center rounded-full bg-[#171a22] text-center"><span className="font-mono text-3xl font-semibold">{porcentaje}%</span></div>
+          </div>
+          <div><p className="font-mono text-[0.68rem] tracking-[0.14em] text-[#75d9ca]">VOZ DEL EQUIPO</p><h2 className="mt-1 text-2xl font-semibold">{completos} de {habilitados.length} respondieron</h2><p className="mt-1 text-xs leading-relaxed text-white/55">Solo cuenta a quienes tienen preguntas asignadas.</p></div>
+        </div>
 
-      <ul className="mt-4 flex flex-col divide-y divide-border">
-        {gente.map((p) => {
+        <ul className="grid gap-2.5 sm:grid-cols-2">
+        {habilitados.map((p) => {
           const pct = p.esperadas > 0 ? Math.min(100, (p.respondidas / p.esperadas) * 100) : 0;
           return (
-            <li key={p.id} className="flex items-center gap-4 py-2.5">
-              <span
-                className={`h-2 w-2 shrink-0 rounded-full ${p.completo ? "bg-logrado" : p.respondidas > 0 ? "bg-proceso" : "bg-border-strong"}`}
-                aria-hidden="true"
-              />
+            <li key={p.id} className="rounded-2xl border border-white/10 bg-white/[0.06] p-3.5 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+              <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl font-mono text-xs font-semibold ${p.completo ? "bg-[#32b39f] text-[#081511]" : "bg-white/10 text-white/60"}`} aria-hidden="true">{p.completo ? "✓" : "·"}</span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{p.nombre}</p>
-                <p className="truncate text-xs text-muted-2">{p.asignaturas.join(" · ")}</p>
+                <p className="truncate text-sm font-medium">{p.nombre}</p><p className="truncate text-xs text-white/45">{p.asignaturas.join(" · ")}</p>
               </div>
-              <div className="hidden w-28 sm:block">
-                <div className="h-1.5 overflow-hidden rounded-full bg-surface-muted">
-                  <div
-                    className={`h-full rounded-full ${p.completo ? "bg-logrado" : "bg-proceso"}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-              <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted">
-                {p.respondidas}/{p.esperadas}
-              </span>
+              <span className="font-mono text-xs text-white/60">{p.respondidas}/{p.esperadas}</span></div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${p.completo ? "bg-[#32b39f]" : "bg-[#d6a439]"}`} style={{ width: `${pct}%` }} /></div>
             </li>
           );
         })}
       </ul>
+      </div>
 
       {faltan.length > 0 && (
-        <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed text-muted">
-          Antes de cerrar la reunión conviene recordarle el enlace a{" "}
-          <span className="text-foreground">{faltan.map((p) => p.nombre).join(", ")}</span>: las
-          cifras de abajo se calculan solo con lo respondido.
+        <p className="relative mt-5 border-t border-white/10 pt-4 text-sm text-white/65">
+          Falta la respuesta de <span className="font-medium text-white">{faltan.map((p) => p.nombre).join(", ")}</span>.
         </p>
       )}
-    </Card>
+      {sinAsignatura.length > 0 && <p className="relative mt-2 text-xs text-white/45">Sin asignatura configurada: {sinAsignatura.map((p) => p.nombre).join(", ")}.</p>}
+    </section>
   );
 }
 
@@ -226,19 +218,19 @@ function PanelParticipacion({ gente }: { gente: ParticipacionDocente[] }) {
 function VistaInforme({ informe }: { informe: TipoInforme }) {
   return (
     <div className="flex flex-col gap-6">
-      <Card className="border-l-[3px] border-l-ua">
+      <Card className="relative overflow-hidden !border-white/10 !bg-[#12141b] !p-6 text-white sm:!p-8">
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_85%_10%,rgba(178,58,74,0.32),transparent_32%),radial-gradient(circle_at_10%_95%,rgba(51,179,159,0.2),transparent_35%)]" />
+        <div className="relative">
         {informe.veredicto && (
-          <div className="mb-5 border-b border-border pb-5">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-              ¿El nivel está cumpliendo con sus competencias?
-            </p>
+          <div className="mb-5 border-b border-white/10 pb-5">
+            <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#f0a4b2]">DECISIÓN DE LA REUNIÓN</p>
             <p
               className={`mt-2 text-2xl font-semibold ${
                 informe.veredicto.cumple === "SI"
-                  ? "text-logrado"
+                  ? "text-[#75d9ca]"
                   : informe.veredicto.cumple === "NO"
-                    ? "text-incipiente"
-                    : "text-proceso"
+                    ? "text-[#f0a4b2]"
+                    : "text-[#e3bc62]"
               }`}
             >
               {informe.veredicto.cumple === "SI"
@@ -247,31 +239,27 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
                   ? "No todavía."
                   : "Parcialmente."}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted">
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/60">
               {informe.veredicto.fundamento}
             </p>
           </div>
         )}
-        <Eyebrow>Síntesis</Eyebrow>
-        <p className="mt-2.5 text-[1.05rem] leading-relaxed">{informe.sintesis}</p>
+        <p className="font-mono text-[0.68rem] tracking-[0.14em] text-white/45">LECTURA DEL EQUIPO</p>
+        <p className="mt-2.5 max-w-3xl text-[1.05rem] leading-relaxed text-white/85">{informe.sintesis}</p>
 
         {informe.prioridades.length > 0 && (
-          <div className="mt-6 border-t border-border pt-5">
-            <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-              Focos para el resto del trimestre
-            </p>
-            <ol className="flex flex-col gap-2.5">
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <p className="mb-3 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-white/45">TRES MOVIMIENTOS</p>
+            <ol className="grid gap-3 lg:grid-cols-3">
               {informe.prioridades.map((p, i) => (
-                <li key={i} className="flex gap-3 text-sm leading-relaxed">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ua-tint font-mono text-[0.65rem] font-medium text-ua">
-                    {i + 1}
-                  </span>
-                  {p}
+                <li key={i} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm leading-relaxed text-white/80 backdrop-blur-sm">
+                  <span className="mb-3 grid h-8 w-8 place-items-center rounded-xl bg-white/10 font-mono text-xs font-semibold text-white">0{i + 1}</span>{p}
                 </li>
               ))}
             </ol>
           </div>
         )}
+        </div>
       </Card>
 
       {informe.competencias.map((c) => (
@@ -282,14 +270,15 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
           </div>
           <h3 className="mt-1.5 text-xl font-medium">{c.nombre}</h3>
 
-          <p className="mt-3 text-sm leading-relaxed text-muted">{c.diagnostico}</p>
-
-          <div className="mt-5 rounded-xl bg-surface-muted p-4">
-            <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-              Decisión EPG · {c.decisionEpg.componente}
-            </p>
-            <p className="text-sm leading-relaxed">{c.decisionEpg.decision}</p>
+          <div className="mt-5 rounded-2xl border border-ua/10 bg-gradient-to-br from-ua-tint to-surface p-4 sm:p-5">
+            <p className="font-mono text-[0.66rem] font-medium uppercase tracking-[0.13em] text-ua">ACCIÓN PRINCIPAL · {c.decisionEpg.componente}</p>
+            <p className="mt-2 text-base font-medium leading-relaxed">{c.decisionEpg.decision}</p>
           </div>
+
+          <details className="group mt-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-surface-muted"><span>Ver cómo aplicarlo</span><span className="text-muted-2 transition-transform group-open:rotate-180">▾</span></summary>
+            <div className="mt-4 border-t border-border pt-4">
+          <p className="text-sm leading-relaxed text-muted">{c.diagnostico}</p>
 
           {c.accionesParaEstudiantes.length > 0 && (
             <div className="mt-5">
@@ -327,6 +316,8 @@ function VistaInforme({ informe }: { informe: TipoInforme }) {
               </ul>
             </div>
           )}
+            </div>
+          </details>
         </Card>
       ))}
 
@@ -588,31 +579,20 @@ export default async function ResultadosPage({
               recién después lo que propone la máquina a partir de eso. */}
           {d.percepciones.length > 0 && (
             <section id="voces" className="mb-12 scroll-mt-24">
-              <SectionLabel>Lo que dicen tus docentes</SectionLabel>
-              <p className="mb-4 max-w-prose text-[0.8125rem] leading-relaxed text-muted">
-                Lo que ven en clases y no cabe en la rúbrica. Es la materia prima de la
-                reunión: léelo antes de decidir.
-              </p>
-              <div className="flex flex-col gap-3">
+              <div className="mb-5"><p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-ua">PERCEPCIONES</p><h2 className="mt-1 text-2xl font-semibold tracking-tight">Lo que está viendo el equipo</h2></div>
+              <div className="grid gap-4 lg:grid-cols-3">
                 {d.percepciones.map((p, i) => (
-                  <Card key={`${p.docente}-${p.asignatura}-${i}`}>
-                    <p className="text-sm font-medium">{p.docente}</p>
-                    <p className="text-xs text-muted-2">{p.asignatura}</p>
-                    <div className="mt-3 flex flex-col gap-3">
+                  <Card key={`${p.docente}-${p.asignatura}-${i}`} className="relative overflow-hidden !p-0">
+                    <div className="border-b border-border bg-gradient-to-br from-surface-muted to-ua-tint/50 p-4"><span aria-hidden="true" className="absolute right-4 top-1 font-serif text-6xl leading-none text-ua/10">“</span><p className="text-sm font-semibold">{p.docente}</p><p className="mt-0.5 truncate text-xs text-muted-2">{p.asignatura}</p></div>
+                    <div className="flex flex-col gap-4 p-4">
                       {p.dificultad && (
-                        <div>
-                          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
-                            Qué le está costando
-                          </p>
-                          <p className="mt-1 text-sm leading-relaxed">{p.dificultad}</p>
+                        <div className="rounded-xl border border-incipiente-line bg-incipiente-tint/50 p-3.5">
+                          <p className="font-mono text-[0.64rem] font-medium uppercase tracking-[0.1em] text-incipiente">DIFICULTAD</p><p className="mt-2 text-sm leading-relaxed">{p.dificultad}</p>
                         </div>
                       )}
                       {p.sugerencia && (
-                        <div>
-                          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
-                            Qué cree que ayudaría
-                          </p>
-                          <p className="mt-1 text-sm leading-relaxed">{p.sugerencia}</p>
+                        <div className="rounded-xl border border-logrado-line bg-logrado-tint/50 p-3.5">
+                          <p className="font-mono text-[0.64rem] font-medium uppercase tracking-[0.1em] text-logrado">PROPUESTA</p><p className="mt-2 text-sm leading-relaxed">{p.sugerencia}</p>
                         </div>
                       )}
                     </div>

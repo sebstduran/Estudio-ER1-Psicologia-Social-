@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import {
   construirDiagnostico,
@@ -471,8 +472,14 @@ export default async function ResultadosPage({
   const d = await construirDiagnostico(id, user.id);
   if (!d) notFound();
 
-  const acuerdos = await acuerdosDelNivel(id, d.reunionActual?.id ?? null);
-  const informe = d.reunionActual ? await informeVigente(id, d.reunionActual.id) : null;
+  const [acuerdos, informe, totalActas] = await Promise.all([
+    acuerdosDelNivel(id, d.reunionActual?.id ?? null),
+    d.reunionActual ? informeVigente(id, d.reunionActual.id) : Promise.resolve(null),
+    d.reunionActual
+      ? prisma.acta.count({ where: { reunionId: d.reunionActual.id } })
+      : Promise.resolve(0),
+  ]);
+  const hayActa = totalActas > 0;
   const contenido = informe?.estado === "LISTO" ? (informe.contenido as TipoInforme) : null;
 
   const conDatos = d.competencias.filter((c) => c.severidad !== "SIN_DATOS");
@@ -495,6 +502,11 @@ export default async function ResultadosPage({
                 FASE_LABEL[d.reunionActual.fase as keyof typeof FASE_LABEL]
               }`}
           </p>
+          <div className="mt-3 flex flex-wrap gap-2 text-[0.7rem]">
+            <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-muted"><b className="font-mono text-foreground">{d.participacion.filter((p) => p.completo).length}</b> docentes</span>
+            <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-muted"><b className="font-mono text-foreground">{d.totalVotos}</b> respuestas</span>
+            <span className={`rounded-full border px-2.5 py-1 ${hayActa ? "border-logrado-line bg-logrado-tint text-logrado" : "border-border bg-surface text-muted"}`}><b className="font-mono">{totalActas}</b> {totalActas === 1 ? "acta" : "actas"}</span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {d.totalVotos > 0 && (
@@ -638,17 +650,22 @@ export default async function ResultadosPage({
                     estándar del nivel.
                   </p>
                 </div>
-                <InformeBoton
-                  nivelId={id}
-                  yaExiste={false}
-                  errorPrevio={informe?.estado === "ERROR" ? informe.error : null}
-                />
+                {hayActa ? (
+                  <InformeBoton
+                    nivelId={id}
+                    yaExiste={false}
+                    hayActa
+                    errorPrevio={informe?.estado === "ERROR" ? informe.error : null}
+                  />
+                ) : (
+                  <Link href={`/niveles/${id}`}><Button>Subir el acta para completar el análisis</Button></Link>
+                )}
               </Card>
             )}
 
-            {contenido && (
+            {contenido && hayActa && (
               <div className="mt-6">
-                <InformeBoton nivelId={id} yaExiste />
+                <InformeBoton nivelId={id} yaExiste hayActa={hayActa} />
               </div>
             )}
           </section>

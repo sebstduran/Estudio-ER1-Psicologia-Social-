@@ -18,11 +18,31 @@ export async function entrarPorCodigo(formData: FormData) {
     redirect(`/docente?error=${encodeURIComponent("Escribe el código que te dio tu coordinación.")}`);
   }
 
-  const nivel = await prisma.nivel.findUnique({ where: { codigo }, select: { id: true } });
+  const numero = Number(formData.get("numero"));
+  const modalidad = formData.get("modalidad");
+  const nivel = await prisma.nivel.findUnique({
+    where: { codigo },
+    select: { id: true, nombre: true, modalidad: true },
+  });
   if (!nivel) {
     redirect(
       `/docente?error=${encodeURIComponent(
         "No encontramos ese código. Revísalo con tu coordinación: son 6 caracteres."
+      )}`
+    );
+  }
+
+  const numeroConfigurado = Number(nivel.nombre.match(/\d+/)?.[0]);
+  if (
+    !Number.isInteger(numero) ||
+    numero < 1 ||
+    numero > 14 ||
+    numeroConfigurado !== numero ||
+    nivel.modalidad !== modalidad
+  ) {
+    redirect(
+      `/docente?error=${encodeURIComponent(
+        "Los datos no coinciden. Revisa el nivel, la modalidad y el código con tu coordinación."
       )}`
     );
   }
@@ -33,6 +53,7 @@ export async function entrarPorCodigo(formData: FormData) {
 const identificarDocenteSchema = z.object({
   nombre: z.string().trim().min(1, "Ingresa tu nombre."),
   email: z.string().trim().toLowerCase().email("Correo inválido."),
+  asignaturaIds: z.array(z.string()).min(1, "Selecciona al menos una asignatura."),
 });
 
 // El docente no tiene cuenta: se identifica por correo dentro del nivel.
@@ -42,21 +63,36 @@ export async function identificarDocente(nivelId: string, formData: FormData) {
   const parsed = identificarDocenteSchema.safeParse({
     nombre: formData.get("nombre"),
     email: formData.get("email"),
+    asignaturaIds: formData.getAll("asignaturaIds"),
   });
 
   if (!parsed.success) {
     redirect(`/evaluar/${nivelId}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Datos inválidos.")}`);
   }
 
-  const { nombre, email } = parsed.data;
+  const { nombre, email, asignaturaIds } = parsed.data;
 
-  const nivel = await prisma.nivel.findUnique({ where: { id: nivelId } });
+  const nivel = await prisma.nivel.findUnique({
+    where: { id: nivelId },
+    include: { asignaturas: { select: { id: true } } },
+  });
   if (!nivel) redirect(`/evaluar/${nivelId}?error=Nivel no encontrado.`);
+
+  const permitidas = new Set(nivel.asignaturas.map((a) => a.id));
+  const seleccionadas = [...new Set(asignaturaIds)].filter((id) => permitidas.has(id));
+  if (seleccionadas.length === 0) {
+    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent("Selecciona una asignatura de este nivel.")}`);
+  }
 
   const docente = await prisma.docente.upsert({
     where: { nivelId_email: { nivelId, email } },
     update: { nombre },
     create: { nivelId, nombre, email },
+  });
+
+  await prisma.docenteAsignatura.createMany({
+    data: seleccionadas.map((asignaturaId) => ({ docenteId: docente.id, asignaturaId })),
+    skipDuplicates: true,
   });
 
   redirect(`/evaluar/${nivelId}?docente=${docente.id}`);
@@ -91,6 +127,14 @@ export async function guardarEvaluacion(
   const docente = await prisma.docente.findFirst({ where: { id: docenteId, nivelId } });
   if (!docente) redirect(`/evaluar/${nivelId}?error=Docente no válido para este nivel.`);
 
+  const asignacion = await prisma.docenteAsignatura.findUnique({
+    where: { docenteId_asignaturaId: { docenteId, asignaturaId } },
+    select: { id: true },
+  });
+  if (!asignacion) {
+    redirect(`/evaluar/${nivelId}?docente=${docenteId}&error=${encodeURIComponent("Esa asignatura no está vinculada a tu nombre.")}`);
+  }
+
   const indicadorIds = Array.from(
     new Set(
       Array.from(formData.keys())
@@ -104,7 +148,10 @@ export async function guardarEvaluacion(
   }
 
   const indicadores = await prisma.indicador.findMany({
-    where: { id: { in: indicadorIds } },
+    where: {
+      id: { in: indicadorIds },
+      competencia: { mapeos: { some: { asignaturaId } } },
+    },
     select: { id: true, competenciaId: true },
   });
   const competenciaPorIndicador = new Map(indicadores.map((i) => [i.id, i.competenciaId]));

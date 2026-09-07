@@ -52,6 +52,8 @@ export type TipoInforme = {
   alertasHito: string[];
 };
 
+export type ActaParaAnalisis = { nombre: string; url: string };
+
 // Esquema JSON que el modelo debe respetar. Con `strict` la respuesta valida
 // exactamente contra esta forma, así la interfaz nunca recibe algo inesperado.
 const ESQUEMA = {
@@ -279,7 +281,7 @@ function describirConteo(c: {
 }
 
 /** Convierte el diagnóstico en el texto que lee el modelo. */
-export function construirPrompt(d: Diagnostico): string {
+export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []): string {
   const partes: string[] = [];
 
   partes.push(
@@ -291,6 +293,16 @@ export function construirPrompt(d: Diagnostico): string {
     `Votos registrados en esta reunión: ${d.totalVotos}`,
     ""
   );
+
+  if (actas.length > 0) {
+    partes.push(
+      "ACTA DE ESTA REUNIÓN: se adjunta después de este texto.",
+      "Úsala como evidencia cualitativa junto con las respuestas docentes. Distingue hechos,",
+      "acuerdos y percepciones; no atribuyas al acta nada que no esté escrito en ella.",
+      `Archivos adjuntos: ${actas.map((a) => a.nombre).join(", ")}.`,
+      ""
+    );
+  }
 
   if (d.percepciones.length > 0) {
     partes.push(
@@ -437,17 +449,37 @@ function pareceInforme(x: unknown): x is TipoInforme {
   );
 }
 
-export async function generarInforme(d: Diagnostico): Promise<TipoInforme> {
+function mimeDe(nombre: string): string | null {
+  const extension = nombre.toLowerCase().split(".").pop();
+  const tipos: Record<string, string> = { pdf: "application/pdf", txt: "text/plain", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp" };
+  return extension ? tipos[extension] ?? null : null;
+}
+
+async function partesDeActas(actas: ActaParaAnalisis[]) {
+  const partes: Array<{ inlineData: { mimeType: string; data: string } }> = [];
+  for (const acta of actas.slice(0, 4)) {
+    const mimeType = mimeDe(acta.nombre);
+    if (!mimeType || !acta.url.startsWith("https://")) continue;
+    const respuesta = await fetch(acta.url);
+    if (!respuesta.ok) throw new Error(`No se pudo leer el acta «${acta.nombre}».`);
+    const bytes = Buffer.from(await respuesta.arrayBuffer());
+    partes.push({ inlineData: { mimeType, data: bytes.toString("base64") } });
+  }
+  return partes;
+}
+
+export async function generarInforme(d: Diagnostico, actas: ActaParaAnalisis[] = []): Promise<TipoInforme> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new FaltaApiKey();
 
   const ai = new GoogleGenAI({ apiKey });
 
+  const documentos = await partesDeActas(actas);
   let respuesta;
   try {
     respuesta = await ai.models.generateContent({
       model: MODELO,
-      contents: construirPrompt(d),
+      contents: [{ role: "user", parts: [{ text: construirPrompt(d, documentos.length > 0 ? actas : []) }, ...documentos] }],
       config: {
         systemInstruction: SISTEMA,
         responseMimeType: "application/json",

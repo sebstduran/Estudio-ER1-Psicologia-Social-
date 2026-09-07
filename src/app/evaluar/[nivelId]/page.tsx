@@ -26,7 +26,7 @@ function ErrorBanner({ error }: { error?: string }) {
 }
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Quién eres", "Qué asignatura", "Cómo ves al curso"];
+  const steps = ["Tus datos", "Tu asignatura", "Tu mirada"];
   return (
     <div className="mb-8 flex items-center gap-2 text-xs text-muted-2">
       {steps.map((label, i) => {
@@ -113,9 +113,9 @@ export default async function EvaluarPage({
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in">
-          <h2 className="text-xl font-semibold tracking-tight">Comparte cómo ves al curso</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Confirma quién eres y qué haces</h2>
           <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
-            Te tomará unos 5 minutos. No necesitas cuenta ni contraseña.
+            Elige una o más asignaturas. No necesitas crear una cuenta.
           </p>
           <form action={action} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
@@ -126,9 +126,20 @@ export default async function EvaluarPage({
               <span className="text-sm font-medium">Correo institucional</span>
               <input className={inputClass} type="email" name="email" required autoComplete="email" />
             </label>
+            <fieldset>
+              <legend className="text-sm font-medium">Asignaturas en las que haces clases</legend>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {nivel.asignaturas.map((a) => (
+                  <label key={a.id} className="cursor-pointer rounded-xl border border-border-strong px-3.5 py-3 text-sm text-muted transition-all hover:border-muted-2 has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua">
+                    <input type="checkbox" name="asignaturaIds" value={a.id} className="mr-2 accent-ua" />
+                    {a.nombre}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <ErrorBanner error={error} />
             <Button type="submit" className="mt-1 w-full">
-              Continuar
+              Continuar a mis preguntas <span aria-hidden="true">→</span>
             </Button>
           </form>
         </Card>

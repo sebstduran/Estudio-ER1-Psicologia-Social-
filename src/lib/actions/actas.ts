@@ -11,6 +11,16 @@ import { prisma } from "@/lib/prisma";
 // que ahí subimos a Vercel Blob. En desarrollo local, sin BLOB_READ_WRITE_TOKEN,
 // caemos a /public/uploads para no depender de una cuenta de Vercel.
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "actas");
+const EXTENSIONES_ANALIZABLES = new Set([".pdf", ".txt", ".png", ".jpg", ".jpeg", ".webp"]);
+
+function validarActa(archivo: File, volver: string) {
+  if (archivo.size > 15 * 1024 * 1024) {
+    redirect(`${volver}${volver.includes("?") ? "&" : "?"}error=${encodeURIComponent("El archivo no puede superar 15 MB.")}`);
+  }
+  if (!EXTENSIONES_ANALIZABLES.has(path.extname(archivo.name).toLowerCase())) {
+    redirect(`${volver}${volver.includes("?") ? "&" : "?"}error=${encodeURIComponent("Sube el acta como PDF, texto o imagen para poder analizarla.")}`);
+  }
+}
 
 async function guardarArchivo(nombreSeguro: string, bytes: Buffer): Promise<string> {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
@@ -35,9 +45,7 @@ export async function subirActaCoordinador(
   if (!(archivo instanceof File) || archivo.size === 0) {
     redirect(`${volver}?error=${encodeURIComponent("Selecciona un archivo.")}`);
   }
-  if (archivo.size > 15 * 1024 * 1024) {
-    redirect(`${volver}?error=${encodeURIComponent("El archivo no puede superar 15 MB.")}`);
-  }
+  validarActa(archivo, volver);
 
   const extension = path.extname(archivo.name) || "";
   const nombreSeguro = `${reunionId}-${Date.now()}${extension}`;
@@ -64,9 +72,7 @@ export async function subirActa(
   if (!(archivo instanceof File) || archivo.size === 0) {
     redirect(`${volver}&error=${encodeURIComponent("Selecciona un archivo.")}`);
   }
-  if (archivo.size > 15 * 1024 * 1024) {
-    redirect(`${volver}&error=${encodeURIComponent("El archivo no puede superar 15 MB.")}`);
-  }
+  validarActa(archivo, volver);
 
   const extension = path.extname(archivo.name) || "";
   const nombreSeguro = `${reunionId}-${Date.now()}${extension}`;

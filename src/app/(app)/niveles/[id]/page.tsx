@@ -160,7 +160,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
             action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")}
             className="flex flex-col items-stretch gap-3"
           >
-            <input type="file" name="archivo" required className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground" />
+            <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground" />
             <Button type="submit" size="sm" variant="secondary">Subir acta de R{reunionActual.numero}</Button>
           </form>
           {actas.length > 0 && (

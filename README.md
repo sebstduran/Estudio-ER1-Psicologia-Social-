@@ -83,8 +83,9 @@ presente qué se manda y bajo qué condiciones.
 códigos de las competencias, los comentarios que escribieron las y los docentes
 en la rúbrica, y sus respuestas a las dos preguntas abiertas del final ("qué te
 está costando" y "qué crees que ayudaría") — en ambos casos con el nombre de
-quien las escribió y su asignatura. No se envían correos, contraseñas ni las
-actas subidas.
+quien las escribió y su asignatura. Si quien coordina marca explícitamente
+**«Incluir el acta de esta reunión»**, también se envía ese archivo para cruzarlo
+con las respuestas. No se envían correos ni contraseñas.
 
 **La capa gratuita no es privada.** Google se reserva el derecho de revisar y
 usar el contenido enviado por la capa sin costo para mejorar sus productos —

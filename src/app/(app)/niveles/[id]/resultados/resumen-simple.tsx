@@ -9,7 +9,7 @@ const ESTILO_TUBO = {
   SIN_DATOS: { fondo: "linear-gradient(180deg, #777f8b 0%, #505761 100%)", texto: "Sin evaluar", lleno: 0 },
 } as const;
 
-function GraficoDeResultados({ competencias }: { competencias: CompetenciaDiagnostico[] }) {
+function GraficoPrioridades({ competencias }: { competencias: CompetenciaDiagnostico[] }) {
   const conDatos = competencias.filter((c) => c.score !== null);
   const relevantes = conDatos
     .toSorted((a, b) => (a.score ?? 0) - (b.score ?? 0))
@@ -25,6 +25,14 @@ function GraficoDeResultados({ competencias }: { competencias: CompetenciaDiagno
 
 function Fortaleza({ c }: { c: CompetenciaDiagnostico }) {
   return <li className="flex items-center gap-3 rounded-2xl border border-logrado-line bg-logrado-tint/70 px-4 py-3"><span className="grid h-8 w-8 place-items-center rounded-xl bg-logrado text-xs font-semibold text-white">✓</span><span className="min-w-0 flex-1"><span className="block font-mono text-[0.65rem] font-medium text-logrado">{c.codigo}</span><span className="block truncate text-sm font-medium">{c.nombre}</span></span><span className="font-mono text-xl font-semibold tabular-nums text-logrado">{Math.round(c.score ?? 0)}</span></li>;
+}
+
+function PanoramaCompetencias({ competencias }: { competencias: CompetenciaDiagnostico[] }) {
+  return <section className="overflow-hidden rounded-[1.75rem] border border-border bg-surface/90 p-6 shadow-[0_18px_48px_-38px_rgba(31,20,25,.38)] sm:p-7"><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="font-mono text-xs font-medium tracking-[.14em] text-ua">PANORAMA COMPLETO</p><h2 className="mt-1 text-2xl font-semibold tracking-tight">Las competencias de un vistazo</h2></div><p className="text-xs text-muted">El arco muestra el avance · la referencia está en 70</p></div><ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{competencias.map((c) => { const score = Math.round(c.score ?? 0); const color = c.severidad === "CONSOLIDADO" ? "#32b39f" : c.severidad === "EN_RIESGO" ? "#d7a536" : c.severidad === "CRITICO" ? "#d64a63" : "#858c98"; return <li key={c.id} className="group flex items-center gap-4 rounded-2xl border border-border bg-gradient-to-br from-surface to-surface-muted/60 p-4 transition-transform hover:-translate-y-0.5"><div className="relative grid h-16 w-16 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(${color} ${score * 3.6}deg, var(--border) 0deg)` }}><div className="grid h-[50px] w-[50px] place-items-center rounded-full bg-surface font-mono text-base font-semibold tabular-nums">{c.score === null ? "—" : score}</div></div><div className="min-w-0"><p className="font-mono text-[0.63rem] font-medium text-muted-2">{c.codigo}</p><h3 className="mt-0.5 truncate text-sm font-semibold">{c.nombre}</h3><p className="mt-1 text-xs text-muted">{c.score === null ? "Aún sin evaluar" : score >= ESPERADO ? "Meta alcanzada" : `${ESPERADO - score} puntos para la meta`}</p></div></li>; })}</ul></section>;
+}
+
+function GraficoDeResultados({ competencias }: { competencias: CompetenciaDiagnostico[] }) {
+  return <><GraficoPrioridades competencias={competencias} /><PanoramaCompetencias competencias={competencias} /></>;
 }
 
 function Brecha({ c, index }: { c: CompetenciaDiagnostico; index: number }) {

@@ -9,8 +9,10 @@ export function NuevoNivelForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <Field label="Nombre del nivel" hint="Ej. Nivel 1 · Sede Providencia">
-        <input className={inputClass} name="nombre" required />
+      <Field label="Nivel">
+        <select className={inputClass} name="nombre" defaultValue="Nivel 1" required>
+          {Array.from({ length: 14 }, (_, i) => <option key={i + 1} value={`Nivel ${i + 1}`}>Nivel {i + 1}</option>)}
+        </select>
       </Field>
 
       <Field label="Ciclo formativo">

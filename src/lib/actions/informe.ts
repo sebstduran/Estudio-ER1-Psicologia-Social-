@@ -27,12 +27,28 @@ export async function generarInformeDelNivel(
     };
   }
 
+  const incluirActa = _formData.get("incluirActa") === "si";
+  if (!incluirActa) {
+    return { error: "Confirma que quieres incluir el acta para combinarla con las respuestas docentes." };
+  }
+  const actas = await prisma.acta.findMany({
+    where: { reunionId: diagnostico.reunionActual.id },
+    select: { nombreArchivo: true, url: true },
+    orderBy: { createdAt: "desc" },
+  });
+  if (actas.length === 0) {
+    return { error: "Sube el acta de esta reunión antes de generar el análisis." };
+  }
+
   const registro = await prisma.informe.create({
     data: { nivelId, reunionId: diagnostico.reunionActual.id, modelo: MODELO },
   });
 
   try {
-    const contenido = await generarInforme(diagnostico);
+    const contenido = await generarInforme(
+      diagnostico,
+      actas.map((a) => ({ nombre: a.nombreArchivo, url: a.url }))
+    );
     await prisma.informe.update({
       where: { id: registro.id },
       data: { estado: "LISTO", contenido },

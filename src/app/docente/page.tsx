@@ -30,17 +30,31 @@ export default async function DocentePage({
     : [];
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
+    <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col justify-center gap-7 overflow-hidden px-6 py-16">
+      <div aria-hidden="true" className="absolute inset-x-10 top-14 h-48 rounded-full bg-gradient-to-r from-ua-tint via-[#e8f6f5] to-[#edf1ff] blur-3xl" />
       <div className="text-center">
+        <p className="font-mono text-[0.68rem] font-medium tracking-[.14em] text-ua">ENTRADA DOCENTE</p>
         <h1 className="text-2xl font-semibold tracking-tight">Entrar como docente</h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Vas a contar cómo ves a tu curso en las competencias que trabaja tu asignatura.
-          Toma unos 5 minutos y no necesitas cuenta ni contraseña.
+          Ubica tu curso. Después eliges tus asignaturas y respondes.
         </p>
       </div>
 
-      <Card className="animate-fade-in">
-        <form action={entrarPorCodigo} className="flex flex-col gap-4">
+      <Card className="relative animate-fade-in !rounded-[1.75rem] !p-6 sm:!p-8">
+        <form action={entrarPorCodigo} className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Nivel">
+              <select className={inputClass} name="numero" defaultValue="1" required>
+                {Array.from({ length: 14 }, (_, i) => <option key={i + 1} value={i + 1}>Nivel {i + 1}</option>)}
+              </select>
+            </Field>
+            <Field label="Modalidad">
+              <select className={inputClass} name="modalidad" defaultValue="DIURNO" required>
+                <option value="DIURNO">Diurno</option>
+                <option value="VESPERTINO_TECH">Vespertino</option>
+              </select>
+            </Field>
+          </div>
           <Field label="Código del nivel">
             <input
               className={`${inputClass} text-center font-mono text-lg tracking-[0.35em] uppercase`}
@@ -57,14 +71,14 @@ export default async function DocentePage({
             />
           </Field>
 
-          <p id="ayuda-codigo" className="-mt-1 text-xs leading-relaxed text-muted-2">
-            Son 6 caracteres. Te lo da quien coordina tu CCAA, junto al enlace.
+          <p id="ayuda-codigo" className="-mt-2 text-xs leading-relaxed text-muted-2">
+            Te lo entrega quien coordina. Sirve para abrir el curso correcto sin contraseña.
           </p>
 
           {error && <p className="text-sm text-incipiente">{error}</p>}
 
           <Button type="submit" className="mt-1 w-full">
-            Continuar
+            Ver mis asignaturas <span aria-hidden="true">→</span>
           </Button>
         </form>
       </Card>
@@ -96,8 +110,6 @@ export default async function DocentePage({
       )}
 
       <p className="text-center text-sm text-muted">
-        ¿Tienes el enlace que te mandaron? Ábrelo y entras directo.
-        <br />
         <Link href="/" className="font-medium text-ua hover:underline">
           Volver al inicio
         </Link>

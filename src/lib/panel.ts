@@ -20,6 +20,7 @@ export type CompetenciaDelCiclo = {
 
 export type ResumenNivel = {
   id: string;
+  codigo: string;
   nombre: string;
   ciclo: string;
   modalidad: string;
@@ -179,6 +180,7 @@ export async function resumenNiveles(coordinadorId: string): Promise<ResumenNive
 
     return {
       id: n.id,
+      codigo: n.codigo,
       nombre: n.nombre,
       ciclo: n.cicloTipo,
       modalidad: n.modalidad,

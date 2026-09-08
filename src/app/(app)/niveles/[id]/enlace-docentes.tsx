@@ -9,7 +9,15 @@ const sinSuscripcion = () => () => {};
 const enCliente = () => window.location.origin;
 const enServidor = () => "";
 
-export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: string }) {
+export function EnlaceDocentes({
+  nivelId,
+  codigo,
+  compacto = false,
+}: {
+  nivelId: string;
+  codigo: string;
+  compacto?: boolean;
+}) {
   const origen = useSyncExternalStore(sinSuscripcion, enCliente, enServidor);
   const url = origen ? `${origen}/evaluar/${nivelId}` : "";
   const [copiado, setCopiado] = useState(false);
@@ -25,12 +33,14 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
   }
 
   return (
-    <div className="border-t border-border pt-5">
-      <p className={`${CLASE_ROTULO} mb-2.5 block`}>Mándales este enlace</p>
-      <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
-        Por correo o WhatsApp. Cada docente se identifica con su correo y responde solo
-        las preguntas de las asignaturas que tú le asignaste. No configura nada.
-      </p>
+    <div className={compacto ? "" : "border-t border-border pt-5"}>
+      <p className={`${CLASE_ROTULO} mb-2.5 block`}>{compacto ? "Enlace para docentes" : "Mándales este enlace"}</p>
+      {!compacto && (
+        <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
+          Por correo o WhatsApp. Cada docente se identifica con su correo y responde solo
+          las preguntas de las asignaturas que tú le asignaste. No configura nada.
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <input
           readOnly
@@ -42,7 +52,7 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
         <Button type="button" variant="secondary" size="sm" onClick={copiar}>
           {copiado ? "Copiado" : "Copiar"}
         </Button>
-        <a href={`/evaluar/${nivelId}`} target="_blank" rel="noreferrer">
+        <a href={`/evaluar/${nivelId}`} target="_blank" rel="noreferrer" className={compacto ? "hidden sm:block" : ""}>
           <Button type="button" variant="ghost" size="sm">
             Ver lo que verán
           </Button>
@@ -52,7 +62,7 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
       {/* El enlace se pierde: se borra el WhatsApp, se cambia de teléfono. El
           código es la red de seguridad, y solo sirve si se dicta en voz alta en
           la reunión, así que se muestra grande y no escondido en un menú. */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[9px] border border-dashed border-border-strong bg-surface-muted px-4 py-3">
+      {!compacto && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[9px] border border-dashed border-border-strong bg-surface-muted px-4 py-3">
         <div>
           <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
             O que escriban este código
@@ -63,7 +73,7 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
           Para quien perdió el enlace: entra en <span className="font-medium">Docente</span>{" "}
           desde la portada y escribe únicamente este código.
         </p>
-      </div>
+      </div>}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
@@ -480,6 +480,12 @@ export default async function ResultadosPage({
       : Promise.resolve(0),
   ]);
   const hayActa = totalActas > 0;
+  if (d.totalVotos === 0 || !hayActa) {
+    const mensaje = d.totalVotos === 0
+      ? "Primero necesitas recibir respuestas del equipo docente."
+      : "Sube el acta de la reunión para habilitar los resultados.";
+    redirect(`/niveles/${id}?error=${encodeURIComponent(mensaje)}`);
+  }
   const contenido = informe?.estado === "LISTO" ? (informe.contenido as TipoInforme) : null;
 
   const conDatos = d.competencias.filter((c) => c.severidad !== "SIN_DATOS");

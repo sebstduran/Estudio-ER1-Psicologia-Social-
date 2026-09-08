@@ -65,6 +65,16 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
     : [];
   const totalEvaluaciones = reunionActual?._count.evaluaciones ?? 0;
   const esCierre = reunionActual?.fase === "CIERRE";
+  const hayRespuestas = totalEvaluaciones > 0;
+  const hayActa = actas.length > 0;
+  const etapaActual = !hayRespuestas ? 2 : !hayActa ? 3 : 4;
+
+  const etapas = [
+    { numero: 1, titulo: "Preparar", apoyo: "Nivel y equipo" },
+    { numero: 2, titulo: "Responder", apoyo: "Voz docente" },
+    { numero: 3, titulo: "Subir acta", apoyo: `Reunión ${reunionActual?.numero ?? ""}` },
+    { numero: 4, titulo: "Resultados", apoyo: "Análisis y acciones" },
+  ];
 
   return (
     <div className="product-page !max-w-6xl">
@@ -92,6 +102,33 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           Acta subida.
         </p>
       )}
+
+      <nav aria-label="Proceso de la comunidad académica" className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {etapas.map((etapa) => {
+          const completa = etapa.numero < etapaActual;
+          const activa = etapa.numero === etapaActual;
+          return (
+            <div
+              key={etapa.numero}
+              aria-current={activa ? "step" : undefined}
+              className={`rounded-2xl border p-4 transition-colors ${
+                activa
+                  ? "border-transparent bg-[#111318] text-white shadow-lg"
+                  : completa
+                    ? "border-logrado-line bg-logrado-tint text-foreground"
+                    : "border-border bg-surface text-muted-2"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-semibold">{completa ? "✓" : `0${etapa.numero}`}</span>
+                {activa && <span className="h-2 w-2 rounded-full bg-ua" />}
+              </div>
+              <p className="mt-5 text-sm font-semibold">{etapa.titulo}</p>
+              <p className={`mt-0.5 text-xs ${activa ? "text-white/50" : "text-muted-2"}`}>{etapa.apoyo}</p>
+            </div>
+          );
+        })}
+      </nav>
 
       <section className="mb-6 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -126,58 +163,40 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-ua-tint font-mono text-xs font-semibold text-ua">01</span>
-          <h2 className="mt-4 font-semibold">Recibe respuestas</h2>
-          <p className="mb-4 mt-1 text-sm leading-relaxed text-muted">Comparte el enlace. Cada docente verá solo sus asignaturas.</p>
-          <EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} />
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface p-5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-proceso-tint font-mono text-xs font-semibold text-proceso">02</span>
-          <h2 className="mt-4 font-semibold">Revisa y decide</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted">
-          {totalEvaluaciones === 0
-            ? "Aún no hay respuestas en esta reunión."
-            : `${plural(totalEvaluaciones, "respuesta recibida", "respuestas recibidas")}.`}
-          </p>
-        {totalEvaluaciones > 0 ? (
-          <Link className="mt-4 inline-block" href={`/niveles/${nivel.id}/resultados`}>
-            <Button>{esCierre ? "Ver cierre del período" : "Ver resultados"}</Button>
-          </Link>
-        ) : null}
-        </div>
-
-      {reunionActual && (
-        <div className="rounded-2xl border border-border bg-surface p-5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-logrado-tint font-mono text-xs font-semibold text-logrado">03</span>
-          <h2 className="mt-4 font-semibold">Guarda el acta de R{reunionActual.numero}</h2>
-          <p className="mb-4 mt-1 text-sm leading-relaxed text-muted">
-            Queda unida a las respuestas de esta reunión.
-          </p>
-          <form
-            action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")}
-            className="flex flex-col items-stretch gap-3"
-          >
-            <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-[7px] file:border file:border-border-strong file:bg-surface file:px-2.5 file:py-[5px] file:text-xs file:font-medium file:text-foreground" />
-            <Button type="submit" size="sm" variant="secondary">Subir acta de R{reunionActual.numero}</Button>
-          </form>
-          {actas.length > 0 && (
-            <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-              {actas.map((a) => <li key={a.id}><a href={a.url} target="_blank" className="text-ua hover:underline">{a.nombreArchivo}</a><span className="ml-2 text-xs text-muted-2">· {a.subidoPor}</span></li>)}
-            </ul>
-          )}
-        </div>
+      {!hayRespuestas && (
+        <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
+          <Eyebrow>Paso 2 de 4</Eyebrow>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Envía el enlace al equipo docente</h2>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona entra, confirma su correo y responde únicamente las preguntas de sus asignaturas.</p>
+          <div className="mt-7"><EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} /></div>
+          <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">Aún no hay respuestas. Cuando llegue la primera, se habilitará el paso del acta.</p>
+        </section>
       )}
-      </section>
 
-      {esCierre && totalEvaluaciones > 0 && (
-        <section className="mt-6 overflow-hidden rounded-[1.75rem] bg-[#12141b] p-6 text-white sm:p-7">
-          <p className="font-mono text-[0.68rem] tracking-[.14em] text-[#75d9ca]">CIERRE DEL PERÍODO</p>
-          <h2 className="mt-2 text-2xl font-semibold">Convierte el recorrido en un punto de partida</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/60">El cierre reúne la evolución, la voz docente y los acuerdos para dejar prioridades claras al próximo período académico.</p>
-          <Link className="mt-5 inline-block" href={`/niveles/${nivel.id}/resultados?vista=decisiones`}><Button>Preparar conclusiones finales</Button></Link>
+      {hayRespuestas && !hayActa && reunionActual && (
+        <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
+          <Eyebrow>Paso 3 de 4</Eyebrow>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Sube el acta de la reunión</h2>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Ya recibimos {plural(totalEvaluaciones, "respuesta", "respuestas")}. Ahora agrega el acta para completar la evidencia de esta reunión.</p>
+          <form action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")} className="mt-7 flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5 sm:flex-row sm:items-center">
+            <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="min-w-0 flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-full file:border file:border-border-strong file:bg-surface file:px-3.5 file:py-2 file:text-xs file:font-medium file:text-foreground" />
+            <Button type="submit">Subir acta de R{reunionActual.numero}</Button>
+          </form>
+        </section>
+      )}
+
+      {hayRespuestas && hayActa && (
+        <section className="product-hero">
+          <div className="relative z-10">
+            <p className="font-mono text-xs tracking-[.14em] text-white/45">PASO 4 DE 4 · TODO LISTO</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Ya puedes conocer cómo está el nivel</h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/55">El análisis cruza las respuestas docentes con el acta de la reunión para mostrar fortalezas, brechas y acciones recomendadas.</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href={`/niveles/${nivel.id}/resultados`}><Button className="!bg-white !text-[#111318] hover:!bg-white/90">{esCierre ? "Ver cierre del período" : "Ver resultados"}</Button></Link>
+              <Link href={`/niveles/${nivel.id}/configurar/asignaturas`}><Button variant="secondary" className="!border-white/20 !bg-white/8 !text-white">Revisar configuración</Button></Link>
+            </div>
+            <p className="mt-6 text-xs text-white/40">Acta incorporada: {actas[0]?.nombreArchivo}</p>
+          </div>
         </section>
       )}
 

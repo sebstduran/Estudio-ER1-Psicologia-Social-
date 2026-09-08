@@ -7,14 +7,15 @@ import { NuevoNivelPanel } from "./nuevo-nivel-panel";
 const FASE_LABEL = { BASE: "línea base", SEGUIMIENTO: "seguimiento", CIERRE: "cierre" } as const;
 
 function siguientePaso(nivel: ResumenNivel) {
-  if (nivel.pasoConfiguracion < 5) return { numero: "01", titulo: "Prepara el nivel", ayuda: "Agrega lo que falta para que el equipo pueda responder.", boton: "Continuar preparando", href: `/niveles/${nivel.id}` };
-  if (!nivel.evaluado) return { numero: "02", titulo: "Pide las respuestas", ayuda: "Comparte el enlace con tus docentes. Cuando respondan, aquí aparecerá el análisis.", boton: "Ver enlace para docentes", href: `/niveles/${nivel.id}` };
-  return { numero: "03", titulo: "Conduce la reunión", ayuda: "Revisa lo que está pasando, escucha al equipo y deja un acuerdo concreto.", boton: "Abrir la reunión", href: `/niveles/${nivel.id}/resultados` };
+  if (nivel.pasoConfiguracion < 5) return { numero: "01", titulo: "Prepara la comunidad", ayuda: "Define nivel, asignaturas, docentes y competencias.", boton: "Continuar preparando", href: `/niveles/${nivel.id}` };
+  if (!nivel.evaluado) return { numero: "02", titulo: "Recibe las respuestas", ayuda: "Comparte el enlace. El equipo docente solo tendrá que responder.", boton: "Ver enlace para docentes", href: `/niveles/${nivel.id}` };
+  if (!nivel.actaSubida) return { numero: "03", titulo: "Sube el acta", ayuda: "Une el registro de la reunión con las respuestas del equipo.", boton: "Subir acta de la reunión", href: `/niveles/${nivel.id}` };
+  return { numero: "04", titulo: "Revisa los resultados", ayuda: "Ya está todo listo: conoce cómo está el nivel y qué conviene reforzar.", boton: "Ver análisis del nivel", href: `/niveles/${nivel.id}/resultados` };
 }
 
 function prioridad(niveles: ResumenNivel[]) {
   return [...niveles].sort((a, b) => {
-    const estado = (n: ResumenNivel) => n.pasoConfiguracion < 5 ? 0 : !n.evaluado ? 1 : n.severidades.CRITICO > 0 ? 2 : 3;
+    const estado = (n: ResumenNivel) => n.pasoConfiguracion < 5 ? 0 : !n.evaluado ? 1 : !n.actaSubida ? 2 : 3;
     return estado(a) - estado(b);
   })[0];
 }

@@ -39,6 +39,7 @@ export type ResumenNivel = {
   docentesQueRespondieron: number;
   acuerdosAbiertos: number;
   evaluado: boolean;
+  actaSubida: boolean;
 };
 
 function conteoVacio(): ConteoLogro {
@@ -55,7 +56,10 @@ export async function resumenNiveles(coordinadorId: string): Promise<ResumenNive
     where: { coordinadorId },
     orderBy: { createdAt: "desc" },
     include: {
-      reuniones: { orderBy: { numero: "asc" } },
+      reuniones: {
+        orderBy: { numero: "asc" },
+        include: { _count: { select: { actas: true } } },
+      },
       _count: { select: { competencias: true, asignaturas: true, docentes: true } },
       asignaturas: { select: { _count: { select: { mapeos: true } } } },
     },
@@ -191,6 +195,7 @@ export async function resumenNiveles(coordinadorId: string): Promise<ResumenNive
       docentesQueRespondieron: reunion ? (docentesPorReunion.get(reunion.id)?.size ?? 0) : 0,
       acuerdosAbiertos: acuerdosPorNivel.get(n.id) ?? 0,
       evaluado: reunion ? (docentesPorReunion.get(reunion.id)?.size ?? 0) > 0 : false,
+      actaSubida: (reunion?._count.actas ?? 0) > 0,
     };
   });
 }

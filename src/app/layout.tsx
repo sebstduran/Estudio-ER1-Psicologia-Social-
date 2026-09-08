@@ -36,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
+      data-scroll-behavior="smooth"
       className={`${instrument.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

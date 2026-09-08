@@ -67,7 +67,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
   const esCierre = reunionActual?.fase === "CIERRE";
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="product-page !max-w-6xl">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
         <div>
         <Eyebrow>Comunidad académica</Eyebrow>
@@ -93,7 +93,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </p>
       )}
 
-      <section className="mb-6 rounded-[1.75rem] border border-border bg-surface/90 p-5 shadow-[0_20px_60px_-48px_rgba(31,20,25,.45)] sm:p-7">
+      <section className="mb-6 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><p className={CLASE_ROTULO}>RECORRIDO DEL PERÍODO</p><h2 className="mt-1 text-xl font-semibold">Elige la reunión de hoy</h2></div>
           <p className="text-xs text-muted">{nivel.modalidad === "DIURNO" ? "4 reuniones · cierre en R4" : "3 reuniones · cierre en R3"}</p>

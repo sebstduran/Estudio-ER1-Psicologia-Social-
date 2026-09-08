@@ -106,9 +106,9 @@ export default async function ReunionPage({
   const ir = (i: number) => `/reunion/${nivelId}?paso=${PASOS[i]}`;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-white text-[#111318]">
       {/* Encabezado mínimo: de qué reunión estamos hablando, y la salida. */}
-      <header className="flex items-center justify-between gap-6 px-8 pt-7 sm:px-14">
+      <header className="flex items-center justify-between gap-6 border-b border-black/8 px-8 py-6 sm:px-14">
         <p className="text-sm text-muted-2 sm:text-base">
           {d.nivel.nombre}
           {d.reunionActual && ` · Reunión ${d.reunionActual.numero}`}
@@ -121,7 +121,7 @@ export default async function ReunionPage({
         </Link>
       </header>
 
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-8 py-10 sm:px-14">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-8 py-12 sm:px-14">
         <p className="mb-8 font-mono text-sm uppercase tracking-[0.18em] text-muted-2">
           {TITULO[paso]}
         </p>
@@ -253,7 +253,7 @@ export default async function ReunionPage({
                 ))}
               </ul>
             )}
-            <div className="rounded-2xl border border-border bg-surface p-6">
+            <div className="rounded-[2rem] border border-border bg-surface p-7 shadow-[0_28px_80px_-58px_rgba(17,19,24,.48)]">
               <p className="mb-4 text-lg text-muted sm:text-xl">
                 Escríbelo ahora, con el equipo mirando.
               </p>
@@ -271,9 +271,9 @@ export default async function ReunionPage({
       </main>
 
       {/* Avanzar. Los puntos dicen cuánto queda sin ocupar sitio. */}
-      <footer className="flex items-center justify-between gap-6 border-t border-border px-8 py-5 sm:px-14">
+      <footer className="flex items-center justify-between gap-6 border-t border-black/8 bg-[#111318] px-8 py-5 text-white sm:px-14">
         {n > 0 ? (
-          <Link href={ir(n - 1)} className="text-base text-muted hover:text-foreground">
+          <Link href={ir(n - 1)} className="text-base text-white/55 hover:text-white">
             ← Atrás
           </Link>
         ) : (
@@ -284,7 +284,7 @@ export default async function ReunionPage({
           {PASOS.map((p, i) => (
             <span
               key={p}
-              className={`h-2 w-2 rounded-full ${i === n ? "bg-foreground" : "bg-border-strong"}`}
+              className={`h-2 w-2 rounded-full ${i === n ? "bg-white" : "bg-white/20"}`}
             />
           ))}
         </div>
@@ -292,14 +292,14 @@ export default async function ReunionPage({
         {n < PASOS.length - 1 ? (
           <Link
             href={ir(n + 1)}
-            className="rounded-xl bg-foreground px-6 py-3 text-base font-medium text-surface transition-opacity hover:opacity-90"
+            className="rounded-full bg-white px-6 py-3 text-base font-medium text-[#111318] transition-transform hover:-translate-y-0.5"
           >
             Siguiente →
           </Link>
         ) : (
           <Link
             href={`/niveles/${nivelId}/resultados`}
-            className="rounded-xl bg-foreground px-6 py-3 text-base font-medium text-surface transition-opacity hover:opacity-90"
+            className="rounded-full bg-white px-6 py-3 text-base font-medium text-[#111318] transition-transform hover:-translate-y-0.5"
           >
             Terminar
           </Link>

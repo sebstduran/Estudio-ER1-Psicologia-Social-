@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -25,27 +26,27 @@ export function BarraSuperior({
   salir: ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur print:hidden">
-      <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
+    <header className="sticky top-0 z-40 border-b border-black/6 bg-surface/88 backdrop-blur-xl print:hidden">
+      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-4 px-6 lg:px-10">
         {/* El logotipo vuelve a la PORTADA, no al panel: es el único camino de
             regreso a la elección coordinación / docente una vez dentro. */}
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-ua text-[0.6875rem] font-semibold text-white">
-            UA
+          <span className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-white shadow-sm">
+            <Image src="/logo-ua.png" alt="" width={30} height={24} className="h-auto w-7" />
           </span>
-          <span className="text-[0.9375rem] font-medium tracking-tight">Instrumento CCAA</span>
+          <span className="hidden text-[0.9375rem] font-semibold tracking-tight sm:inline">Comunidades Académicas</span>
         </Link>
 
         <Link
           href="/niveles"
-          className="rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+          className="rounded-full px-3.5 py-2 text-[0.8125rem] text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
         >
           Mis niveles
         </Link>
 
         <div className="ml-auto flex items-center gap-1.5">
           <ThemeToggle />
-          <span className="hidden text-[0.8125rem] text-muted sm:inline">{nombre}</span>
+          <span className="hidden border-l border-border pl-3 text-[0.8125rem] text-muted md:inline">{nombre}</span>
           {salir}
         </div>
       </div>

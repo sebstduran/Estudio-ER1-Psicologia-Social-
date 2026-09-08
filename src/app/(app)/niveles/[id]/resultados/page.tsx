@@ -488,34 +488,34 @@ export default async function ResultadosPage({
   const sinDatos = d.competencias.filter((c) => c.severidad === "SIN_DATOS");
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
+    <div className="product-page">
+      <div className="product-hero mb-8 flex flex-wrap items-start justify-between gap-6">
         <div>
-          <Eyebrow>Reunión de cierre</Eyebrow>
-          <h1 className="mt-1.5 text-3xl font-semibold tracking-tight">
+          <Eyebrow className="!text-white/45">Diagnóstico del nivel</Eyebrow>
+          <h1 className="relative mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">
             Qué fortalecer
           </h1>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="relative mt-3 text-sm text-white/55">
             {d.nivel.nombre}
             {d.reunionActual &&
               ` · Reunión ${d.reunionActual.numero}, ${
                 FASE_LABEL[d.reunionActual.fase as keyof typeof FASE_LABEL]
               }`}
           </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-[0.7rem]">
-            <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-muted"><b className="font-mono text-foreground">{d.participacion.filter((p) => p.completo).length}</b> docentes</span>
-            <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-muted"><b className="font-mono text-foreground">{d.totalVotos}</b> respuestas</span>
-            <span className={`rounded-full border px-2.5 py-1 ${hayActa ? "border-logrado-line bg-logrado-tint text-logrado" : "border-border bg-surface text-muted"}`}><b className="font-mono">{totalActas}</b> {totalActas === 1 ? "acta" : "actas"}</span>
+          <div className="relative mt-5 flex flex-wrap gap-2 text-[0.7rem]">
+            <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.participacion.filter((p) => p.completo).length}</b> docentes</span>
+            <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.totalVotos}</b> respuestas</span>
+            <span className={`rounded-full border px-3 py-1.5 ${hayActa ? "border-logrado/30 bg-logrado/15 text-white" : "border-white/12 bg-white/6 text-white/60"}`}><b className="font-mono">{totalActas}</b> {totalActas === 1 ? "acta" : "actas"}</span>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex flex-wrap items-center gap-2">
           {d.totalVotos > 0 && (
             <Link href={`/reunion/${id}`}>
-              <Button>Presentar la reunión</Button>
+              <Button className="!bg-white !text-[#111318] hover:!bg-white/90">Presentar la reunión</Button>
             </Link>
           )}
           <Link href={`/niveles/${id}`}>
-            <Button variant="secondary">Configurar</Button>
+            <Button variant="secondary" className="!border-white/20 !bg-white/8 !text-white hover:!bg-white/14">Configurar</Button>
           </Link>
         </div>
       </div>

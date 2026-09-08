@@ -109,10 +109,10 @@ export default async function EvaluarPage({
   if (!docente) {
     const action = identificarDocente.bind(null, nivel.id);
     return (
-      <div className="mx-auto max-w-md px-6 py-16">
+      <div className="mx-auto max-w-xl px-6 py-16 sm:py-20">
         {shellHeader}
         <Stepper step={1} />
-        <Card className="animate-fade-in">
+        <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
           <h2 className="text-xl font-semibold tracking-tight">Confirma quién eres y qué haces</h2>
           <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
             Elige una o más asignaturas. No necesitas crear una cuenta.
@@ -159,7 +159,7 @@ export default async function EvaluarPage({
     const asignaturasDelDocente = docente.asignaturas.map((item) => item.asignatura);
 
     return (
-      <div className="mx-auto max-w-2xl px-6 py-16">
+      <div className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
         {shellHeader}
         <Stepper step={2} />
 
@@ -235,7 +235,7 @@ export default async function EvaluarPage({
   const guardarAction = guardarEvaluacion.bind(null, nivel.id, docente.id, asignatura.id);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <div className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
       {shellHeader}
       <Stepper step={3} />
 

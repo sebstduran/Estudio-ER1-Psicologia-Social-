@@ -12,8 +12,8 @@ export function Card({
   return (
     <div
       className={cx(
-        "rounded-[1.25rem] border border-border bg-surface/90 p-5 shadow-[0_18px_48px_-38px_rgba(31,20,25,0.38)] backdrop-blur-sm",
-        interactive && "transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_22px_50px_-36px_rgba(31,20,25,0.48)]",
+        "rounded-[1.5rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,0.42)]",
+        interactive && "transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[0_32px_80px_-48px_rgba(17,19,24,0.5)]",
         className
       )}
       {...props}
@@ -112,14 +112,14 @@ export function Button({
   size?: "sm" | "md";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent font-medium no-underline shadow-sm transition-all duration-200 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ua active:translate-y-px";
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent font-medium no-underline transition-all duration-300 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-ua active:translate-y-px";
   const sizes = {
-    sm: "px-2.5 py-[5px] text-xs",
-    md: "px-4 py-2.5 text-[0.8125rem]",
+    sm: "px-3.5 py-2 text-xs",
+    md: "px-5 py-3 text-[0.8125rem]",
   };
   const variants = {
-    primary: "bg-foreground text-surface hover:opacity-90",
-    secondary: "border-border-strong bg-surface text-foreground hover:border-muted-2 hover:bg-surface-muted",
+    primary: "bg-foreground text-surface shadow-[0_12px_28px_-16px_rgba(17,19,24,.65)] hover:-translate-y-0.5 hover:bg-ua hover:text-white",
+    secondary: "border-border-strong bg-surface text-foreground shadow-sm hover:-translate-y-0.5 hover:border-foreground/40 hover:bg-surface-muted",
     ghost: "text-muted hover:bg-surface-hover hover:text-foreground",
     danger: "bg-incipiente text-white hover:opacity-90",
   };
@@ -150,7 +150,7 @@ export function Field({
 }
 
 export const inputClass =
-  "rounded-xl border border-border-strong bg-surface/80 px-3.5 py-2.5 text-[0.8125rem] text-foreground shadow-sm backdrop-blur-sm placeholder:text-muted-2 transition-all focus:border-ua focus:outline-none focus:ring-4 focus:ring-ua-tint";
+  "rounded-[0.9rem] border border-border-strong bg-surface px-4 py-3 text-[0.875rem] text-foreground shadow-[0_1px_2px_rgba(17,19,24,.04)] placeholder:text-muted-2 transition-all duration-200 focus:border-ua focus:outline-none focus:ring-4 focus:ring-ua-tint";
 
 export function NivelLogroBadge({
   nivel,

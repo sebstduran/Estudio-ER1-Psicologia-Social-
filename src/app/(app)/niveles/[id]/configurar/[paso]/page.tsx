@@ -111,7 +111,7 @@ export default async function ConfigurarPasoPage({
 
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
+    <div className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
       {/* Dónde estás, sin palabras de más */}
       <div className="mb-8 flex items-center gap-2" role="img" aria-label={`Paso ${numero} de ${total}`}>
         {PASOS.map((p, i) => (
@@ -125,12 +125,12 @@ export default async function ConfigurarPasoPage({
       </div>
 
       <Eyebrow>Paso {numero} de {total}</Eyebrow>
-      <h1 className="mt-2 text-[1.75rem] font-semibold leading-tight tracking-tight">
+      <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl">
         {TEXTO[pasoId].titulo}
       </h1>
       <p className="mt-2 text-[0.9375rem] text-muted">{TEXTO[pasoId].ayuda}</p>
 
-      <div className="mt-8">
+      <div className="mt-10 rounded-[2rem] border border-border bg-surface p-5 shadow-[0_28px_80px_-58px_rgba(17,19,24,.48)] sm:p-8">
         {pasoId === "competencias" && (
           <div className="flex flex-col gap-3">
             {nivel.competencias.map((c) => {

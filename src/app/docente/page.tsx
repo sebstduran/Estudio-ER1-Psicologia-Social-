@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { entrarPorCodigo } from "@/lib/actions/evaluar";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -30,17 +31,16 @@ export default async function DocentePage({
     : [];
 
   return (
-    <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col justify-center gap-7 overflow-hidden px-6 py-16">
-      <div aria-hidden="true" className="absolute inset-x-10 top-14 h-48 rounded-full bg-gradient-to-r from-ua-tint via-[#e8f6f5] to-[#edf1ff] blur-3xl" />
-      <div className="text-center">
+    <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-8 overflow-hidden px-6 py-16">
+      <div aria-hidden="true" className="absolute -right-32 top-10 h-96 w-96 rounded-full bg-ua/10 blur-3xl" />
+      <div className="relative">
+        <Link href="/" className="mb-12 inline-flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl border border-border bg-white shadow-sm"><Image src="/logo-ua.png" alt="" width={30} height={24} className="h-auto w-7" /></span><span className="text-sm font-semibold">Comunidades Académicas</span></Link>
         <p className="font-mono text-[0.68rem] font-medium tracking-[.14em] text-ua">ENTRADA DOCENTE</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Entrar como docente</h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Ubica tu curso. Después eliges tus asignaturas y respondes.
-        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">Tu mirada importa.</h1>
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">Ingresa al nivel con el código que recibiste. No necesitas contraseña y responder toma unos minutos.</p>
       </div>
 
-      <Card className="relative animate-fade-in !rounded-[1.75rem] !p-6 sm:!p-8">
+      <Card className="relative animate-fade-in !rounded-[2rem] !p-6 sm:!p-9">
         <form action={entrarPorCodigo} className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nivel">

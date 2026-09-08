@@ -4,23 +4,14 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { registrarCoordinador } from "@/lib/actions/auth";
 import { Button, Card, Field, inputClass } from "@/components/ui";
+import { AuthFrame } from "@/components/auth-frame";
 
 export default function RegistroPage() {
   const [state, formAction, pending] = useActionState(registrarCoordinador, undefined);
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-7 px-6 py-20 sm:py-28">
-      <div className="text-center">
-        <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-ua text-lg font-semibold text-white">
-          E
-        </span>
-        <h1 className="text-2xl font-semibold tracking-tight">Crear cuenta</h1>
-        <p className="mt-1.5 text-sm text-muted">
-          Cada coordinador administra sus propios niveles y datos.
-        </p>
-      </div>
-
-      <Card className="animate-fade-in">
+    <AuthFrame eyebrow="Nueva coordinación" title="Crea tu espacio." description="Tus niveles, respuestas y acuerdos quedarán resguardados en una cuenta de coordinación.">
+      <Card className="!border-0 !p-0 !shadow-none">
         <form action={formAction} className="flex flex-col gap-4">
           <Field label="Nombre completo">
             <input className={inputClass} name="nombre" required autoComplete="name" />
@@ -55,12 +46,12 @@ export default function RegistroPage() {
         </form>
       </Card>
 
-      <p className="text-center text-sm text-muted">
+      <p className="mt-8 text-sm text-muted">
         ¿Ya tienes cuenta?{" "}
         <Link href="/login" className="font-medium text-ua hover:underline">
           Ingresar
         </Link>
       </p>
-    </div>
+    </AuthFrame>
   );
 }

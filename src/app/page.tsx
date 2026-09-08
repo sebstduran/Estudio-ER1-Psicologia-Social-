@@ -111,7 +111,7 @@ export default async function PortadaPage() {
                 </Link>
                 <Link href="/docente" className="group rounded-2xl border border-white/16 bg-white/[.06] p-6 transition hover:-translate-y-1 hover:bg-white/[.1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
                   <span className="text-lg font-semibold">Docente</span>
-                  <span className="mt-8 flex items-end justify-between gap-3 text-sm text-white/48">Entrar con el código<span className="text-xl text-white transition-transform group-hover:translate-x-1" aria-hidden="true">→</span></span>
+                  <span className="mt-8 flex items-end justify-between gap-3 text-sm text-white/48">Solo responder preguntas<span className="text-xl text-white transition-transform group-hover:translate-x-1" aria-hidden="true">→</span></span>
                 </Link>
               </div>
             </div>

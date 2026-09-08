@@ -26,7 +26,7 @@ function ErrorBanner({ error }: { error?: string }) {
 }
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Tus datos", "Tu asignatura", "Tu mirada"];
+  const steps = ["Identifícate", "Tu asignatura", "Responde"];
   return (
     <div className="mb-8 flex items-center gap-2 text-xs text-muted-2">
       {steps.map((label, i) => {
@@ -113,33 +113,18 @@ export default async function EvaluarPage({
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
-          <h2 className="text-xl font-semibold tracking-tight">Confirma quién eres y qué haces</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Confirma quién eres</h2>
           <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
-            Elige una o más asignaturas. No necesitas crear una cuenta.
+            Usaremos tu correo para mostrarte únicamente las asignaturas que la coordinación dejó asociadas a ti.
           </p>
           <form action={action} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Nombre completo</span>
-              <input className={inputClass} name="nombre" required autoComplete="name" />
-            </label>
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium">Correo institucional</span>
               <input className={inputClass} type="email" name="email" required autoComplete="email" />
             </label>
-            <fieldset>
-              <legend className="text-sm font-medium">Asignaturas en las que haces clases</legend>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {nivel.asignaturas.map((a) => (
-                  <label key={a.id} className="cursor-pointer rounded-xl border border-border-strong px-3.5 py-3 text-sm text-muted transition-all hover:border-muted-2 has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua">
-                    <input type="checkbox" name="asignaturaIds" value={a.id} className="mr-2 accent-ua" />
-                    {a.nombre}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
             <ErrorBanner error={error} />
             <Button type="submit" className="mt-1 w-full">
-              Continuar a mis preguntas <span aria-hidden="true">→</span>
+              Ver mis preguntas <span aria-hidden="true">→</span>
             </Button>
           </form>
         </Card>

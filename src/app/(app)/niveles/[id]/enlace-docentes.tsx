@@ -28,8 +28,8 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
     <div className="border-t border-border pt-5">
       <p className={`${CLASE_ROTULO} mb-2.5 block`}>Mándales este enlace</p>
       <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
-        Por correo o WhatsApp. Cada docente pone su nombre, elige su asignatura y evalúa solo
-        lo que le toca. No tiene que crear cuenta ni recordar contraseña.
+        Por correo o WhatsApp. Cada docente se identifica con su correo y responde solo
+        las preguntas de las asignaturas que tú le asignaste. No configura nada.
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <input
@@ -61,7 +61,7 @@ export function EnlaceDocentes({ nivelId, codigo }: { nivelId: string; codigo: s
         </div>
         <p className="max-w-xs text-xs leading-relaxed text-muted-2">
           Para quien perdió el enlace: entra en <span className="font-medium">Docente</span>{" "}
-          desde la portada y lo escribe. Puedes dictarlo en la reunión.
+          desde la portada y escribe únicamente este código.
         </p>
       </div>
     </div>

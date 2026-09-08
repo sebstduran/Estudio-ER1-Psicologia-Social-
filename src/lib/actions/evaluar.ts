@@ -18,11 +18,9 @@ export async function entrarPorCodigo(formData: FormData) {
     redirect(`/docente?error=${encodeURIComponent("Escribe el código que te dio tu coordinación.")}`);
   }
 
-  const numero = Number(formData.get("numero"));
-  const modalidad = formData.get("modalidad");
   const nivel = await prisma.nivel.findUnique({
     where: { codigo },
-    select: { id: true, nombre: true, modalidad: true },
+    select: { id: true },
   });
   if (!nivel) {
     redirect(
@@ -32,68 +30,32 @@ export async function entrarPorCodigo(formData: FormData) {
     );
   }
 
-  const numeroConfigurado = Number(nivel.nombre.match(/\d+/)?.[0]);
-  if (
-    !Number.isInteger(numero) ||
-    numero < 1 ||
-    numero > 14 ||
-    numeroConfigurado !== numero ||
-    nivel.modalidad !== modalidad
-  ) {
-    redirect(
-      `/docente?error=${encodeURIComponent(
-        "Los datos no coinciden. Revisa el nivel, la modalidad y el código con tu coordinación."
-      )}`
-    );
-  }
-
   redirect(`/evaluar/${nivel.id}`);
 }
 
 const identificarDocenteSchema = z.object({
-  nombre: z.string().trim().min(1, "Ingresa tu nombre."),
   email: z.string().trim().toLowerCase().email("Correo inválido."),
-  asignaturaIds: z.array(z.string()).min(1, "Selecciona al menos una asignatura."),
 });
 
-// El docente no tiene cuenta: se identifica por correo dentro del nivel.
-// Si es la primera vez que participa, se crea su registro en el acto.
-// Flujo 100% server-rendered vía redirects con query params (sin JS).
+// La coordinación ya registró al docente y sus asignaturas. Aquí la persona
+// solo se reconoce por su correo; no puede configurar ni alterar el nivel.
 export async function identificarDocente(nivelId: string, formData: FormData) {
   const parsed = identificarDocenteSchema.safeParse({
-    nombre: formData.get("nombre"),
     email: formData.get("email"),
-    asignaturaIds: formData.getAll("asignaturaIds"),
   });
 
   if (!parsed.success) {
     redirect(`/evaluar/${nivelId}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Datos inválidos.")}`);
   }
 
-  const { nombre, email, asignaturaIds } = parsed.data;
-
-  const nivel = await prisma.nivel.findUnique({
-    where: { id: nivelId },
-    include: { asignaturas: { select: { id: true } } },
-  });
-  if (!nivel) redirect(`/evaluar/${nivelId}?error=Nivel no encontrado.`);
-
-  const permitidas = new Set(nivel.asignaturas.map((a) => a.id));
-  const seleccionadas = [...new Set(asignaturaIds)].filter((id) => permitidas.has(id));
-  if (seleccionadas.length === 0) {
-    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent("Selecciona una asignatura de este nivel.")}`);
-  }
-
-  const docente = await prisma.docente.upsert({
+  const { email } = parsed.data;
+  const docente = await prisma.docente.findUnique({
     where: { nivelId_email: { nivelId, email } },
-    update: { nombre },
-    create: { nivelId, nombre, email },
+    select: { id: true },
   });
-
-  await prisma.docenteAsignatura.createMany({
-    data: seleccionadas.map((asignaturaId) => ({ docenteId: docente.id, asignaturaId })),
-    skipDuplicates: true,
-  });
+  if (!docente) {
+    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent("Tu correo aún no está registrado en este nivel. Pide a quien coordina que lo revise.")}`);
+  }
 
   redirect(`/evaluar/${nivelId}?docente=${docente.id}`);
 }

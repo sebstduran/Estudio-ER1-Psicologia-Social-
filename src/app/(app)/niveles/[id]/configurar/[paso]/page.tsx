@@ -6,6 +6,7 @@ import { Button, Eyebrow } from "@/components/ui";
 import { eliminarAsignatura, guardarCompetenciasDeAsignatura } from "@/lib/actions/asignaturas";
 import { eliminarCompetencia } from "@/lib/actions/competencias";
 import { eliminarDocente } from "@/lib/actions/docentes";
+import { lineaDeCodigo, tributacionDePrograma } from "@/lib/tributacion-programas";
 import { AsignaturaForm } from "../../asignatura-form";
 import { CompetenciaForm } from "../../competencia-form";
 import { DocenteForm } from "../../docente-form";
@@ -47,7 +48,7 @@ const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }
   },
   vinculos: {
     titulo: "Qué competencia trabaja cada asignatura",
-    ayuda: "Directa si la enseña y evalúa; transversal si la refuerza.",
+    ayuda: "Ya cargamos lo declarado en cada programa. Abre una asignatura solo si quieres revisarla.",
     pendiente: "Marca al menos un vínculo para terminar.",
   },
 };
@@ -83,6 +84,13 @@ export default async function ConfigurarPasoPage({
     nivel.asignaturas.flatMap((a) =>
       a.mapeos.map((m) => [`${a.id}:${m.competenciaId}`, m.tipo] as const)
     )
+  );
+  const programasEncontrados = nivel.asignaturas.filter((asignatura) =>
+    tributacionDePrograma(asignatura.nombre)
+  ).length;
+  const vinculosDeclarados = nivel.asignaturas.reduce(
+    (total, asignatura) => total + (tributacionDePrograma(asignatura.nombre)?.lineas.length ?? 0),
+    0
   );
 
   const resuelto: Record<PasoId, boolean> = {
@@ -235,77 +243,130 @@ export default async function ConfigurarPasoPage({
             </p>
           ) : (
             <div className="flex flex-col gap-4">
-              {nivel.asignaturas.map((a) => {
+              <div className="rounded-2xl border border-logrado-line bg-logrado-tint/60 p-5">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-logrado text-sm font-semibold text-white" aria-hidden="true">✓</span>
+                  <div>
+                    <h2 className="text-base font-semibold">Cruce curricular preparado</h2>
+                    <p className="mt-1 text-sm leading-relaxed text-muted">
+                      {programasEncontrados} de {nivel.asignaturas.length} programas identificados · {vinculosDeclarados} relaciones declaradas.
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-2">
+                      “Del programa” significa que la competencia aparece expresamente en el programa de la asignatura. “Transversal” sirve para un refuerzo adicional acordado por el equipo.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {nivel.asignaturas.map((a, asignaturaIndex) => {
                 const guardar = guardarCompetenciasDeAsignatura.bind(null, nivel.id, a.id);
                 const tipoDe = (cid: string) => mapeoPorPar.get(`${a.id}:${cid}`) ?? "NADA";
-                const marcadas = nivel.competencias.filter((c) => tipoDe(c.id) !== "NADA").length;
+                const competenciasMarcadas = nivel.competencias.filter((c) => tipoDe(c.id) !== "NADA");
+                const programa = tributacionDePrograma(a.nombre);
+                const coincideConPrograma = programa
+                  ? nivel.competencias.every((competencia) => {
+                      const linea = lineaDeCodigo(competencia.codigo);
+                      const declarada = linea ? programa.lineas.includes(linea) : false;
+                      return declarada
+                        ? tipoDe(competencia.id) === "DIRECTA"
+                        : tipoDe(competencia.id) === "NADA";
+                    })
+                  : false;
+                const estado = programa?.soloGenericas
+                  ? "Solo declara competencia genérica"
+                  : coincideConPrograma
+                    ? "Cargada desde el programa"
+                    : programa
+                      ? "Ajustada por el equipo"
+                      : "Revisión manual";
+                const estadoListo = coincideConPrograma;
 
                 return (
-                  <form
+                  <details
                     key={a.id}
-                    action={guardar}
-                    className="rounded-xl border border-border bg-surface p-5"
+                    open={asignaturaIndex === 0 || !programa}
+                    className="group overflow-hidden rounded-2xl border border-border bg-surface open:shadow-[0_22px_55px_-42px_rgba(17,19,24,.45)]"
                   >
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <h2 className="text-[1.0625rem] font-medium">{a.nombre}</h2>
-                      <span className="text-[0.8125rem] text-muted-2">
-                        {marcadas === 0
-                          ? "sin competencias marcadas"
-                          : `trabaja ${marcadas} ${marcadas === 1 ? "competencia" : "competencias"}`}
-                      </span>
-                    </div>
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:content-none">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-[1.0625rem] font-semibold">{a.nombre}</h2>
+                          <span className={`rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold ${estadoListo ? "bg-logrado-tint text-logrado" : "bg-proceso-tint text-proceso"}`}>
+                            {estado}
+                          </span>
+                        </div>
+                        {competenciasMarcadas.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {competenciasMarcadas.map((competencia) => (
+                              <span key={competencia.id} className="rounded-md border border-border bg-surface-muted px-2 py-1 text-xs text-muted">
+                                {competencia.codigo} {competencia.nombre}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-1.5 text-xs text-muted-2">
+                            {programa?.soloGenericas
+                              ? "El programa no declara una competencia de ciclo."
+                              : "Aún no hay competencias seleccionadas."}
+                          </p>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-lg text-muted-2 transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+                    </summary>
 
-                    <ul className="mt-4 flex flex-col divide-y divide-border">
-                      {nivel.competencias.map((c) => {
-                        const actual = tipoDe(c.id);
-                        return (
-                          <li
-                            key={c.id}
-                            className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 py-3.5"
-                          >
-                            <div className="min-w-0 flex-1 sm:max-w-[26rem]">
-                              <div className="flex items-baseline gap-2.5">
-                                <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
-                                  {c.codigo}
-                                </span>
-                                <span className="text-[0.9375rem] font-medium">{c.nombre}</span>
+                    <form action={guardar} className="border-t border-border bg-surface-muted/35 px-5 pb-5">
+                      <ul className="flex flex-col divide-y divide-border">
+                        {nivel.competencias.map((c) => {
+                          const actual = tipoDe(c.id);
+                          return (
+                            <li
+                              key={c.id}
+                              className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 py-4"
+                            >
+                              <div className="min-w-0 flex-1 sm:max-w-[25rem]">
+                                <div className="flex items-baseline gap-2.5">
+                                  <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
+                                    {c.codigo}
+                                  </span>
+                                  <span className="text-[0.9375rem] font-medium">{c.nombre}</span>
+                                </div>
+                                <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
+                                  {c.descriptor}
+                                </p>
                               </div>
-                              <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-                                {c.descriptor}
-                              </p>
-                            </div>
-                            <div className="flex shrink-0 gap-1">
-                              {(
-                                [
-                                  ["NADA", "No la trabaja"],
-                                  ["DIRECTA", "Directa"],
-                                  ["TRANSVERSAL", "Transversal"],
-                                ] as const
-                              ).map(([valor, etiqueta]) => (
-                                <label
-                                  key={valor}
-                                  className="cursor-pointer select-none rounded-[7px] border border-border-strong px-2.5 py-1 text-xs text-muted transition-colors hover:border-muted-2 hover:text-foreground has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua"
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`tipo:${c.id}`}
-                                    value={valor}
-                                    defaultChecked={actual === valor}
-                                    className="sr-only"
-                                  />
-                                  {etiqueta}
-                                </label>
-                              ))}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                              <div className="flex shrink-0 gap-1">
+                                {(
+                                  [
+                                    ["NADA", "No corresponde"],
+                                    ["DIRECTA", "Del programa"],
+                                    ["TRANSVERSAL", "Transversal"],
+                                  ] as const
+                                ).map(([valor, etiqueta]) => (
+                                  <label
+                                    key={valor}
+                                    className="cursor-pointer select-none rounded-[7px] border border-border-strong px-2.5 py-1 text-xs text-muted transition-colors hover:border-muted-2 hover:text-foreground has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`tipo:${c.id}`}
+                                      value={valor}
+                                      defaultChecked={actual === valor}
+                                      className="sr-only"
+                                    />
+                                    {etiqueta}
+                                  </label>
+                                ))}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
 
-                    <Button type="submit" size="sm" variant="secondary" className="mt-4">
-                      Guardar {a.nombre}
-                    </Button>
-                  </form>
+                      <Button type="submit" size="sm" variant="secondary" className="mt-4">
+                        Guardar cambios
+                      </Button>
+                    </form>
+                  </details>
                 );
               })}
             </div>

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import { nivelDeMalla } from "@/lib/malla-psicologia";
+import { lineaDeCodigo, tributacionDePrograma } from "@/lib/tributacion-programas";
 import { COMPETENCIAS_POR_CICLO } from "../../../prisma/seed-data";
 
 const REUNIONES_POR_MODALIDAD = {
@@ -115,6 +116,33 @@ export async function crearNivel(
         },
       },
     });
+  }
+
+  // Los programas oficiales ya declaran qué competencias tributa cada
+  // asignatura. Las dejamos precargadas para que el coordinador solo revise y
+  // ajuste, en vez de construir la matriz desde cero.
+  const [asignaturas, competencias] = await Promise.all([
+    prisma.asignatura.findMany({ where: { nivelId: nivel.id }, select: { id: true, nombre: true } }),
+    prisma.competencia.findMany({ where: { nivelId: nivel.id }, select: { id: true, codigo: true } }),
+  ]);
+  const competenciaPorLinea = new Map(
+    competencias.flatMap((competencia) => {
+      const linea = lineaDeCodigo(competencia.codigo);
+      return linea ? [[linea, competencia.id] as const] : [];
+    })
+  );
+  const mapeos = asignaturas.flatMap((asignatura) => {
+    const programa = tributacionDePrograma(asignatura.nombre);
+    if (!programa) return [];
+    return programa.lineas.flatMap((linea) => {
+      const competenciaId = competenciaPorLinea.get(linea);
+      return competenciaId
+        ? [{ asignaturaId: asignatura.id, competenciaId, tipo: "DIRECTA" as const }]
+        : [];
+    });
+  });
+  if (mapeos.length > 0) {
+    await prisma.mapeoAsignaturaCompetencia.createMany({ data: mapeos, skipDuplicates: true });
   }
 
   revalidatePath("/niveles");

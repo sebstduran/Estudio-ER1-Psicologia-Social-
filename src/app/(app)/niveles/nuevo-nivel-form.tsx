@@ -17,9 +17,9 @@ export function NuevoNivelForm() {
 
       <Field label="Ciclo formativo">
         <select className={inputClass} name="cicloTipo" defaultValue="INICIAL">
-          <option value="INICIAL">Inicial (6 competencias precargadas)</option>
-          <option value="INTERMEDIO">Intermedio</option>
-          <option value="FINAL">Final</option>
+          <option value="INICIAL">Inicial · 1.º y 2.º año</option>
+          <option value="INTERMEDIO">Intermedio · 3.º y 4.º año</option>
+          <option value="FINAL">Avanzado · 5.º año</option>
         </select>
       </Field>
 

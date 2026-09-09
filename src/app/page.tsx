@@ -3,9 +3,9 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 
 const pasos = [
-  { numero: "01", titulo: "Prepara el nivel", texto: "Registra asignaturas, docentes y las competencias que observarán." },
-  { numero: "02", titulo: "Escucha al equipo", texto: "Cada docente responde desde su teléfono y aporta su mirada del curso." },
-  { numero: "03", titulo: "Decide qué hacer", texto: "Las respuestas y las actas se convierten en prioridades y acuerdos concretos." },
+  { numero: "01", titulo: "Alinea el nivel", texto: "Conecta asignaturas y docentes con las competencias que corresponden al ciclo." },
+  { numero: "02", titulo: "Reúne la evidencia", texto: "Cruza la mirada docente, los resultados y el acta de cada encuentro." },
+  { numero: "03", titulo: "Acuerda y sigue", texto: "Convierte lo observado en decisiones responsables que se revisan en la próxima reunión." },
 ] as const;
 
 const barras = [58, 76, 43, 68, 84, 51] as const;

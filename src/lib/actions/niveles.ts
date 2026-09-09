@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
+import { nivelDeMalla } from "@/lib/malla-psicologia";
 import { COMPETENCIAS_CICLO_INICIAL } from "../../../prisma/seed-data";
 
 const REUNIONES_POR_MODALIDAD = {
@@ -22,8 +23,7 @@ function faseDeReunion(numero: number, totalReuniones: number) {
 }
 
 const nivelSchema = z.object({
-  nombre: z.string().trim().min(1, "Ingresa un nombre para el nivel."),
-  cicloTipo: z.enum(["INICIAL", "INTERMEDIO", "FINAL"]),
+  nivelNumero: z.coerce.number().int().positive(),
   modalidad: z.enum(["DIURNO", "VESPERTINO_TECH"]),
   trimestre: z.string().trim().min(1, "Ingresa el trimestre."),
 });
@@ -59,8 +59,7 @@ export async function crearNivel(
   const user = await requireCoordinador();
 
   const parsed = nivelSchema.safeParse({
-    nombre: formData.get("nombre"),
-    cicloTipo: formData.get("cicloTipo"),
+    nivelNumero: formData.get("nivelNumero"),
     modalidad: formData.get("modalidad"),
     trimestre: formData.get("trimestre"),
   });
@@ -69,7 +68,12 @@ export async function crearNivel(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
 
-  const { nombre, cicloTipo, modalidad, trimestre } = parsed.data;
+  const { nivelNumero, modalidad, trimestre } = parsed.data;
+  const nivelCurricular = nivelDeMalla(modalidad, nivelNumero);
+  if (!nivelCurricular) return { error: "Ese nivel no corresponde a la jornada seleccionada." };
+
+  const nombre = `Nivel ${nivelNumero}`;
+  const cicloTipo = nivelCurricular.ciclo;
   const totalReuniones = REUNIONES_POR_MODALIDAD[modalidad];
 
   const nivel = await prisma.nivel.create({
@@ -85,6 +89,9 @@ export async function crearNivel(
           numero: i + 1,
           fase: faseDeReunion(i + 1, totalReuniones),
         })),
+      },
+      asignaturas: {
+        create: nivelCurricular.asignaturas.map((asignatura) => ({ nombre: asignatura })),
       },
     },
   });

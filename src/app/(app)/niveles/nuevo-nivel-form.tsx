@@ -1,34 +1,53 @@
 "use client";
 
 import { useActionState } from "react";
+import { useState } from "react";
 import { crearNivel } from "@/lib/actions/niveles";
 import { Button, Field, inputClass } from "@/components/ui";
+import { MALLA_PSICOLOGIA, NOMBRE_CICLO, type JornadaMalla } from "@/lib/malla-psicologia";
 
 export function NuevoNivelForm() {
   const [state, formAction, pending] = useActionState(crearNivel, undefined);
+  const [jornada, setJornada] = useState<JornadaMalla>("DIURNO");
+  const [nivelNumero, setNivelNumero] = useState(1);
+  const niveles = MALLA_PSICOLOGIA[jornada];
+  const nivel = niveles.find((item) => item.numero === nivelNumero) ?? niveles[0];
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      <Field label="Jornada">
+        <select
+          className={inputClass}
+          name="modalidad"
+          value={jornada}
+          onChange={(event) => {
+            const siguiente = event.target.value as JornadaMalla;
+            setJornada(siguiente);
+            setNivelNumero(1);
+          }}
+        >
+          <option value="DIURNO">Diurno · 4 reuniones</option>
+          <option value="VESPERTINO_TECH">Vespertino · 3 reuniones</option>
+        </select>
+      </Field>
+
       <Field label="Nivel">
-        <select className={inputClass} name="nombre" defaultValue="Nivel 1" required>
-          {Array.from({ length: 14 }, (_, i) => <option key={i + 1} value={`Nivel ${i + 1}`}>Nivel {i + 1}</option>)}
+        <select
+          className={inputClass}
+          name="nivelNumero"
+          value={nivelNumero}
+          onChange={(event) => setNivelNumero(Number(event.target.value))}
+          required
+        >
+          {niveles.map((item) => <option key={item.numero} value={item.numero}>Nivel {item.numero}</option>)}
         </select>
       </Field>
 
-      <Field label="Ciclo formativo">
-        <select className={inputClass} name="cicloTipo" defaultValue="INICIAL">
-          <option value="INICIAL">Inicial · 1.º y 2.º año</option>
-          <option value="INTERMEDIO">Intermedio · 3.º y 4.º año</option>
-          <option value="FINAL">Avanzado · 5.º año</option>
-        </select>
-      </Field>
-
-      <Field label="Modalidad">
-        <select className={inputClass} name="modalidad" defaultValue="DIURNO">
-          <option value="DIURNO">Diurno (4 reuniones CCAA)</option>
-          <option value="VESPERTINO_TECH">Vespertino/TECH (3 reuniones CCAA)</option>
-        </select>
-      </Field>
+      <div className="rounded-2xl border border-border bg-surface-muted/70 p-4">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-ua">{NOMBRE_CICLO[nivel.ciclo]}</p>
+        <p className="mt-1 text-sm font-medium">{nivel.asignaturas.length} asignaturas cargadas automáticamente</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted">Según la malla oficial de Psicología 2025.</p>
+      </div>
 
       <Field label="Trimestre" hint="Ej. 2026-T3">
         <input className={inputClass} name="trimestre" required />

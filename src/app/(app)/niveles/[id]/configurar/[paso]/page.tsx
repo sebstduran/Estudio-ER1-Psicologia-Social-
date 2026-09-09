@@ -23,15 +23,9 @@ import { DocenteForm } from "../../docente-form";
 
 const TODOS_LOS_PASOS = ["competencias", "asignaturas", "docentes", "vinculos"] as const;
 
-/**
- * En Ciclo Inicial las seis competencias vienen cargadas por el instrumento, así
- * que ese paso no pide nada: era una pantalla donde sólo cabía pulsar
- * «siguiente». Se salta, y el recorrido empieza donde hay algo que hacer.
- */
-function pasosDe(ciclo: "INICIAL" | "INTERMEDIO" | "FINAL"): readonly PasoId[] {
-  return ciclo === "INICIAL"
-    ? (["asignaturas", "docentes", "vinculos"] as const)
-    : TODOS_LOS_PASOS;
+/** Las competencias oficiales ya vienen cargadas en los tres ciclos. */
+function pasosDe(): readonly PasoId[] {
+  return ["asignaturas", "docentes", "vinculos"] as const;
 }
 type PasoId = (typeof TODOS_LOS_PASOS)[number];
 
@@ -98,8 +92,8 @@ export default async function ConfigurarPasoPage({
     vinculos: totalMapeos > 0,
   };
 
-  // El recorrido depende del ciclo: Inicial no pasa por «competencias».
-  const PASOS = pasosDe(nivel.cicloTipo);
+  // Las competencias oficiales se cargan automáticamente para los tres ciclos.
+  const PASOS = pasosDe();
   const indice = PASOS.indexOf(pasoId);
   if (indice === -1) redirect(`/niveles/${id}/configurar/${PASOS[0]}`);
   const numero = indice + 1;

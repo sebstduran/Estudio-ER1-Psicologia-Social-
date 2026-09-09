@@ -51,6 +51,12 @@ export const NOMBRE_CICLO: Record<CicloMalla, string> = {
   FINAL: "Ciclo Avanzado",
 };
 
+export const HITO_CICLO: Record<CicloMalla, string> = {
+  INICIAL: "Nivel de Bachiller",
+  INTERMEDIO: "Nivel de Licenciado",
+  FINAL: "Perfil de Egreso Profesional",
+};
+
 export function nivelDeMalla(jornada: JornadaMalla, numero: number) {
   return MALLA_PSICOLOGIA[jornada].find((nivel) => nivel.numero === numero) ?? null;
 }

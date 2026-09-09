@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { useState } from "react";
 import { crearNivel } from "@/lib/actions/niveles";
 import { Button, Field, inputClass } from "@/components/ui";
-import { MALLA_PSICOLOGIA, NOMBRE_CICLO, type JornadaMalla } from "@/lib/malla-psicologia";
+import { HITO_CICLO, MALLA_PSICOLOGIA, NOMBRE_CICLO, type JornadaMalla } from "@/lib/malla-psicologia";
 
 export function NuevoNivelForm() {
   const [state, formAction, pending] = useActionState(crearNivel, undefined);
@@ -46,7 +46,7 @@ export function NuevoNivelForm() {
       <div className="rounded-2xl border border-border bg-surface-muted/70 p-4">
         <p className="text-xs font-medium uppercase tracking-[0.12em] text-ua">{NOMBRE_CICLO[nivel.ciclo]}</p>
         <p className="mt-1 text-sm font-medium">{nivel.asignaturas.length} asignaturas cargadas automáticamente</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted">Según la malla oficial de Psicología 2025.</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted">{HITO_CICLO[nivel.ciclo]} · 6 competencias oficiales</p>
       </div>
 
       <Field label="Trimestre" hint="Ej. 2026-T3">

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import { nivelDeMalla } from "@/lib/malla-psicologia";
-import { COMPETENCIAS_CICLO_INICIAL } from "../../../prisma/seed-data";
+import { COMPETENCIAS_POR_CICLO } from "../../../prisma/seed-data";
 
 const REUNIONES_POR_MODALIDAD = {
   DIURNO: 4,
@@ -96,33 +96,29 @@ export async function crearNivel(
     },
   });
 
-  // El Ciclo Inicial viene precargado con 6 competencias institucionales;
-  // Intermedio y Final los define el coordinador desde cero.
-  if (cicloTipo === "INICIAL") {
-    const componentes = await prisma.componenteEPG.findMany();
-    const componentePorOrden = new Map(componentes.map((c) => [c.orden, c.id]));
+  const componentes = await prisma.componenteEPG.findMany();
+  const componentePorOrden = new Map(componentes.map((c) => [c.orden, c.id]));
 
-    for (const [i, comp] of COMPETENCIAS_CICLO_INICIAL.entries()) {
-      const componenteEpgId = componentePorOrden.get(comp.componenteOrden);
-      if (!componenteEpgId) continue;
-      await prisma.competencia.create({
-        data: {
-          nivelId: nivel.id,
-          codigo: comp.codigo,
-          nombre: comp.nombre,
-          descriptor: comp.descriptor,
-          orden: i + 1,
-          componenteEpgId,
-          indicadores: {
-            create: comp.indicadores.map((texto, j) => ({ texto, orden: j + 1 })),
-          },
+  for (const [i, comp] of COMPETENCIAS_POR_CICLO[cicloTipo].entries()) {
+    const componenteEpgId = componentePorOrden.get(comp.componenteOrden);
+    if (!componenteEpgId) continue;
+    await prisma.competencia.create({
+      data: {
+        nivelId: nivel.id,
+        codigo: comp.codigo,
+        nombre: comp.nombre,
+        descriptor: comp.descriptor,
+        orden: i + 1,
+        componenteEpgId,
+        indicadores: {
+          create: comp.indicadores.map((texto, j) => ({ texto, orden: j + 1 })),
         },
-      });
-    }
+      },
+    });
   }
 
   revalidatePath("/niveles");
-  redirect(`/niveles/${nivel.id}`);
+  redirect(`/niveles/${nivel.id}/configurar/asignaturas`);
 }
 
 export async function actualizarReunionActual(nivelId: string, numero: number) {

@@ -27,6 +27,7 @@ import { InformeBoton } from "./informe-boton";
 import { AcuerdoForm } from "./acuerdo-form";
 import { ResumenSimple } from "./resumen-simple";
 import { MapaEvidencias } from "./mapa-evidencias";
+import { HITO_CICLO, NOMBRE_CICLO, type CicloMalla } from "@/lib/malla-psicologia";
 
 const FASE_LABEL = {
   BASE: "línea base",
@@ -509,6 +510,7 @@ export default async function ResultadosPage({
               }`}
           </p>
           <div className="relative mt-5 flex flex-wrap gap-2 text-[0.7rem]">
+            <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="text-white">{NOMBRE_CICLO[d.nivel.ciclo as CicloMalla]}</b> · {HITO_CICLO[d.nivel.ciclo as CicloMalla]}</span>
             <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.participacion.filter((p) => p.completo).length}</b> docentes</span>
             <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.totalVotos}</b> respuestas</span>
             <span className={`rounded-full border px-3 py-1.5 ${hayActa ? "border-logrado/30 bg-logrado/15 text-white" : "border-white/12 bg-white/6 text-white/60"}`}><b className="font-mono">{totalActas}</b> {totalActas === 1 ? "acta" : "actas"}</span>

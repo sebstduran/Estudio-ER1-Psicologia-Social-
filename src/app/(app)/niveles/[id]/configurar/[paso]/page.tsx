@@ -47,7 +47,7 @@ const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }
   },
   vinculos: {
     titulo: "Qué competencia trabaja cada asignatura",
-    ayuda: "Marca lo que trabaja cada una. Así cada docente evalúa solo lo suyo.",
+    ayuda: "Directa si la enseña y evalúa; transversal si la refuerza.",
     pendiente: "Marca al menos un vínculo para terminar.",
   },
 };
@@ -261,14 +261,19 @@ export default async function ConfigurarPasoPage({
                         return (
                           <li
                             key={c.id}
-                            className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5"
+                            className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 py-3.5"
                           >
-                            <span className="flex min-w-0 items-baseline gap-2.5">
-                              <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
-                                {c.codigo}
-                              </span>
-                              <span className="truncate text-[0.9375rem]">{c.nombre}</span>
-                            </span>
+                            <div className="min-w-0 flex-1 sm:max-w-[26rem]">
+                              <div className="flex items-baseline gap-2.5">
+                                <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
+                                  {c.codigo}
+                                </span>
+                                <span className="text-[0.9375rem] font-medium">{c.nombre}</span>
+                              </div>
+                              <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
+                                {c.descriptor}
+                              </p>
+                            </div>
                             <div className="flex shrink-0 gap-1">
                               {(
                                 [

@@ -9,12 +9,12 @@ const pasos = [
 ] as const;
 
 const competenciasVista = [
-  { nombre: "Fundamentar", valor: 58 },
-  { nombre: "Investigar", valor: 76 },
-  { nombre: "Evaluar", valor: 43 },
-  { nombre: "Analizar", valor: 68 },
-  { nombre: "Intervenir", valor: 84 },
-  { nombre: "Autoexplorar", valor: 51 },
+  { codigo: "1.1", nombre: "Fundamentar", valor: 58 },
+  { codigo: "2.1", nombre: "Investigar", valor: 76 },
+  { codigo: "3.1", nombre: "Evaluar", valor: 43 },
+  { codigo: "4.1", nombre: "Analizar", valor: 68 },
+  { codigo: "5.1", nombre: "Intervenir", valor: 84 },
+  { codigo: "6.1", nombre: "Autoexplorar", valor: 51 },
 ] as const;
 
 export default async function PortadaPage() {
@@ -53,30 +53,43 @@ export default async function PortadaPage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-[34rem]" aria-label="Ejemplo visual del avance de seis competencias">
-            <div aria-hidden="true" className="absolute -inset-12 rounded-full bg-[#9e1b32]/8 blur-3xl" />
+            <div aria-hidden="true" className="absolute -inset-12 rounded-full bg-[radial-gradient(circle_at_24%_24%,rgba(158,27,50,.16),transparent_42%),radial-gradient(circle_at_80%_82%,rgba(39,167,125,.13),transparent_38%)] blur-2xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-[#111318] p-7 text-white shadow-[0_38px_90px_-42px_rgba(17,19,24,.72)] sm:p-9">
-              <div className="flex items-start justify-between">
+              <div aria-hidden="true" className="absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#9e1b32]/20 blur-3xl" />
+              <div className="relative flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-white/42">Lectura del nivel</p>
-                  <p className="mt-2 text-xl font-medium">Distancia al logro esperado</p>
+                  <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-white/42">Ejemplo de lectura · Ciclo Inicial</p>
+                  <p className="mt-2 text-xl font-medium">El nivel aún no alcanza la meta</p>
                 </div>
-                <span className="rounded-full border border-white/12 px-3 py-1 text-[0.65rem] text-white/55">Meta del ciclo · 70</span>
+                <span className="shrink-0 rounded-full border border-[#d7a536]/30 bg-[#d7a536]/12 px-3 py-1 text-[0.65rem] text-[#f1cf7a]">En riesgo</span>
               </div>
-              <div className="relative mt-12 flex h-56 items-end gap-3 sm:gap-4">
-                <span aria-hidden="true" className="absolute inset-x-0 top-[30%] border-t border-dashed border-white/30" />
-                {competenciasVista.map((competencia, index) => (
-                  <div key={index} className="flex h-full flex-1 flex-col justify-end gap-3">
-                    <span className="text-center font-mono text-[0.62rem] text-white/48">{competencia.valor}</span>
-                    <div className="relative h-full overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/10">
-                      <span className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-[#771126] to-[#d44460] shadow-[0_0_28px_rgba(158,27,50,.75)]" style={{ height: `${competencia.valor}%` }} />
+              <div className="relative mt-7 grid grid-cols-[auto_1fr] items-end gap-5 border-b border-white/10 pb-6">
+                <div><p className="font-mono text-5xl font-semibold tracking-[-.07em]">63<span className="text-lg font-normal text-white/35">/100</span></p><p className="mt-1 text-xs text-white/45">promedio del nivel</p></div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-xl border border-white/10 bg-white/[.05] px-3 py-2.5"><p className="font-mono text-lg font-semibold text-[#70d1ac]">2 de 6</p><p className="mt-0.5 text-[.62rem] text-white/40">logradas</p></div>
+                  <div className="rounded-xl border border-white/10 bg-white/[.05] px-3 py-2.5"><p className="font-mono text-lg font-semibold text-[#f1cf7a]">−7</p><p className="mt-0.5 text-[.62rem] text-white/40">para la meta</p></div>
+                </div>
+              </div>
+              <div className="relative mt-6 space-y-3.5">
+                <div className="grid grid-cols-[1fr_auto] items-center gap-4 text-[.6rem] uppercase tracking-[.12em] text-white/35"><span>Competencia</span><span>Hoy · Meta 70</span></div>
+                {competenciasVista.map((competencia) => {
+                  const lograda = competencia.valor >= 70;
+                  const color = lograda ? "#35a77d" : "#d7a536";
+                  return (
+                    <div key={competencia.codigo} className="grid grid-cols-[6.8rem_1fr_2rem] items-center gap-3">
+                      <div className="min-w-0"><p className="truncate text-xs font-medium">{competencia.nombre}</p><p className="font-mono text-[.55rem] text-white/30">{competencia.codigo}</p></div>
+                      <div className="relative h-2.5 rounded-full bg-white/[.08] ring-1 ring-inset ring-white/[.06]">
+                        <span aria-hidden="true" className="absolute -top-1 bottom-[-4px] z-10 border-l border-dashed border-white/45" style={{ left: "70%" }} />
+                        <span className="block h-full rounded-full" style={{ width: `${competencia.valor}%`, background: `linear-gradient(90deg, ${color}99, ${color})`, boxShadow: `0 0 14px ${color}55` }} />
+                      </div>
+                      <span className="text-right font-mono text-xs font-semibold tabular-nums" style={{ color }}>{competencia.valor}</span>
                     </div>
-                    <span className="text-center font-mono text-[0.58rem] text-white/36" title={competencia.nombre}>C{index + 1}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6">
-                <div><p className="text-[0.65rem] text-white/42">Fortaleza del nivel</p><p className="mt-1 text-sm font-medium">Intervenir · 84</p></div>
-                <div><p className="text-[0.65rem] text-white/42">Próximo foco</p><p className="mt-1 text-sm font-medium">Evaluar · faltan 27</p></div>
+              <div className="relative mt-7 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.055] px-4 py-3.5">
+                <div><p className="font-mono text-[.58rem] uppercase tracking-[.13em] text-[#f1cf7a]">Primera prioridad</p><p className="mt-1 text-sm font-medium">Evaluar · faltan 27 puntos</p></div>
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#d7a536] text-lg text-[#17130a]" aria-hidden="true">↗</span>
               </div>
             </div>
           </div>

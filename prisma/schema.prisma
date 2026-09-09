@@ -1,4 +1,4 @@
-// Schema de datos del Instrumento CCAA — EPG
+// Datos de Comunidades Académicas de Psicología — EPG
 // Ver AGENTS.md del proyecto para contexto institucional.
 
 generator client {
@@ -158,7 +158,6 @@ model MapeoAsignaturaCompetencia {
 model Docente {
   id     String @id @default(cuid())
   nombre String
-  email  String
 
   nivelId String
   nivel   Nivel  @relation(fields: [nivelId], references: [id], onDelete: Cascade)
@@ -167,7 +166,6 @@ model Docente {
   evaluaciones Evaluacion[]
   percepciones Percepcion[]
 
-  @@unique([nivelId, email])
   @@index([nivelId])
 }
 

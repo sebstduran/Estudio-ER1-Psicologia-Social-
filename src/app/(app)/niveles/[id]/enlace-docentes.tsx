@@ -37,8 +37,8 @@ export function EnlaceDocentes({
       <p className={`${CLASE_ROTULO} mb-2.5 block`}>{compacto ? "Enlace para docentes" : "Mándales este enlace"}</p>
       {!compacto && (
         <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
-          Por correo o WhatsApp. Cada docente se identifica con su correo y responde solo
-          las preguntas de las asignaturas que tú le asignaste. No configura nada.
+          Por correo o WhatsApp. Cada docente elige su nombre y responde solo las preguntas
+          de las asignaturas que tú le asignaste. No necesita cuenta ni correo.
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">

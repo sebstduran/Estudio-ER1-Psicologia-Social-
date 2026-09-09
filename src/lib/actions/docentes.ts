@@ -15,7 +15,6 @@ async function nivelDelCoordinador(nivelId: string, coordinadorId: string) {
 
 const docenteSchema = z.object({
   nombre: z.string().trim().min(1, "Ingresa el nombre del docente."),
-  email: z.string().trim().toLowerCase().email("Correo inválido."),
   asignaturaIds: z.array(z.string()).min(1, "Selecciona al menos una asignatura."),
 });
 
@@ -31,7 +30,6 @@ export async function crearDocente(
 
   const parsed = docenteSchema.safeParse({
     nombre: formData.get("nombre"),
-    email: formData.get("email"),
     asignaturaIds: formData.getAll("asignaturaIds"),
   });
 
@@ -39,18 +37,17 @@ export async function crearDocente(
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
 
-  const existente = await prisma.docente.findUnique({
-    where: { nivelId_email: { nivelId, email: parsed.data.email } },
+  const existente = await prisma.docente.findFirst({
+    where: { nivelId, nombre: { equals: parsed.data.nombre, mode: "insensitive" } },
   });
   if (existente) {
-    return { error: "Ya existe un docente con ese correo en este nivel." };
+    return { error: "Ese docente ya está agregado en este nivel." };
   }
 
   await prisma.docente.create({
     data: {
       nivelId,
       nombre: parsed.data.nombre,
-      email: parsed.data.email,
       asignaturas: {
         create: parsed.data.asignaturaIds.map((asignaturaId) => ({ asignaturaId })),
       },

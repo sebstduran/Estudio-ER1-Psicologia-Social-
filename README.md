@@ -1,4 +1,4 @@
-# Instrumento CCAA — EPG
+# Comunidades Académicas de Psicología
 
 Aplicación para coordinadores de Comunidad Académica (CCAA) de Psicología UA:
 diagnostica el logro de las competencias de ciclo a partir del juicio docente

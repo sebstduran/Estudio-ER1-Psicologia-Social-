@@ -167,7 +167,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
           <Eyebrow>Paso 2 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Envía el enlace al equipo docente</h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona entra, confirma su correo y responde únicamente las preguntas de sus asignaturas.</p>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona entra, elige su nombre y responde únicamente las preguntas de sus asignaturas. Sin cuenta ni correo.</p>
           <div className="mt-7"><EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} /></div>
           <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">Aún no hay respuestas. Cuando llegue la primera, se habilitará el paso del acta.</p>
         </section>

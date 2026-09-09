@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Instrumento CCAA · EPG",
+  title: "Comunidades Académicas · Psicología",
   description: "Diagnóstico de competencias de ciclo y decisiones de Estrategia Pedagógica Global.",
 };
 

@@ -18,14 +18,9 @@ export function DocenteForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Nombre del docente">
-          <input className={inputClass} name="nombre" required />
-        </Field>
-        <Field label="Correo">
-          <input className={inputClass} type="email" name="email" required />
-        </Field>
-      </div>
+      <Field label="Nombre del docente">
+        <input className={inputClass} name="nombre" required autoComplete="off" />
+      </Field>
 
       <div>
         <span className="text-sm font-medium text-foreground">Asignaturas que dicta</span>

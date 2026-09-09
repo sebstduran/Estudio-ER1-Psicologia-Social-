@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -31,33 +30,6 @@ export async function entrarPorCodigo(formData: FormData) {
   }
 
   redirect(`/evaluar/${nivel.id}`);
-}
-
-const identificarDocenteSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Correo inválido."),
-});
-
-// La coordinación ya registró al docente y sus asignaturas. Aquí la persona
-// solo se reconoce por su correo; no puede configurar ni alterar el nivel.
-export async function identificarDocente(nivelId: string, formData: FormData) {
-  const parsed = identificarDocenteSchema.safeParse({
-    email: formData.get("email"),
-  });
-
-  if (!parsed.success) {
-    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Datos inválidos.")}`);
-  }
-
-  const { email } = parsed.data;
-  const docente = await prisma.docente.findUnique({
-    where: { nivelId_email: { nivelId, email } },
-    select: { id: true },
-  });
-  if (!docente) {
-    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent("Tu correo aún no está registrado en este nivel. Pide a quien coordina que lo revise.")}`);
-  }
-
-  redirect(`/evaluar/${nivelId}?docente=${docente.id}`);
 }
 
 const NIVEL_LOGRO = ["LOGRADO", "EN_PROCESO", "INCIPIENTE", "NO_TRABAJADO"] as const;

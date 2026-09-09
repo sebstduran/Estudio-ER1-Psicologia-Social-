@@ -106,7 +106,6 @@ export type CompetenciaDiagnostico = {
 export type ParticipacionDocente = {
   id: string;
   nombre: string;
-  email: string;
   asignaturas: string[];
   esperadas: number;
   respondidas: number;
@@ -268,7 +267,6 @@ export async function construirDiagnostico(
     return {
       id: d.id,
       nombre: d.nombre,
-      email: d.email,
       asignaturas: d.asignaturas.map((da) => da.asignatura.nombre),
       esperadas,
       respondidas,

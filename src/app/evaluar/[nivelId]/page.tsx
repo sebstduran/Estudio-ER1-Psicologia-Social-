@@ -2,12 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
-import { identificarDocente, guardarEvaluacion } from "@/lib/actions/evaluar";
+import { guardarEvaluacion } from "@/lib/actions/evaluar";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
   INTERMEDIO: "Ciclo Intermedio",
-  FINAL: "Ciclo Final",
+  FINAL: "Ciclo Avanzado",
 } as const;
 
 const FASE_LABEL = {
@@ -26,7 +26,7 @@ function ErrorBanner({ error }: { error?: string }) {
 }
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
-  const steps = ["Identifícate", "Tu asignatura", "Responde"];
+  const steps = ["Tu nombre", "Tu asignatura", "Responde"];
   return (
     <div className="mb-8 flex items-center gap-2 text-xs text-muted-2">
       {steps.map((label, i) => {
@@ -75,6 +75,10 @@ export default async function EvaluarPage({
     where: { id: nivelId },
     include: {
       asignaturas: { orderBy: { nombre: "asc" } },
+      docentes: {
+        orderBy: { nombre: "asc" },
+        include: { asignaturas: { include: { asignatura: true } } },
+      },
       reuniones: { orderBy: { numero: "asc" } },
     },
   });
@@ -82,12 +86,7 @@ export default async function EvaluarPage({
 
   const reunionActual = nivel.reuniones.find((r) => r.numero === nivel.reunionActualNumero);
 
-  const docente = docenteId
-    ? await prisma.docente.findFirst({
-        where: { id: docenteId, nivelId },
-        include: { asignaturas: { include: { asignatura: true } } },
-      })
-    : null;
+  const docente = docenteId ? nivel.docentes.find((item) => item.id === docenteId) ?? null : null;
 
   const shellHeader = (
     <div className="mb-8">
@@ -107,26 +106,36 @@ export default async function EvaluarPage({
 
   // ── Paso 1: identificación ─────────────────────────────────────
   if (!docente) {
-    const action = identificarDocente.bind(null, nivel.id);
     return (
-      <div className="mx-auto max-w-xl px-6 py-16 sm:py-20">
+      <div className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
         {shellHeader}
         <Stepper step={1} />
         <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
-          <h2 className="text-xl font-semibold tracking-tight">Confirma quién eres</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Elige tu nombre</h2>
           <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
-            Usaremos tu correo para mostrarte únicamente las asignaturas que la coordinación dejó asociadas a ti.
+            Verás únicamente las asignaturas que la coordinación dejó asociadas a ti.
           </p>
-          <form action={action} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Correo institucional</span>
-              <input className={inputClass} type="email" name="email" required autoComplete="email" />
-            </label>
-            <ErrorBanner error={error} />
-            <Button type="submit" className="mt-1 w-full">
-              Ver mis preguntas <span aria-hidden="true">→</span>
-            </Button>
-          </form>
+          <ErrorBanner error={error} />
+          <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
+            {nivel.docentes.map((persona) => (
+              <Link
+                key={persona.id}
+                href={`/evaluar/${nivel.id}?docente=${persona.id}`}
+                className="group rounded-2xl border border-border bg-surface-muted/55 p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface"
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span className="font-medium">{persona.nombre}</span>
+                  <span className="text-ua transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                </span>
+                <span className="mt-1.5 block text-xs leading-relaxed text-muted">
+                  {persona.asignaturas.map((item) => item.asignatura.nombre).join(" · ") || "Sin asignatura asignada"}
+                </span>
+              </Link>
+            ))}
+            {nivel.docentes.length === 0 && (
+              <p className="text-sm text-muted sm:col-span-2">La coordinación todavía no ha agregado docentes a este nivel.</p>
+            )}
+          </div>
         </Card>
       </div>
     );

@@ -107,9 +107,9 @@ async function main() {
   }
 
   const docentesInfo = [
-    { nombre: "Prof. Carla Vidal", email: "carla.vidal@ua.cl", asigIdx: 0 },
-    { nombre: "Prof. Matías Herrera", email: "matias.herrera@ua.cl", asigIdx: 1 },
-    { nombre: "Prof. Daniela Soto", email: "daniela.soto@ua.cl", asigIdx: 2 },
+    { nombre: "Prof. Carla Vidal", asigIdx: 0 },
+    { nombre: "Prof. Matías Herrera", asigIdx: 1 },
+    { nombre: "Prof. Daniela Soto", asigIdx: 2 },
   ];
   const docentes: Prisma.DocenteGetPayload<object>[] = [];
   for (const d of docentesInfo) {
@@ -118,7 +118,6 @@ async function main() {
         data: {
           nivelId: nivel.id,
           nombre: d.nombre,
-          email: d.email,
           asignaturas: { create: [{ asignaturaId: asignaturas[d.asigIdx].id }] },
         },
       })

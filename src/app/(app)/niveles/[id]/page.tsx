@@ -32,6 +32,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
   const sp = await searchParams;
   const aviso = typeof sp.error === "string" ? sp.error : undefined;
   const actaSubida = sp.acta === "1";
+  const revisarActa = sp.revision === "acta";
 
   const user = await requireCoordinador();
 
@@ -130,6 +131,18 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         })}
       </nav>
 
+      <section aria-labelledby="accesos-revision" className="mb-6 rounded-[1.75rem] border border-border bg-surface/80 p-5 backdrop-blur-xl sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><p className={CLASE_ROTULO}>ACCESOS PARA REVISAR</p><h2 id="accesos-revision" className="mt-1 text-xl font-semibold">Puedes mirar todo el recorrido</h2></div>
+          <p className="text-xs text-muted">La vista previa no modifica tus datos.</p>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <Link href={`/evaluar/${nivel.id}`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">02</span><b className="mt-3 block text-sm">Formulario docente</b><span className="mt-1 block text-xs text-muted">Ver lo que responderán</span></Link>
+          <Link href={`/niveles/${nivel.id}?revision=acta#cargar-acta`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">03</span><b className="mt-3 block text-sm">Carga de acta</b><span className="mt-1 block text-xs text-muted">Abrir aunque falten respuestas</span></Link>
+          <Link href={`/niveles/${nivel.id}/resultados/vista-previa`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">04</span><b className="mt-3 block text-sm">Resultados</b><span className="mt-1 block text-xs text-muted">Previsualizar con datos simulados</span></Link>
+        </div>
+      </section>
+
       <section className="mb-6 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><p className={CLASE_ROTULO}>RECORRIDO DEL PERÍODO</p><h2 className="mt-1 text-xl font-semibold">Elige la reunión de hoy</h2></div>
@@ -173,11 +186,11 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </section>
       )}
 
-      {hayRespuestas && !hayActa && reunionActual && (
-        <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
+      {!hayActa && reunionActual && (hayRespuestas || revisarActa) && (
+        <section id="cargar-acta" className="scroll-mt-24 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
           <Eyebrow>Paso 3 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Sube el acta de la reunión</h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Ya recibimos {plural(totalEvaluaciones, "respuesta", "respuestas")}. Ahora agrega el acta para completar la evidencia de esta reunión.</p>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">{hayRespuestas ? `Ya recibimos ${plural(totalEvaluaciones, "respuesta", "respuestas")}. Ahora agrega el acta para completar la evidencia de esta reunión.` : "Puedes revisar o utilizar la carga desde ahora. Los resultados reales se habilitarán cuando también exista al menos una respuesta docente."}</p>
           <form action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")} className="mt-7 flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5 sm:flex-row sm:items-center">
             <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="min-w-0 flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-full file:border file:border-border-strong file:bg-surface file:px-3.5 file:py-2 file:text-xs file:font-medium file:text-foreground" />
             <Button type="submit">Subir acta de R{reunionActual.numero}</Button>

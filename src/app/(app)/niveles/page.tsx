@@ -57,6 +57,30 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
         )}
       </div>
       </section>
+
+      <section aria-labelledby="revisar-todo" className="mt-5 rounded-[1.75rem] border border-border bg-surface/78 p-5 shadow-[0_18px_50px_-42px_rgba(17,19,24,.38)] backdrop-blur-xl sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-ua">ACCESO DIRECTO</p>
+            <h2 id="revisar-todo" className="mt-1 text-xl font-semibold tracking-tight">Revisa cualquier parte</h2>
+          </div>
+          <p className="text-xs text-muted">No necesitas completar el paso anterior para mirar.</p>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { numero: "01", titulo: "Preparación", apoyo: "Nivel, equipo y competencias", href: `/niveles/${nivel.id}` },
+            { numero: "02", titulo: "Formulario docente", apoyo: "Lo que recibirá el equipo", href: `/evaluar/${nivel.id}` },
+            { numero: "03", titulo: "Subir un acta", apoyo: `Acta de la reunión ${nivel.reunionNumero}`, href: `/niveles/${nivel.id}?revision=acta#cargar-acta` },
+            { numero: "04", titulo: "Vista de resultados", apoyo: "Ejemplo completo y seguro", href: `/niveles/${nivel.id}/resultados/vista-previa` },
+          ].map((acceso) => (
+            <Link key={acceso.numero} href={acceso.href} className="group rounded-2xl border border-border bg-surface-muted/55 p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface">
+              <span className="font-mono text-[0.68rem] font-semibold text-ua">{acceso.numero}</span>
+              <span className="mt-5 block text-sm font-semibold">{acceso.titulo}</span>
+              <span className="mt-1 flex items-center justify-between gap-2 text-xs text-muted"><span>{acceso.apoyo}</span><span className="transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span></span>
+            </Link>
+          ))}
+        </div>
+      </section>
     </>
   );
 }

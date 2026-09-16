@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import type { ReactNode } from "react";
 import { prisma } from "@/lib/prisma";
 import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
 import { guardarEvaluacion } from "@/lib/actions/evaluar";
+import { FormularioEvaluacion } from "./formulario-evaluacion";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
@@ -28,17 +31,17 @@ function ErrorBanner({ error }: { error?: string }) {
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
   const steps = ["Tu nombre", "Tu asignatura", "Responde"];
   return (
-    <div className="mb-8 flex items-center gap-2 text-xs text-muted-2">
+    <div className="surface-glass mb-8 grid grid-cols-3 gap-1.5 rounded-2xl p-2 text-xs text-muted-2 shadow-[0_24px_60px_-46px_rgba(17,19,24,.5)]">
       {steps.map((label, i) => {
         const n = (i + 1) as 1 | 2 | 3;
         const active = n === step;
         const done = n < step;
         return (
-          <div key={label} className="flex items-center gap-2">
+          <div key={label} className={`flex min-w-0 items-center gap-2 rounded-xl px-2.5 py-2.5 sm:px-3 ${active ? "bg-foreground text-surface shadow-sm" : ""}`}>
             <span
               className={`grid h-[18px] w-[18px] place-items-center rounded-md font-mono text-[0.625rem] font-medium ${
                 active
-                  ? "bg-foreground text-surface"
+                  ? "bg-white/14 text-current"
                   : done
                     ? "border border-logrado-line bg-logrado-tint text-logrado"
                     : "bg-surface-hover text-muted-2"
@@ -46,12 +49,54 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
             >
               {done ? "✓" : n}
             </span>
-            <span className={active ? "font-medium text-foreground" : ""}>{label}</span>
-            {i < steps.length - 1 && <span className="mx-1 text-border-strong">—</span>}
+            <span className={`truncate ${active ? "font-medium text-current" : ""}`}>{label}</span>
           </div>
         );
       })}
     </div>
+  );
+}
+
+function MarcoDocente({
+  nivel,
+  ciclo,
+  trimestre,
+  reunion,
+  step,
+  children,
+}: {
+  nivel: string;
+  ciclo: string;
+  trimestre: string;
+  reunion: string | null;
+  step: 1 | 2 | 3;
+  children: ReactNode;
+}) {
+  return (
+    <main className="assessment-page min-h-screen pb-20">
+      <header className="relative overflow-hidden bg-[#12141a] text-white">
+        <div aria-hidden="true" className="absolute -right-32 -top-40 h-[30rem] w-[30rem] rounded-full bg-ua/35 blur-3xl" />
+        <div aria-hidden="true" className="absolute -bottom-36 left-[18%] h-72 w-72 rounded-full bg-[#167b75]/20 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-7 sm:pb-24 sm:pt-9">
+          <Link href="/" className="inline-flex items-center gap-2.5 text-sm font-medium text-white/78">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white shadow-lg"><Image src="/logo-ua.png" alt="" width={29} height={23} className="h-auto w-7" /></span>
+            Comunidades Académicas
+          </Link>
+          <div className="mt-14 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="font-mono text-[.65rem] font-medium uppercase tracking-[.16em] text-[#f0a4b2]">{ciclo} · {trimestre}</p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">{nivel}</h1>
+              <p className="mt-3 text-sm text-white/48">Tu observación profesional se integra al análisis del nivel.</p>
+            </div>
+            {reunion && <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/72">{reunion}</span>}
+          </div>
+        </div>
+      </header>
+      <div className="relative mx-auto -mt-8 max-w-5xl px-6">
+        <Stepper step={step} />
+        {children}
+      </div>
+    </main>
   );
 }
 
@@ -88,40 +133,25 @@ export default async function EvaluarPage({
 
   const docente = docenteId ? nivel.docentes.find((item) => item.id === docenteId) ?? null : null;
 
-  const shellHeader = (
-    <div className="mb-8">
-      <Eyebrow>
-        {CICLO_LABEL[nivel.cicloTipo]} · {nivel.trimestre}
-      </Eyebrow>
-      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-[2.125rem]">
-        {nivel.nombre}
-      </h1>
-      {reunionActual && (
-        <p className="mt-1.5 text-sm text-muted">
-          Reunión {reunionActual.numero} · {FASE_LABEL[reunionActual.fase]}
-        </p>
-      )}
-    </div>
-  );
+  const reunionTexto = reunionActual
+    ? `Reunión ${reunionActual.numero} · ${FASE_LABEL[reunionActual.fase]}`
+    : null;
 
   // ── Paso 1: identificación ─────────────────────────────────────
   if (!docente) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
-        {shellHeader}
-        <Stepper step={1} />
+      <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={1}>
         <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
-          <h2 className="text-xl font-semibold tracking-tight">Elige tu nombre</h2>
-          <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
-            Verás únicamente las asignaturas que la coordinación dejó asociadas a ti.
-          </p>
+          <p className="font-mono text-[.64rem] font-medium uppercase tracking-[.14em] text-ua">PASO 1 · IDENTIFICARTE</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">¿Cuál es tu nombre?</h2>
+          <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">Solo verás las asignaturas asociadas a ti. No necesitas contraseña.</p>
           <ErrorBanner error={error} />
           <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
             {nivel.docentes.map((persona) => (
               <Link
                 key={persona.id}
                 href={`/evaluar/${nivel.id}?docente=${persona.id}`}
-                className="group rounded-2xl border border-border bg-surface-muted/55 p-4 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface"
+              className="group rounded-2xl border border-border bg-surface/72 p-4 shadow-[0_12px_30px_-26px_rgba(17,19,24,.4)] transition-all hover:-translate-y-0.5 hover:border-ua/35 hover:bg-surface"
               >
                 <span className="flex items-center justify-between gap-3">
                   <span className="font-medium">{persona.nombre}</span>
@@ -137,7 +167,7 @@ export default async function EvaluarPage({
             )}
           </div>
         </Card>
-      </div>
+      </MarcoDocente>
     );
   }
 
@@ -153,14 +183,11 @@ export default async function EvaluarPage({
     const asignaturasDelDocente = docente.asignaturas.map((item) => item.asignatura);
 
     return (
-      <div className="mx-auto max-w-3xl px-6 py-16 sm:py-20">
-        {shellHeader}
-        <Stepper step={2} />
-
-        <p className="mb-4 text-sm text-muted">
-          Hola <span className="font-medium text-foreground">{docente.nombre}</span>, elige la
-          asignatura que vas a evaluar.
-        </p>
+      <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={2}>
+        <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
+          <p className="font-mono text-[.64rem] font-medium uppercase tracking-[.14em] text-ua">PASO 2 · TU ASIGNATURA</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">Hola, {docente.nombre}</h2>
+          <p className="mb-5 mt-2 text-sm text-muted">Elige la asignatura que vas a evaluar.</p>
 
         <ErrorBanner error={error} />
         {guardado && (
@@ -175,8 +202,8 @@ export default async function EvaluarPage({
               key={a.id}
               href={`/evaluar/${nivel.id}?docente=${docente.id}&asignatura=${a.id}`}
             >
-              <Card interactive className="!p-4 text-sm font-medium">
-                {a.nombre}
+              <Card interactive className="group !p-5 text-sm font-medium">
+                <span className="flex items-center justify-between gap-4">{a.nombre}<span className="text-lg text-ua transition-transform group-hover:translate-x-1">→</span></span>
               </Card>
             </Link>
           ))}
@@ -187,7 +214,8 @@ export default async function EvaluarPage({
             </Card>
           )}
         </div>
-      </div>
+        </Card>
+      </MarcoDocente>
     );
   }
 
@@ -229,18 +257,16 @@ export default async function EvaluarPage({
   const guardarAction = guardarEvaluacion.bind(null, nivel.id, docente.id, asignatura.id);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
-      {shellHeader}
-      <Stepper step={3} />
-
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-[0.8125rem] text-muted">
-          Estás evaluando <span className="font-medium text-foreground">{asignatura.nombre}</span>{" "}
-          como {docente.nombre}.
-        </p>
+    <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={3}>
+      <div className="surface-glass mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl px-5 py-4">
+        <div>
+          <p className="font-mono text-[.6rem] font-medium uppercase tracking-[.13em] text-ua">RESPONDIENDO COMO {docente.nombre}</p>
+          <p className="mt-1 text-base font-semibold">{asignatura.nombre}</p>
+          <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "competencia" : "competencias"} · alrededor de 5 minutos</p>
+        </div>
         <Link
           href={`/evaluar/${nivel.id}?docente=${docente.id}`}
-          className="text-xs text-muted-2 hover:text-foreground"
+          className="rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted transition-colors hover:border-border-strong hover:text-foreground"
         >
           Cambiar asignatura
         </Link>
@@ -254,27 +280,34 @@ export default async function EvaluarPage({
           complete el mapeo en la configuración del nivel.
         </Card>
       ) : (
-        <form action={guardarAction} className="flex flex-col gap-6">
-          {competenciasTributadas.map(({ competencia, tipo }) => (
-            <Card key={competencia.id} className="animate-fade-in">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <Eyebrow>
-                  {competencia.codigo} · {competencia.componenteEpg.nombre}
-                </Eyebrow>
-                <TipoMapeoBadge tipo={tipo} />
-              </div>
-              <h3 className="text-lg font-medium">{competencia.nombre}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{competencia.descriptor}</p>
+        <FormularioEvaluacion action={guardarAction}>
+          {competenciasTributadas.map(({ competencia, tipo }, competenciaIndex) => (
+            <details key={competencia.id} open={competenciaIndex === 0} className="assessment-competency group animate-fade-in overflow-hidden rounded-[1.5rem] border border-white/70 bg-surface/80 shadow-[0_24px_70px_-52px_rgba(17,19,24,.52)] backdrop-blur-xl">
+              <summary className="relative cursor-pointer list-none overflow-hidden bg-[#17191f] p-6 text-white marker:content-none sm:p-7">
+                <div aria-hidden="true" className="absolute -right-12 -top-20 h-44 w-44 rounded-full bg-ua/24 blur-3xl" />
+                <div className="relative flex items-start gap-4">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/12 bg-white/[.07] font-mono text-xs text-white/70">{String(competenciaIndex + 1).padStart(2, "0")}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <Eyebrow className="!text-white/48">{competencia.codigo} · {competencia.componenteEpg.nombre}</Eyebrow>
+                      <span className="flex items-center gap-3"><TipoMapeoBadge tipo={tipo} /><span aria-hidden="true" className="text-white/38 transition-transform group-open:rotate-180">⌄</span></span>
+                    </div>
+                    <h3 className="text-xl font-semibold tracking-[-.03em]">{competencia.nombre}</h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/52">{competencia.descriptor}</p>
+                  </div>
+                </div>
+              </summary>
 
-              <div className="mt-5 flex flex-col divide-y divide-border">
+              <div className="flex flex-col gap-3 p-4 sm:p-6">
                 {competencia.indicadores.map((ind) => {
                   const previa = previaPorIndicador.get(ind.id);
                   return (
-                    <div key={ind.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
-                      <p className="text-sm">{ind.texto}</p>
+                    <div key={ind.id} className="rounded-2xl border border-border/80 bg-surface/72 p-4 sm:p-5">
+                      <p className="text-sm font-medium leading-relaxed">{ind.texto}</p>
+                      <p className="mb-3 mt-1 text-xs text-muted-2">¿Dónde se encuentra hoy la mayoría del curso?</p>
                       <RubricaControl name={`logro:${ind.id}`} defaultValue={previa?.nivelLogro} />
                       <textarea
-                        className={`${inputClass} min-h-16 text-sm`}
+                        className={`${inputClass} mt-3 min-h-16 text-sm`}
                         name={`comentario:${ind.id}`}
                         placeholder="¿Algo que quieras agregar? (opcional)"
                         defaultValue={previa?.comentario ?? ""}
@@ -283,16 +316,16 @@ export default async function EvaluarPage({
                   );
                 })}
               </div>
-            </Card>
+            </details>
           ))}
 
           {/* Dos preguntas dirigidas, no una caja en blanco: una caja en blanco
               se devuelve en blanco. Esto es lo que antes se decía en la reunión
               y se perdía en el acta, así que va aquí, mientras la persona
               todavía tiene el curso en la cabeza. */}
-          <Card className="animate-fade-in">
-            <Eyebrow>Lo que no cabe en la rúbrica</Eyebrow>
-            <h3 className="mt-3 text-lg font-medium">Cuéntanos cómo lo ves tú</h3>
+          <Card className="animate-fade-in !rounded-[2rem] !p-6 sm:!p-8">
+            <Eyebrow>Tu lectura profesional</Eyebrow>
+            <h3 className="mt-3 text-2xl font-semibold tracking-[-.035em]">Lo que los números no alcanzan a mostrar</h3>
             <p className="mt-1 text-sm leading-relaxed text-muted">
               Opcional, pero es lo que más ayuda a decidir qué hacer. Lo lee quien coordina
               y alimenta las recomendaciones.
@@ -333,11 +366,12 @@ export default async function EvaluarPage({
             </div>
           </Card>
 
-          <Button type="submit" size="md" className="self-start">
-            Guardar evaluación
-          </Button>
-        </form>
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/70 bg-surface/88 px-5 py-4 shadow-[0_24px_70px_-35px_rgba(17,19,24,.48)] backdrop-blur-2xl">
+            <p className="text-xs text-muted">Al guardar, podrás responder otra asignatura.</p>
+            <Button type="submit" size="md">Guardar evaluación <span aria-hidden="true">→</span></Button>
+          </div>
+        </FormularioEvaluacion>
       )}
-    </div>
+    </MarcoDocente>
   );
 }

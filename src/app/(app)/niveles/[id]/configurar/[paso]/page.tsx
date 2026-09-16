@@ -113,26 +113,32 @@ export default async function ConfigurarPasoPage({
 
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <header className="relative overflow-hidden rounded-[2rem] bg-[#12141a] px-6 pb-16 pt-7 text-white shadow-[0_32px_80px_-48px_rgba(17,19,24,.75)] sm:px-10 sm:pb-20 sm:pt-9">
+      <div aria-hidden="true" className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-ua/38 blur-3xl" />
+      <div aria-hidden="true" className="absolute -bottom-28 left-[16%] h-64 w-64 rounded-full bg-[#167b75]/16 blur-3xl" />
+      <div className="relative">
       {/* Dónde estás, sin palabras de más */}
-      <div className="mb-8 flex items-center gap-2" role="img" aria-label={`Paso ${numero} de ${total}`}>
+      <div className="mb-10 flex items-center gap-2" role="img" aria-label={`Paso ${numero} de ${total}`}>
         {PASOS.map((p, i) => (
           <span
             key={p}
             className={`h-1.5 flex-1 rounded-full ${
-              i + 1 < numero ? "bg-logrado" : i + 1 === numero ? "bg-ua" : "bg-border"
+              i + 1 < numero ? "bg-[#58c7a1]" : i + 1 === numero ? "bg-[#e16a7e]" : "bg-white/14"
             }`}
           />
         ))}
       </div>
 
-      <Eyebrow>Paso {numero} de {total}</Eyebrow>
-      <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl">
+      <Eyebrow className="!text-white/48">Preparar la comunidad · Paso {numero} de {total}</Eyebrow>
+      <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
         {TEXTO[pasoId].titulo}
       </h1>
-      <p className="mt-2 text-[0.9375rem] text-muted">{TEXTO[pasoId].ayuda}</p>
+      <p className="mt-3 max-w-2xl text-[0.9375rem] text-white/52">{TEXTO[pasoId].ayuda}</p>
+      </div>
+      </header>
 
-      <div className="mt-10 rounded-[2rem] border border-border bg-surface p-5 shadow-[0_28px_80px_-58px_rgba(17,19,24,.48)] sm:p-8">
+      <div className="surface-glass relative mx-3 -mt-7 rounded-[2rem] p-5 sm:mx-6 sm:-mt-9 sm:p-8">
         {pasoId === "competencias" && (
           <div className="flex flex-col gap-3">
             {nivel.competencias.map((c) => {
@@ -375,7 +381,7 @@ export default async function ConfigurarPasoPage({
 
       {/* Avanzar. El botón sólo se enciende cuando el paso está resuelto: el
           avance mismo confirma que está hecho, sin un aviso extra que leer. */}
-      <div className="mt-10 flex items-center justify-between gap-4 border-t border-border pt-6">
+      <div className="sticky bottom-4 z-20 mx-3 mt-8 flex items-center justify-between gap-4 rounded-2xl border border-white/70 bg-surface/88 px-5 py-4 shadow-[0_22px_65px_-38px_rgba(17,19,24,.5)] backdrop-blur-2xl sm:mx-6">
         <Link href={atras} className="text-[0.8125rem] text-muted hover:text-foreground">
           ← Atrás
         </Link>
@@ -387,6 +393,6 @@ export default async function ConfigurarPasoPage({
           <span className="text-[0.8125rem] text-muted-2">{TEXTO[pasoId].pendiente}</span>
         )}
       </div>
-    </div>
+    </main>
   );
 }

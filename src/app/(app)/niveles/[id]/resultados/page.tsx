@@ -531,17 +531,17 @@ export default async function ResultadosPage({
       {d.totalVotos > 0 && (
         <nav
           aria-label="Momentos de la reunión"
-          className="mb-8 flex gap-1 border-b border-border"
+          className="surface-glass mb-8 grid grid-cols-3 gap-1.5 rounded-2xl p-2"
         >
           {VISTAS.map((v) => (
             <Link
               key={v.id}
               href={`/niveles/${id}/resultados?vista=${v.id}`}
               aria-current={v.id === vista ? "page" : undefined}
-              className={`-mb-px border-b-2 px-3.5 py-2.5 text-[0.9375rem] transition-colors ${
+              className={`rounded-xl px-3.5 py-3 text-center text-[0.875rem] transition-all sm:text-[0.9375rem] ${
                 v.id === vista
-                  ? "border-ua font-medium text-foreground"
-                  : "border-transparent text-muted hover:text-foreground"
+                  ? "bg-foreground font-medium text-surface shadow-sm"
+                  : "text-muted hover:bg-surface/70 hover:text-foreground"
               }`}
             >
               {v.texto}

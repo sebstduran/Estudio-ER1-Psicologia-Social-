@@ -78,19 +78,19 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
 
   return (
     <div className="product-page !max-w-6xl">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
-        <div>
-        <Eyebrow>Comunidad académica</Eyebrow>
-        <h1 className="mt-1.5 text-[2.125rem] font-semibold tracking-tight">{nivel.nombre}</h1>
-        <p className="mt-1.5 text-sm text-muted">
+      <section className="product-hero mb-6 flex flex-wrap items-end justify-between gap-7">
+        <div className="relative z-10">
+        <Eyebrow className="!text-white/45">Comunidad académica</Eyebrow>
+        <h1 className="mt-2 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">{nivel.nombre}</h1>
+        <p className="mt-3 text-sm text-white/52">
           {MODALIDAD_LABEL[nivel.modalidad]} · {nivel.trimestre} ·{" "}
           {plural(nivel.reuniones.length, "reunión", "reuniones")}
         </p>
         </div>
-        <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="text-sm font-medium text-ua hover:underline">
-          Editar nivel
+        <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="relative z-10 rounded-full border border-white/16 bg-white/[.07] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/[.13]">
+          Revisar configuración
         </Link>
-      </div>
+      </section>
 
       {aviso && (
         <p className="mb-5 rounded-[7px] border border-incipiente-line bg-incipiente-tint px-3.5 py-2.5 text-[0.8125rem] text-incipiente">
@@ -103,7 +103,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </p>
       )}
 
-      <nav aria-label="Proceso de la comunidad académica" className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <nav aria-label="Proceso de la comunidad académica" className="mb-6 grid grid-cols-2 gap-2 rounded-[1.75rem] border border-white/70 bg-surface/62 p-2 shadow-[0_24px_60px_-48px_rgba(17,19,24,.45)] backdrop-blur-xl sm:grid-cols-4">
         {etapas.map((etapa) => {
           const completa = etapa.numero < etapaActual;
           const activa = etapa.numero === etapaActual;

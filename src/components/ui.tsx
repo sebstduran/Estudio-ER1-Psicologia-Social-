@@ -182,17 +182,20 @@ const RUBRICA_OPCIONES = [
   {
     value: "INCIPIENTE",
     label: "Incipiente",
-    active: "has-[:checked]:border-incipiente has-[:checked]:bg-incipiente-tint has-[:checked]:text-incipiente",
+    apoyo: "Recién comienza",
+    active: "has-[:checked]:border-incipiente has-[:checked]:bg-incipiente-tint has-[:checked]:text-incipiente has-[:checked]:shadow-[0_10px_28px_-20px_rgba(163,24,44,.65)]",
   },
   {
     value: "EN_PROCESO",
     label: "En proceso",
-    active: "has-[:checked]:border-proceso has-[:checked]:bg-proceso-tint has-[:checked]:text-proceso",
+    apoyo: "Avanza con apoyo",
+    active: "has-[:checked]:border-proceso has-[:checked]:bg-proceso-tint has-[:checked]:text-proceso has-[:checked]:shadow-[0_10px_28px_-20px_rgba(179,130,15,.65)]",
   },
   {
     value: "LOGRADO",
     label: "Logrado",
-    active: "has-[:checked]:border-logrado has-[:checked]:bg-logrado-tint has-[:checked]:text-logrado",
+    apoyo: "Lo demuestra",
+    active: "has-[:checked]:border-logrado has-[:checked]:bg-logrado-tint has-[:checked]:text-logrado has-[:checked]:shadow-[0_10px_28px_-20px_rgba(16,113,79,.65)]",
   },
 ] as const;
 
@@ -212,11 +215,11 @@ export function RubricaControl({
   return (
     <div className="space-y-1.5">
       <div className="grid grid-cols-3 gap-1.5">
-        {RUBRICA_OPCIONES.map((opt) => (
+        {RUBRICA_OPCIONES.map((opt, index) => (
           <label
             key={opt.value}
             className={cx(
-              "cursor-pointer select-none rounded-xl border border-border-strong px-2 py-2.5 text-center text-xs font-medium text-muted transition-all hover:-translate-y-px hover:border-muted-2 hover:text-foreground",
+              "cursor-pointer select-none rounded-2xl border border-border-strong bg-surface/78 px-2 py-3 text-center text-xs font-medium text-muted transition-all hover:-translate-y-px hover:border-muted-2 hover:text-foreground sm:px-3",
               opt.active
             )}
           >
@@ -228,7 +231,11 @@ export function RubricaControl({
               required
               className="sr-only"
             />
-            {opt.label}
+            <span className="mb-2 flex justify-center gap-0.5" aria-hidden="true">
+              {[0, 1, 2].map((segmento) => <i key={segmento} className={`h-3 w-1 rounded-full bg-current ${segmento > index ? "opacity-[.18]" : ""}`} />)}
+            </span>
+            <span className="block">{opt.label}</span>
+            <span className="mt-0.5 hidden text-[.6rem] font-normal opacity-[.68] sm:block">{opt.apoyo}</span>
           </label>
         ))}
       </div>

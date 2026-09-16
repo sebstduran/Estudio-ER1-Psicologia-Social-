@@ -12,7 +12,7 @@ export function Card({
   return (
     <div
       className={cx(
-        "rounded-[1.5rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,0.42)]",
+        "surface-glass rounded-[1.5rem] p-6",
         interactive && "transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[0_32px_80px_-48px_rgba(17,19,24,0.5)]",
         className
       )}
@@ -52,7 +52,7 @@ export function Panel({
   id?: string;
 }) {
   return (
-    <section id={id} className={cx("rounded-[1.25rem] border border-border bg-surface/90 shadow-[0_18px_48px_-38px_rgba(31,20,25,0.38)] backdrop-blur-sm", className)}>
+    <section id={id} className={cx("surface-glass rounded-[1.25rem]", className)}>
       {titulo && (
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 border-b border-border px-5 py-4">
           <div className="min-w-[220px] flex-1">

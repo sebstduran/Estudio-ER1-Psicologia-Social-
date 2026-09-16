@@ -26,12 +26,12 @@ export function BarraSuperior({
   salir: ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-black/6 bg-surface/88 backdrop-blur-xl print:hidden">
+    <header className="sticky top-0 z-40 border-b border-white/45 bg-surface/76 shadow-[0_12px_40px_-34px_rgba(17,19,24,.42)] backdrop-blur-2xl print:hidden dark:border-white/6">
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-4 px-6 lg:px-10">
         {/* El logotipo vuelve a la PORTADA, no al panel: es el único camino de
             regreso a la elección coordinación / docente una vez dentro. */}
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-white shadow-sm">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl border border-white/80 bg-white shadow-[0_10px_25px_-18px_rgba(17,19,24,.45)]">
             <Image src="/logo-ua.png" alt="" width={30} height={24} className="h-auto w-7" />
           </span>
           <span className="hidden text-[0.9375rem] font-semibold tracking-tight sm:inline">Comunidades Académicas</span>

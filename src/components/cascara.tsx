@@ -23,7 +23,7 @@ export async function Cascara({ children }: { children: ReactNode }) {
   });
 
   return (
-    <>
+    <div className="app-shell">
       <BarraSuperior
         niveles={niveles}
         nombre={sesion.user.name ?? "Coordinación"}
@@ -40,7 +40,7 @@ export async function Cascara({ children }: { children: ReactNode }) {
           </form>
         }
       />
-      <main className="min-w-0">{children}</main>
-    </>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }

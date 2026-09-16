@@ -108,7 +108,10 @@ html.dark {
 }
 
 body {
-  background: var(--color-background);
+  background:
+    radial-gradient(circle at 8% -10%, color-mix(in srgb, var(--ua-tint-strong) 52%, transparent), transparent 30rem),
+    radial-gradient(circle at 96% 14%, color-mix(in srgb, var(--logrado-tint) 55%, transparent), transparent 28rem),
+    var(--color-background);
   color: var(--color-foreground);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -195,6 +198,122 @@ h1, h2, h3 {
 }
 .animate-fade-in {
   animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Lenguaje visual del instrumento ────────────────────────────────
+   El vidrio se usa para agrupar y dar profundidad, nunca para texto largo
+   sobre una imagen. Así conserva contraste y no convierte la interfaz en
+   decoración. */
+.liquid-glass {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.055));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+  backdrop-filter: blur(20px) saturate(125%);
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,.42), rgba(255,255,255,.05) 45%, rgba(255,255,255,.18));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.surface-glass {
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.58));
+  box-shadow:
+    0 28px 70px -48px rgba(17,19,24,.42),
+    inset 0 1px 0 rgba(255,255,255,.92);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 4.5rem 0 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 82% 4%, color-mix(in srgb, var(--ua-tint-strong) 48%, transparent), transparent 26rem),
+    radial-gradient(circle at 10% 38%, color-mix(in srgb, var(--logrado-tint) 54%, transparent), transparent 30rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 46%, transparent), transparent 28rem);
+}
+
+.hero-cinematic {
+  box-shadow: 0 48px 110px -58px rgba(17, 19, 24, .72);
+}
+
+.hero-cinematic-media {
+  transform: scale(1.018);
+  animation: cinematic-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.hero-light-orb {
+  animation: ambient-pulse 8s ease-in-out infinite alternate;
+}
+
+.data-float {
+  animation: data-float 7s ease-in-out infinite;
+}
+
+@keyframes cinematic-drift {
+  from { transform: scale(1.018) translate3d(0, 0, 0); }
+  to { transform: scale(1.055) translate3d(-0.7%, -0.35%, 0); }
+}
+
+@keyframes ambient-pulse {
+  from { opacity: .62; transform: scale(.92); }
+  to { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes data-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.dark .surface-glass {
+  border-color: rgba(255,255,255,.09);
+  background: linear-gradient(145deg, rgba(28,31,37,.9), rgba(18,20,25,.72));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 28px 70px -48px rgba(0,0,0,.8);
+}
+
+@media (max-width: 1023px) {
+  .hero-cinematic-media { object-position: 64% center; }
+  .hero-cinematic::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(12,14,18,.9), rgba(12,14,18,.2) 75%);
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cinematic-media,
+  .hero-light-orb,
+  .data-float {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 /* ── Impresión ──

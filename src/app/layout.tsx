@@ -48,9 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       {/* La barra lateral la monta el grupo (app), sólo en las pantallas del
           coordinador. Aquí abajo cuelgan también la portada, el ingreso y el
           formulario del docente, que se dibujan solos. */}
-      <body className="min-h-full bg-background font-sans text-foreground">
-        <main className="min-h-screen">{children}</main>
-      </body>
+      <body className="min-h-full bg-background font-sans text-foreground">{children}</body>
     </html>
   );
 }

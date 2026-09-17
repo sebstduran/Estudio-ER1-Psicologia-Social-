@@ -67,6 +67,9 @@ export function EnlaceDocentes({ nivelId, enlaces }: { nivelId: string; enlaces:
                 <Button type="button" variant="secondary" size="sm" onClick={() => copiar(enlace.id, url)}>
                   {copiado === enlace.id ? "Copiado" : "Copiar"}
                 </Button>
+                <a href={url} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 text-xs font-medium text-muted transition-colors hover:bg-surface hover:text-foreground">
+                  Probar
+                </a>
               </div>
             </li>
           );

@@ -80,7 +80,7 @@ export default async function PortadaPage() {
                     <span className="flex items-center justify-between gap-4 text-sm font-semibold text-white">
                       Soy docente <span className="text-xl transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
                     </span>
-                    <span className="mt-1 block text-xs text-white/50">Entrar con el enlace o código</span>
+                    <span className="mt-1 block text-xs text-white/50">Abrir mi enlace personal</span>
                   </Link>
                 </div>
               </div>

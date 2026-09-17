@@ -1,5 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
+import { get } from "@vercel/blob";
 import type { Diagnostico } from "@/lib/diagnostico";
+import {
+  EVIDENCIAS_PEDAGOGICAS,
+  evidenciaPorId,
+  type EvidenciaId,
+} from "@/lib/ai/evidencia-pedagogica";
 
 /**
  * Gemini tiene una capa de uso gratuita, que es lo que hace viable este botón
@@ -7,6 +13,7 @@ import type { Diagnostico } from "@/lib/diagnostico";
  * código: la lista vigente está en https://ai.google.dev/gemini-api/docs/models
  */
 export const MODELO = process.env.GEMINI_MODELO ?? "gemini-2.5-flash";
+export const VERSION_PROMPT = "v2";
 
 // ─── Forma del informe ───────────────────────────────────────
 
@@ -19,6 +26,8 @@ export type AccionPedagogica = {
   tecnica: string;
   accion: string;
   porQue: string;
+  evidenciaId: EvidenciaId;
+  indicadorExito: string;
 };
 
 export type Veredicto = {
@@ -141,7 +150,7 @@ const ESQUEMA = {
             items: {
               type: "object",
               additionalProperties: false,
-              required: ["tecnica", "accion", "porQue"],
+              required: ["tecnica", "accion", "porQue", "evidenciaId", "indicadorExito"],
               properties: {
                 tecnica: {
                   type: "string",
@@ -157,6 +166,15 @@ const ESQUEMA = {
                   type: "string",
                   description:
                     "Por qué esta técnica ataca precisamente la evidencia que está fallando. Una frase.",
+                },
+                evidenciaId: {
+                  type: "string",
+                  enum: EVIDENCIAS_PEDAGOGICAS.map((evidencia) => evidencia.id),
+                  description: "Identificador exacto de la fuente pedagógica que respalda esta acción.",
+                },
+                indicadorExito: {
+                  type: "string",
+                  description: "Una señal observable y medible para revisar en la próxima reunión si la acción funcionó.",
                 },
               },
             },
@@ -275,18 +293,18 @@ Cómo trabajas:
   causa. Úsalos: si un docente dice que llegan sin la lectura hecha, eso apunta a aula
   invertida o a control de lectura, no a más contenido en clase.
 - El bloque "LO QUE DICEN LAS Y LOS DOCENTES" tiene prioridad sobre tu repertorio de
-  técnicas. Si alguien ya nombró la dificultad o propuso una salida, tu trabajo es
-  recogerla, nombrar a quien la dijo y convertirla en algo accionable — no reemplazarla
-  por una técnica genérica. Que el equipo se reconozca en la recomendación es lo que hace
-  que la cumpla.
+  técnicas. Si alguien ya nombró la dificultad o propuso una salida, recógela usando su
+  identificador anónimo y conviértela en algo accionable.
 - Escribes para una reunión de trabajo, no para un informe de acreditación. Frases
   directas, sin relleno institucional.
 - Cada afirmación se apoya en los datos que recibes. Cuando la evidencia es escasa
   (pocos votos, un solo docente), lo dices en vez de sobreinterpretar.
 - Las recomendaciones por asignatura respetan la tributación: a una que tributa de forma
   transversal no le pides lo mismo que a una directa.
-- No inventas nombres de asignaturas, docentes ni competencias: usas exactamente los que
-  aparecen en los datos.
+- No revelas ni infieres nombres propios, RUT, correos u otros datos personales aunque
+  aparezcan en un acta. Hablas de "Docente 1", "Docente 2" o del equipo.
+- Solo recomiendas técnicas incluidas en la biblioteca de evidencia entregada. Debes
+  indicar su evidenciaId y una señal observable para comprobar el efecto.
 - Escribes en español de Chile, tratando de "tú" a quien coordina.`;
 
 function describirConteo(c: {
@@ -302,6 +320,12 @@ function describirConteo(c: {
 /** Convierte el diagnóstico en el texto que lee el modelo. */
 export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []): string {
   const partes: string[] = [];
+  const alias = new Map<string, string>();
+  const anonimizar = (nombre: string) => {
+    if (!alias.has(nombre)) alias.set(nombre, `Docente ${alias.size + 1}`);
+    return alias.get(nombre)!;
+  };
+  for (const participante of d.participacion) anonimizar(participante.nombre);
 
   partes.push(
     `NIVEL: ${d.nivel.nombre}`,
@@ -318,7 +342,8 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
       "ACTA DE ESTA REUNIÓN: se adjunta después de este texto.",
       "Úsala como evidencia cualitativa junto con las respuestas docentes. Distingue hechos,",
       "acuerdos y percepciones; no atribuyas al acta nada que no esté escrito en ella.",
-      `Archivos adjuntos: ${actas.map((a) => a.nombre).join(", ")}.`,
+      `Archivos adjuntos: ${actas.map((_, indice) => `Acta ${indice + 1}`).join(", ")}.`,
+      "No reproduzcas nombres propios ni datos identificatorios que aparezcan en los archivos.",
       ""
     );
   }
@@ -331,7 +356,7 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
       ""
     );
     for (const p of d.percepciones) {
-      partes.push(`· ${p.docente} (${p.asignatura}):`);
+      partes.push(`· ${anonimizar(p.docente)} (${p.asignatura}):`);
       if (p.dificultad) partes.push(`    qué le cuesta: "${p.dificultad}"`);
       if (p.sugerencia) partes.push(`    qué cree que ayudaría: "${p.sugerencia}"`);
     }
@@ -343,7 +368,7 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
     partes.push(
       `PARTICIPACIÓN: respondieron completo ${d.participacion.length - faltantes.length} de ${d.participacion.length} docentes.`,
       faltantes.length > 0
-        ? `Falta o está incompleto: ${faltantes.map((p) => p.nombre).join(", ")}. Considera esto al calibrar cuánta confianza depositas en las cifras.`
+        ? `Falta o está incompleto: ${faltantes.map((p) => anonimizar(p.nombre)).join(", ")}. Considera esto al calibrar cuánta confianza depositas en las cifras.`
         : "La cobertura está completa.",
       ""
     );
@@ -371,6 +396,9 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
     partes.push(
       `Puntaje: ${Math.round(c.score)}/100 (${c.severidad}) · ${describirConteo(c.conteo)}`,
       `Docentes que la evaluaron: ${c.docentesQueEvaluaron}`
+    );
+    partes.push(
+      `Amplitud de evidencia: ${c.amplitudEvidencia} · cobertura ${Math.round(c.coberturaDocente)}% (${c.docentesQueEvaluaron} de ${c.docentesEsperados} docentes esperados)`
     );
     if (c.delta !== null) {
       const signo = c.delta >= 0 ? "+" : "";
@@ -400,7 +428,7 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
       );
       for (const com of i.comentarios) {
         partes.push(
-          `      comentario de ${com.docente} (${com.asignatura}, votó ${com.nivelLogro}): "${com.texto}"`
+          `      comentario de ${anonimizar(com.docente)} (${com.asignatura}, votó ${com.nivelLogro}): "${com.texto}"`
         );
       }
     }
@@ -419,6 +447,11 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
   }
 
   partes.push(
+    "BIBLIOTECA DE EVIDENCIA DISPONIBLE (elige solo desde aquí):",
+    ...EVIDENCIAS_PEDAGOGICAS.map(
+      (e) => `· ${e.id} · ${e.tecnica}. Úsala cuando: ${e.sirveCuando} Mecanismo: ${e.mecanismo} Aplicación posible: ${e.aplicacion} Cuidado: ${e.cuidado}`
+    ),
+    "",
     "Entrega el informe siguiendo el esquema pedido. Ordena las competencias de la más",
     "urgente a la menos urgente. Omite del arreglo las competencias sin evaluaciones."
   );
@@ -463,6 +496,22 @@ function pareceInforme(x: unknown): x is TipoInforme {
     i.veredicto !== null &&
     Array.isArray(i.prioridades) &&
     Array.isArray(i.competencias) &&
+    i.competencias.every((competencia) => {
+      if (competencia === null || typeof competencia !== "object") return false;
+      const acciones = (competencia as Record<string, unknown>).accionesParaEstudiantes;
+      return Array.isArray(acciones) && acciones.every((accion) => {
+        if (accion === null || typeof accion !== "object") return false;
+        const a = accion as Record<string, unknown>;
+        return (
+          typeof a.tecnica === "string" &&
+          typeof a.accion === "string" &&
+          typeof a.porQue === "string" &&
+          typeof a.indicadorExito === "string" &&
+          typeof a.evidenciaId === "string" &&
+          evidenciaPorId(a.evidenciaId) !== null
+        );
+      });
+    }) &&
     Array.isArray(i.disensos) &&
     Array.isArray(i.alertasHito)
   );
@@ -479,9 +528,21 @@ async function partesDeActas(actas: ActaParaAnalisis[]) {
   for (const acta of actas.slice(0, 4)) {
     const mimeType = mimeDe(acta.nombre);
     if (!mimeType || !acta.url.startsWith("https://")) continue;
-    const respuesta = await fetch(acta.url);
-    if (!respuesta.ok) throw new Error(`No se pudo leer el acta «${acta.nombre}».`);
-    const bytes = Buffer.from(await respuesta.arrayBuffer());
+    let bytes: Buffer;
+    try {
+      const privado = await get(acta.url, {
+        access: "private",
+        storeId: process.env.ACTAS_BLOB_STORE_ID,
+        oidcToken: process.env.VERCEL_OIDC_TOKEN,
+      });
+      if (!privado || privado.statusCode !== 200) throw new Error("Acta privada no disponible");
+      bytes = Buffer.from(await new Response(privado.stream).arrayBuffer());
+    } catch {
+      // Compatibilidad con actas antiguas guardadas antes de activar el almacén privado.
+      const respuesta = await fetch(acta.url);
+      if (!respuesta.ok) throw new Error(`No se pudo leer el acta «${acta.nombre}».`);
+      bytes = Buffer.from(await respuesta.arrayBuffer());
+    }
     partes.push({ inlineData: { mimeType, data: bytes.toString("base64") } });
   }
   return partes;

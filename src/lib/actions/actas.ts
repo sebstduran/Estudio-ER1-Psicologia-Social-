@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
+import { requireCoordinador } from "@/lib/require-coordinador";
 
 // En Vercel el disco es de solo lectura (salvo /tmp, que no es servible), así
 // que ahí subimos a Vercel Blob. En desarrollo local, sin BLOB_READ_WRITE_TOKEN,
@@ -23,8 +24,12 @@ function validarActa(archivo: File, volver: string) {
 }
 
 async function guardarArchivo(nombreSeguro: string, bytes: Buffer): Promise<string> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const blob = await put(`actas/${nombreSeguro}`, bytes, { access: "public" });
+  if (process.env.ACTAS_BLOB_STORE_ID) {
+    const blob = await put(`actas/${nombreSeguro}`, bytes, {
+      access: "private",
+      storeId: process.env.ACTAS_BLOB_STORE_ID,
+      oidcToken: process.env.VERCEL_OIDC_TOKEN,
+    });
     return blob.url;
   }
   await mkdir(UPLOAD_DIR, { recursive: true });
@@ -36,10 +41,15 @@ async function guardarArchivo(nombreSeguro: string, bytes: Buffer): Promise<stri
 export async function subirActaCoordinador(
   nivelId: string,
   reunionId: string,
-  subidoPor: string,
   formData: FormData
 ) {
   const volver = `/niveles/${nivelId}`;
+  const user = await requireCoordinador();
+  const reunion = await prisma.reunion.findFirst({
+    where: { id: reunionId, nivel: { id: nivelId, coordinadorId: user.id } },
+    select: { id: true },
+  });
+  if (!reunion) redirect(`${volver}?error=${encodeURIComponent("No encontramos esa reunión en tu comunidad académica.")}`);
 
   const archivo = formData.get("archivo");
   if (!(archivo instanceof File) || archivo.size === 0) {
@@ -52,37 +62,9 @@ export async function subirActaCoordinador(
   const url = await guardarArchivo(nombreSeguro, Buffer.from(await archivo.arrayBuffer()));
 
   await prisma.acta.create({
-    data: { reunionId, nombreArchivo: archivo.name, url, subidoPor },
+    data: { reunionId, nombreArchivo: archivo.name, url, subidoPor: user.name ?? "Coordinación" },
   });
 
   revalidatePath(volver);
   redirect(`${volver}?acta=1`);
-}
-
-export async function subirActa(
-  nivelId: string,
-  reunionId: string,
-  subidoPor: string,
-  docenteId: string,
-  formData: FormData
-) {
-  const volver = `/evaluar/${nivelId}?docente=${docenteId}`;
-
-  const archivo = formData.get("archivo");
-  if (!(archivo instanceof File) || archivo.size === 0) {
-    redirect(`${volver}&error=${encodeURIComponent("Selecciona un archivo.")}`);
-  }
-  validarActa(archivo, volver);
-
-  const extension = path.extname(archivo.name) || "";
-  const nombreSeguro = `${reunionId}-${Date.now()}${extension}`;
-  const bytes = Buffer.from(await archivo.arrayBuffer());
-  const url = await guardarArchivo(nombreSeguro, bytes);
-
-  await prisma.acta.create({
-    data: { reunionId, nombreArchivo: archivo.name, url, subidoPor },
-  });
-
-  revalidatePath(`/evaluar/${nivelId}`);
-  redirect(`${volver}&acta=1`);
 }

@@ -3,77 +3,81 @@
 import { useState, useSyncExternalStore } from "react";
 import { Button, CLASE_ROTULO, inputClass } from "@/components/ui";
 
-// El host solo existe en el navegador. useSyncExternalStore lo lee sin efectos
-// y da una instantánea vacía al servidor, así la hidratación no se desajusta.
 const sinSuscripcion = () => () => {};
 const enCliente = () => window.location.origin;
 const enServidor = () => "";
 
-export function EnlaceDocentes({
-  nivelId,
-  codigo,
-  compacto = false,
-}: {
-  nivelId: string;
-  codigo: string;
-  compacto?: boolean;
-}) {
-  const origen = useSyncExternalStore(sinSuscripcion, enCliente, enServidor);
-  const url = origen ? `${origen}/evaluar/${nivelId}` : "";
-  const [copiado, setCopiado] = useState(false);
+export type EnlaceDocente = {
+  id: string;
+  nombre: string;
+  token: string;
+  asignaturas: string[];
+};
 
-  async function copiar() {
+export function EnlaceDocentes({ nivelId, enlaces }: { nivelId: string; enlaces: EnlaceDocente[] }) {
+  const origen = useSyncExternalStore(sinSuscripcion, enCliente, enServidor);
+  const [copiado, setCopiado] = useState<string | null>(null);
+
+  function urlDe(token: string) {
+    return origen ? `${origen}/evaluar/${nivelId}?acceso=${encodeURIComponent(token)}` : "";
+  }
+
+  async function copiar(id: string, url: string) {
     try {
       await navigator.clipboard.writeText(url);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 2000);
+      setCopiado(id);
+      setTimeout(() => setCopiado(null), 2000);
     } catch {
-      // Sin permiso de portapapeles: el campo es seleccionable a mano.
+      // El campo queda seleccionable si el navegador no permite usar el portapapeles.
     }
   }
 
   return (
-    <div className={compacto ? "" : "border-t border-border pt-5"}>
-      <p className={`${CLASE_ROTULO} mb-2.5 block`}>{compacto ? "Enlace para docentes" : "Mándales este enlace"}</p>
-      {!compacto && (
-        <p className="mb-3 max-w-prose text-xs leading-relaxed text-muted-2">
-          Por correo o WhatsApp. Cada docente elige su nombre y responde solo las preguntas
-          de las asignaturas que tú le asignaste. No necesita cuenta ni correo.
+    <div className="border-t border-border pt-5">
+      <p className={`${CLASE_ROTULO} mb-2.5 block`}>Un enlace para cada docente</p>
+      <p className="mb-4 max-w-2xl text-xs leading-relaxed text-muted-2">
+        Copia el enlace junto al nombre y envíalo por WhatsApp o correo. La persona entra
+        directamente a sus asignaturas: no crea cuenta, no usa contraseña y no ve nombres ajenos.
+      </p>
+
+      <ul className="grid gap-3">
+        {enlaces.map((enlace) => {
+          const url = urlDe(enlace.token);
+          return (
+            <li key={enlace.id} className="rounded-2xl border border-border bg-surface-muted/55 p-4">
+              <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold">{enlace.nombre}</p>
+                  <p className="mt-0.5 text-xs text-muted-2">
+                    {enlace.asignaturas.join(" · ") || "Sin asignatura asignada"}
+                  </p>
+                </div>
+                <span className="rounded-full border border-logrado-line bg-logrado-tint px-2.5 py-1 text-[0.65rem] font-medium text-logrado">
+                  Acceso personal
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={url}
+                  onFocus={(event) => event.currentTarget.select()}
+                  aria-label={`Enlace de ${enlace.nombre}`}
+                  className={`${inputClass} min-w-0 flex-1 font-mono !text-xs`}
+                />
+                <Button type="button" variant="secondary" size="sm" onClick={() => copiar(enlace.id, url)}>
+                  {copiado === enlace.id ? "Copiado" : "Copiar"}
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {enlaces.length === 0 && (
+        <p className="rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">
+          Agrega al menos un docente para crear los enlaces.
         </p>
       )}
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          readOnly
-          value={url}
-          onFocus={(e) => e.currentTarget.select()}
-          aria-label="Enlace para docentes"
-          className={`${inputClass} min-w-0 flex-1 font-mono !text-xs`}
-        />
-        <Button type="button" variant="secondary" size="sm" onClick={copiar}>
-          {copiado ? "Copiado" : "Copiar"}
-        </Button>
-        <a href={`/evaluar/${nivelId}`} target="_blank" rel="noreferrer" className={compacto ? "hidden sm:block" : ""}>
-          <Button type="button" variant="ghost" size="sm">
-            Ver lo que verán
-          </Button>
-        </a>
-      </div>
-
-      {/* El enlace se pierde: se borra el WhatsApp, se cambia de teléfono. El
-          código es la red de seguridad, y solo sirve si se dicta en voz alta en
-          la reunión, así que se muestra grande y no escondido en un menú. */}
-      {!compacto && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[9px] border border-dashed border-border-strong bg-surface-muted px-4 py-3">
-        <div>
-          <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-2">
-            O que escriban este código
-          </p>
-          <p className="mt-0.5 font-mono text-xl font-semibold tracking-[0.2em]">{codigo}</p>
-        </div>
-        <p className="max-w-xs text-xs leading-relaxed text-muted-2">
-          Para quien perdió el enlace: entra en <span className="font-medium">Docente</span>{" "}
-          desde la portada y escribe únicamente este código.
-        </p>
-      </div>}
     </div>
   );
 }

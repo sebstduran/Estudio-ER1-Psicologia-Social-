@@ -57,6 +57,9 @@ function competenciaSimulada(
     indicadoresConDisenso: 0,
     asignaturas: [],
     docentesQueEvaluaron: 3,
+    docentesEsperados: 4,
+    coberturaDocente: 75,
+    amplitudEvidencia: "PARCIAL",
   };
 }
 

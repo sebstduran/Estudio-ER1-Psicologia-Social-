@@ -68,6 +68,17 @@ export function AcuerdoForm({
         </label>
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium">Cómo sabremos si funcionó</span>
+          <input name="criterioExito" placeholder="Ej. 70% justifica correctamente dos decisiones" className={inputClass} />
+        </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium">Qué revisaremos</span>
+          <input name="evidenciaEsperada" placeholder="Ej. Ticket de salida común en tres asignaturas" className={inputClass} />
+        </label>
+      </div>
+
       {estado?.error && <p className="text-sm text-incipiente">{estado.error}</p>}
 
       <div className="flex gap-2">

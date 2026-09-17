@@ -3,7 +3,6 @@ import { requireCoordinador } from "@/lib/require-coordinador";
 import { resumenNiveles, type ResumenNivel } from "@/lib/panel";
 import { Button, Card } from "@/components/ui";
 import { NuevoNivelPanel } from "./nuevo-nivel-panel";
-import { EnlaceDocentes } from "./[id]/enlace-docentes";
 
 const FASE_LABEL = { BASE: "línea base", SEGUIMIENTO: "seguimiento", CIERRE: "cierre" } as const;
 const ETAPAS = [
@@ -51,7 +50,7 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
           {etapaActual !== 2 && <Link href={paso.href} className="mt-7 inline-block"><Button size="md">{paso.boton} <span aria-hidden="true">→</span></Button></Link>}
         </div>
         {etapaActual === 2 ? (
-          <div className="rounded-2xl border border-border bg-background/75 p-5 backdrop-blur-sm"><EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} compacto /><p className="mt-3 text-xs leading-relaxed text-muted-2">Cópialo y envíalo por correo o WhatsApp. El docente entra directamente a responder.</p></div>
+          <div className="rounded-2xl border border-border bg-background/75 p-5 backdrop-blur-sm"><p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-2">Enlaces personales</p><p className="mt-3 text-sm leading-relaxed text-muted">Cada docente tendrá un acceso directo, sin contraseña y solo a sus asignaturas.</p><Link href={`/niveles/${nivel.id}`} className="mt-5 inline-block"><Button size="sm">Abrir enlaces docentes →</Button></Link></div>
         ) : (
           <div className="rounded-2xl border border-border bg-background/75 p-5 backdrop-blur-sm"><p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-2">En esta reunión</p>{nivel.evaluado ? <><p className="mt-3 text-3xl font-semibold tracking-tight">{criticas + enRiesgo}<span className="ml-1 text-base font-normal text-muted">por fortalecer</span></p><div className="mt-4 flex gap-5 text-sm"><span><b className="font-mono text-incipiente">{criticas}</b> crítico</span><span><b className="font-mono text-proceso">{enRiesgo}</b> en riesgo</span></div></> : <><p className="mt-3 text-3xl font-semibold tracking-tight">{nivel.docentesQueRespondieron} de {nivel.docentes}</p><p className="mt-1 text-sm text-muted">docentes han respondido</p></>}</div>
         )}

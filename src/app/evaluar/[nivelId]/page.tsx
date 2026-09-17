@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
 import { guardarEvaluacion } from "@/lib/actions/evaluar";
 import { FormularioEvaluacion } from "./formulario-evaluacion";
+import { auth } from "@/lib/auth";
+import { crearAccesoDocente, verificarAccesoDocente } from "@/lib/acceso-docente";
 
 const CICLO_LABEL = {
   INICIAL: "Ciclo Inicial",
@@ -112,9 +114,10 @@ export default async function EvaluarPage({
     return typeof v === "string" ? v : undefined;
   };
   const error = get("error");
-  const docenteId = get("docente");
+  const tokenAcceso = get("acceso");
   const asignaturaId = get("asignatura");
   const guardado = get("guardado") === "1";
+  const session = await auth();
 
   const nivel = await prisma.nivel.findUnique({
     where: { id: nivelId },
@@ -130,27 +133,50 @@ export default async function EvaluarPage({
   if (!nivel) notFound();
 
   const reunionActual = nivel.reuniones.find((r) => r.numero === nivel.reunionActualNumero);
-
-  const docente = docenteId ? nivel.docentes.find((item) => item.id === docenteId) ?? null : null;
+  const acceso = verificarAccesoDocente(tokenAcceso);
+  const accesoVigente =
+    acceso?.nivelId === nivel.id && acceso.reunionId === reunionActual?.id ? acceso : null;
+  const docente = accesoVigente
+    ? nivel.docentes.find((item) => item.id === accesoVigente.docenteId) ?? null
+    : null;
+  const rutaDocente = tokenAcceso
+    ? `/evaluar/${nivel.id}?acceso=${encodeURIComponent(tokenAcceso)}`
+    : `/evaluar/${nivel.id}`;
 
   const reunionTexto = reunionActual
     ? `Reunión ${reunionActual.numero} · ${FASE_LABEL[reunionActual.fase]}`
     : null;
 
-  // ── Paso 1: identificación ─────────────────────────────────────
+  // La lista de nombres solo es una vista de coordinación. Quien recibe un
+  // enlace personal entra directamente a sus asignaturas y no ve al equipo.
   if (!docente) {
+    if (!session?.user) {
+      return (
+        <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={1}>
+          <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
+            <p className="font-mono text-[.64rem] font-medium uppercase tracking-[.14em] text-ua">ACCESO DOCENTE</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Necesitas tu enlace personal</h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+              Pide a quien coordina que vuelva a enviártelo. No necesitas crear una cuenta ni usar contraseña.
+            </p>
+            <Link href="/" className="mt-6 inline-block"><Button variant="secondary">Volver al inicio</Button></Link>
+          </Card>
+        </MarcoDocente>
+      );
+    }
+
     return (
       <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={1}>
         <Card className="animate-fade-in !rounded-[2rem] !p-7 sm:!p-9">
           <p className="font-mono text-[.64rem] font-medium uppercase tracking-[.14em] text-ua">PASO 1 · IDENTIFICARTE</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight">¿Cuál es tu nombre?</h2>
-          <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">Solo verás las asignaturas asociadas a ti. No necesitas contraseña.</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">Vista previa de coordinación</h2>
+          <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">Elige una persona para comprobar su recorrido. Los enlaces enviados al equipo entran directamente aquí.</p>
           <ErrorBanner error={error} />
           <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
             {nivel.docentes.map((persona) => (
               <Link
                 key={persona.id}
-                href={`/evaluar/${nivel.id}?docente=${persona.id}`}
+                href={reunionActual ? `/evaluar/${nivel.id}?acceso=${encodeURIComponent(crearAccesoDocente({ nivelId: nivel.id, docenteId: persona.id, reunionId: reunionActual.id }))}` : `/evaluar/${nivel.id}`}
               className="group rounded-2xl border border-border bg-surface/72 p-4 shadow-[0_12px_30px_-26px_rgba(17,19,24,.4)] transition-all hover:-translate-y-0.5 hover:border-ua/35 hover:bg-surface"
               >
                 <span className="flex items-center justify-between gap-3">
@@ -200,7 +226,7 @@ export default async function EvaluarPage({
           {asignaturasDelDocente.map((a) => (
             <Link
               key={a.id}
-              href={`/evaluar/${nivel.id}?docente=${docente.id}&asignatura=${a.id}`}
+              href={`${rutaDocente}&asignatura=${a.id}`}
             >
               <Card interactive className="group !p-5 text-sm font-medium">
                 <span className="flex items-center justify-between gap-4">{a.nombre}<span className="text-lg text-ua transition-transform group-hover:translate-x-1">→</span></span>
@@ -254,7 +280,7 @@ export default async function EvaluarPage({
       })
     : null;
 
-  const guardarAction = guardarEvaluacion.bind(null, nivel.id, docente.id, asignatura.id);
+  const guardarAction = guardarEvaluacion.bind(null, nivel.id, tokenAcceso ?? "", asignatura.id);
 
   return (
     <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={3}>
@@ -265,7 +291,7 @@ export default async function EvaluarPage({
           <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "competencia" : "competencias"} · alrededor de 5 minutos</p>
         </div>
         <Link
-          href={`/evaluar/${nivel.id}?docente=${docente.id}`}
+          href={rutaDocente}
           className="rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted transition-colors hover:border-border-strong hover:text-foreground"
         >
           Cambiar asignatura

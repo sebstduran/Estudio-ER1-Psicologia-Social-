@@ -3,34 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-
-/**
- * Puerta de entrada del docente que no tiene el enlace a mano. El código va en
- * el cuerpo del formulario y no en la URL, para que no quede en el historial
- * del navegador ni en los registros del servidor.
- */
-export async function entrarPorCodigo(formData: FormData) {
-  const crudo = formData.get("codigo");
-  const codigo = typeof crudo === "string" ? crudo.trim().toUpperCase().replace(/[\s-]/g, "") : "";
-
-  if (!codigo) {
-    redirect(`/docente?error=${encodeURIComponent("Escribe el código que te dio tu coordinación.")}`);
-  }
-
-  const nivel = await prisma.nivel.findUnique({
-    where: { codigo },
-    select: { id: true },
-  });
-  if (!nivel) {
-    redirect(
-      `/docente?error=${encodeURIComponent(
-        "No encontramos ese código. Revísalo con tu coordinación: son 6 caracteres."
-      )}`
-    );
-  }
-
-  redirect(`/evaluar/${nivel.id}`);
-}
+import { verificarAccesoDocente } from "@/lib/acceso-docente";
 
 const NIVEL_LOGRO = ["LOGRADO", "EN_PROCESO", "INCIPIENTE", "NO_TRABAJADO"] as const;
 
@@ -43,30 +16,37 @@ function textoLibre(valor: FormDataEntryValue | null, maximo = 2000): string | n
 
 export async function guardarEvaluacion(
   nivelId: string,
-  docenteId: string,
+  tokenAcceso: string,
   asignaturaId: string,
   formData: FormData
 ) {
+  const acceso = verificarAccesoDocente(tokenAcceso);
+  const volver = `/evaluar/${nivelId}?acceso=${encodeURIComponent(tokenAcceso)}`;
+  if (!acceso || acceso.nivelId !== nivelId) {
+    redirect(`/evaluar/${nivelId}?error=${encodeURIComponent("El enlace no es válido. Pide uno nuevo a quien coordina.")}`);
+  }
+  const docenteId = acceso.docenteId;
+
   const nivel = await prisma.nivel.findUnique({
     where: { id: nivelId },
     include: { reuniones: true },
   });
-  if (!nivel) redirect(`/evaluar/${nivelId}?docente=${docenteId}&error=Nivel no encontrado.`);
+  if (!nivel) redirect(`${volver}&error=Nivel no encontrado.`);
 
   const reunion = nivel.reuniones.find((r) => r.numero === nivel.reunionActualNumero);
-  if (!reunion) {
-    redirect(`/evaluar/${nivelId}?docente=${docenteId}&error=No hay una reunión activa.`);
+  if (!reunion || acceso.reunionId !== reunion.id) {
+    redirect(`${volver}&error=${encodeURIComponent("Este enlace corresponde a otra reunión. Pide el enlace actualizado.")}`);
   }
 
   const docente = await prisma.docente.findFirst({ where: { id: docenteId, nivelId } });
-  if (!docente) redirect(`/evaluar/${nivelId}?error=Docente no válido para este nivel.`);
+  if (!docente) redirect(`${volver}&error=Docente no válido para este nivel.`);
 
   const asignacion = await prisma.docenteAsignatura.findUnique({
     where: { docenteId_asignaturaId: { docenteId, asignaturaId } },
     select: { id: true },
   });
   if (!asignacion) {
-    redirect(`/evaluar/${nivelId}?docente=${docenteId}&error=${encodeURIComponent("Esa asignatura no está vinculada a tu nombre.")}`);
+    redirect(`${volver}&error=${encodeURIComponent("Esa asignatura no está vinculada a tu nombre.")}`);
   }
 
   const indicadorIds = Array.from(
@@ -78,7 +58,7 @@ export async function guardarEvaluacion(
   );
 
   if (indicadorIds.length === 0) {
-    redirect(`/evaluar/${nivelId}?docente=${docenteId}&asignatura=${asignaturaId}&error=No hay indicadores para evaluar.`);
+    redirect(`${volver}&asignatura=${asignaturaId}&error=No hay indicadores para evaluar.`);
   }
 
   const indicadores = await prisma.indicador.findMany({
@@ -125,7 +105,7 @@ export async function guardarEvaluacion(
   }
 
   if (operaciones.length === 0) {
-    redirect(`/evaluar/${nivelId}?docente=${docenteId}&asignatura=${asignaturaId}&error=Completa la rúbrica de al menos un indicador.`);
+    redirect(`${volver}&asignatura=${asignaturaId}&error=Completa la rúbrica de al menos un indicador.`);
   }
 
   // Las dos preguntas abiertas del final. Se guardan junto con la rúbrica y no
@@ -144,5 +124,5 @@ export async function guardarEvaluacion(
 
   await prisma.$transaction(operaciones);
   revalidatePath(`/niveles/${nivelId}`);
-  redirect(`/evaluar/${nivelId}?docente=${docenteId}&guardado=1`);
+  redirect(`${volver}&guardado=1`);
 }

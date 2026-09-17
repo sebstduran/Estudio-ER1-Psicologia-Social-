@@ -309,6 +309,11 @@ model Informe {
   contenido Json?
   error     String?
   modelo    String
+  versionPrompt    String @default("v2")
+  versionEvidencia String @default("2026-09")
+  // Huella del diagnóstico anonimizado: permite saber qué entrada originó el
+  // informe sin duplicar comentarios ni datos personales.
+  huellaEntrada String?
   createdAt DateTime      @default(now())
 
   nivelId String
@@ -338,6 +343,8 @@ model Acuerdo {
   texto       String
   responsable String?
   plazo       String?
+  criterioExito String?
+  evidenciaEsperada String?
   estado      EstadoAcuerdo @default(PENDIENTE)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

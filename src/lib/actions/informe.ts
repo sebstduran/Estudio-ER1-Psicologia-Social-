@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import { construirDiagnostico } from "@/lib/diagnostico";
-import { generarInforme, FaltaApiKey, MODELO } from "@/lib/ai/informe";
+import { construirPrompt, generarInforme, FaltaApiKey, MODELO, VERSION_PROMPT } from "@/lib/ai/informe";
+import { VERSION_EVIDENCIA } from "@/lib/ai/evidencia-pedagogica";
 
 export type EstadoGeneracion = { error?: string } | undefined;
 
@@ -40,14 +42,25 @@ export async function generarInformeDelNivel(
     return { error: "Sube el acta de esta reunión antes de generar el análisis." };
   }
 
+  const actasParaAnalisis = actas.map((a) => ({ nombre: a.nombreArchivo, url: a.url }));
+  const huellaEntrada = createHash("sha256")
+    .update(construirPrompt(diagnostico, actasParaAnalisis))
+    .digest("hex");
   const registro = await prisma.informe.create({
-    data: { nivelId, reunionId: diagnostico.reunionActual.id, modelo: MODELO },
+    data: {
+      nivelId,
+      reunionId: diagnostico.reunionActual.id,
+      modelo: MODELO,
+      versionPrompt: VERSION_PROMPT,
+      versionEvidencia: VERSION_EVIDENCIA,
+      huellaEntrada,
+    },
   });
 
   try {
     const contenido = await generarInforme(
       diagnostico,
-      actas.map((a) => ({ nombre: a.nombreArchivo, url: a.url }))
+      actasParaAnalisis
     );
     await prisma.informe.update({
       where: { id: registro.id },

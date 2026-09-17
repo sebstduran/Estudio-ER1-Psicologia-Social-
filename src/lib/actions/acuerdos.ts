@@ -19,6 +19,8 @@ const acuerdoSchema = z.object({
   responsable: z.string().trim().optional(),
   plazo: z.string().trim().optional(),
   competenciaId: z.string().trim().optional(),
+  criterioExito: z.string().trim().max(500).optional(),
+  evidenciaEsperada: z.string().trim().max(500).optional(),
 });
 
 export type FormState = { error?: string } | undefined;
@@ -39,6 +41,8 @@ export async function crearAcuerdo(
     responsable: formData.get("responsable"),
     plazo: formData.get("plazo"),
     competenciaId: formData.get("competenciaId"),
+    criterioExito: formData.get("criterioExito"),
+    evidenciaEsperada: formData.get("evidenciaEsperada"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
@@ -60,6 +64,8 @@ export async function crearAcuerdo(
       texto: parsed.data.texto,
       responsable: parsed.data.responsable || null,
       plazo: parsed.data.plazo || null,
+      criterioExito: parsed.data.criterioExito || null,
+      evidenciaEsperada: parsed.data.evidenciaEsperada || null,
     },
   });
 

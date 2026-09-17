@@ -7,6 +7,7 @@ export type ConteoLogro = {
   NO_TRABAJADO: number;
 };
 export type Severidad = "CRITICO" | "EN_RIESGO" | "CONSOLIDADO" | "SIN_DATOS";
+export type AmplitudEvidencia = "AMPLIA" | "PARCIAL" | "LIMITADA" | "SIN_EVIDENCIA";
 
 function conteoVacio(): ConteoLogro {
   return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0, NO_TRABAJADO: 0 };
@@ -57,6 +58,23 @@ export function hayDisenso(c: ConteoLogro): boolean {
   return c.LOGRADO > 0 && c.INCIPIENTE > 0;
 }
 
+/**
+ * No confunde un puntaje preciso con evidencia suficiente. Dos o más miradas
+ * y al menos 80% de cobertura permiten una lectura amplia; una sola mirada
+ * siempre se presenta como limitada, aunque haya respondido todo.
+ */
+export function amplitudDeEvidencia(
+  docentesQueEvaluaron: number,
+  docentesEsperados: number
+): AmplitudEvidencia {
+  if (docentesQueEvaluaron === 0) return "SIN_EVIDENCIA";
+  if (docentesQueEvaluaron === 1) return "LIMITADA";
+  const cobertura = docentesEsperados > 0 ? docentesQueEvaluaron / docentesEsperados : 0;
+  if (docentesQueEvaluaron >= 2 && cobertura >= 0.8) return "AMPLIA";
+  if (docentesQueEvaluaron >= 2 || cobertura >= 0.5) return "PARCIAL";
+  return "LIMITADA";
+}
+
 export const ORDEN_SEVERIDAD: Record<Severidad, number> = {
   CRITICO: 0,
   EN_RIESGO: 1,
@@ -101,6 +119,9 @@ export type CompetenciaDiagnostico = {
   indicadoresConDisenso: number;
   asignaturas: AsignaturaDiagnostico[];
   docentesQueEvaluaron: number;
+  docentesEsperados: number;
+  coberturaDocente: number;
+  amplitudEvidencia: AmplitudEvidencia;
 };
 
 export type ParticipacionDocente = {
@@ -317,6 +338,11 @@ export async function construirDiagnostico(
       ? scoreDe(porReunionCompetencia.get(`${reunionBase.id}:${comp.id}`) ?? conteoVacio())
       : null;
     const esLaBase = reunionActual?.id === reunionBase?.id;
+    const asignaturasDeLaCompetencia = new Set(comp.mapeos.map((m) => m.asignaturaId));
+    const docentesEsperados = nivel.docentes.filter((docente) =>
+      docente.asignaturas.some((asignacion) => asignaturasDeLaCompetencia.has(asignacion.asignaturaId))
+    ).length;
+    const docentesQueEvaluaron = docentesPorCompetencia.get(comp.id)?.size ?? 0;
 
     return {
       id: comp.id,
@@ -334,7 +360,11 @@ export async function construirDiagnostico(
       indicadorMasDebil,
       indicadoresConDisenso: indicadores.filter((i) => i.disenso).length,
       asignaturas,
-      docentesQueEvaluaron: docentesPorCompetencia.get(comp.id)?.size ?? 0,
+      docentesQueEvaluaron,
+      docentesEsperados,
+      coberturaDocente:
+        docentesEsperados > 0 ? Math.min(100, (docentesQueEvaluaron / docentesEsperados) * 100) : 0,
+      amplitudEvidencia: amplitudDeEvidencia(docentesQueEvaluaron, docentesEsperados),
     };
   });
 

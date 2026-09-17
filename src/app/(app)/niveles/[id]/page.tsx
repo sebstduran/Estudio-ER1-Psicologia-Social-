@@ -6,6 +6,7 @@ import { Button, CLASE_ROTULO, Eyebrow } from "@/components/ui";
 import { actualizarReunionActual } from "@/lib/actions/niveles";
 import { subirActaCoordinador } from "@/lib/actions/actas";
 import { EnlaceDocentes } from "./enlace-docentes";
+import { crearAccesoDocente } from "@/lib/acceso-docente";
 
 const MODALIDAD_LABEL = { DIURNO: "Diurno", VESPERTINO_TECH: "Vespertino/TECH" } as const;
 
@@ -41,7 +42,14 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
     include: {
       asignaturas: { select: { id: true, _count: { select: { mapeos: true } } } },
       competencias: { select: { id: true } },
-      docentes: { select: { id: true } },
+      docentes: {
+        orderBy: { nombre: "asc" },
+        select: {
+          id: true,
+          nombre: true,
+          asignaturas: { select: { asignatura: { select: { nombre: true } } } },
+        },
+      },
       reuniones: {
         orderBy: { numero: "asc" },
         include: { _count: { select: { evaluaciones: true, actas: true, informes: true } } },
@@ -69,6 +77,18 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
   const hayRespuestas = totalEvaluaciones > 0;
   const hayActa = actas.length > 0;
   const etapaActual = !hayRespuestas ? 2 : !hayActa ? 3 : 4;
+  const enlacesDocentes = reunionActual
+    ? nivel.docentes.map((docente) => ({
+        id: docente.id,
+        nombre: docente.nombre,
+        asignaturas: docente.asignaturas.map((item) => item.asignatura.nombre),
+        token: crearAccesoDocente({
+          nivelId: nivel.id,
+          docenteId: docente.id,
+          reunionId: reunionActual.id,
+        }),
+      }))
+    : [];
 
   const etapas = [
     { numero: 1, titulo: "Preparar", apoyo: "Nivel y equipo" },
@@ -180,8 +200,8 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
           <Eyebrow>Paso 2 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Envía el enlace al equipo docente</h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona entra, elige su nombre y responde únicamente las preguntas de sus asignaturas. Sin cuenta ni correo.</p>
-          <div className="mt-7"><EnlaceDocentes nivelId={nivel.id} codigo={nivel.codigo} /></div>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona recibe su acceso directo y responde únicamente las preguntas de sus asignaturas. Sin cuenta, correo ni contraseña.</p>
+          <div className="mt-7"><EnlaceDocentes nivelId={nivel.id} enlaces={enlacesDocentes} /></div>
           <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">Aún no hay respuestas. Cuando llegue la primera, se habilitará el paso del acta.</p>
         </section>
       )}
@@ -191,7 +211,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           <Eyebrow>Paso 3 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Sube el acta de la reunión</h2>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">{hayRespuestas ? `Ya recibimos ${plural(totalEvaluaciones, "respuesta", "respuestas")}. Ahora agrega el acta para completar la evidencia de esta reunión.` : "Puedes revisar o utilizar la carga desde ahora. Los resultados reales se habilitarán cuando también exista al menos una respuesta docente."}</p>
-          <form action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id, user.name ?? "Coordinación")} className="mt-7 flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5 sm:flex-row sm:items-center">
+          <form action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id)} className="mt-7 flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5 sm:flex-row sm:items-center">
             <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="min-w-0 flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-full file:border file:border-border-strong file:bg-surface file:px-3.5 file:py-2 file:text-xs file:font-medium file:text-foreground" />
             <Button type="submit">Subir acta de R{reunionActual.numero}</Button>
           </form>

@@ -28,6 +28,7 @@ import { AcuerdoForm } from "./acuerdo-form";
 import { ResumenSimple } from "./resumen-simple";
 import { MapaEvidencias } from "./mapa-evidencias";
 import { HITO_CICLO, NOMBRE_CICLO, type CicloMalla } from "@/lib/malla-psicologia";
+import { evidenciaPorId } from "@/lib/ai/evidencia-pedagogica";
 
 const FASE_LABEL = {
   BASE: "línea base",
@@ -69,7 +70,8 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
           <h3 className="mt-1.5 text-xl font-medium">{c.nombre}</h3>
           <p className="mt-1 text-xs text-muted-2">
             {c.componenteEpg}
-            {c.docentesQueEvaluaron > 0 && ` · ${c.docentesQueEvaluaron} ${c.docentesQueEvaluaron === 1 ? "docente" : "docentes"}`}
+            {c.docentesQueEvaluaron > 0 && ` · ${c.docentesQueEvaluaron} de ${c.docentesEsperados} docentes`}
+            {` · evidencia ${c.amplitudEvidencia.toLowerCase().replace("_", " ")}`}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -288,17 +290,20 @@ function VistaInforme({ informe, esCierre = false }: { informe: TipoInforme; esC
                 Para que las y los estudiantes logren la competencia
               </p>
               <ul className="flex flex-col gap-4">
-                {c.accionesParaEstudiantes.map((a, i) => (
-                  <li key={i} className="rounded-xl border border-border p-4">
+                {c.accionesParaEstudiantes.map((a, i) => {
+                  const fuente = evidenciaPorId(a.evidenciaId);
+                  return <li key={i} className="rounded-xl border border-border p-4">
                     <span className="inline-block rounded-full bg-ua-tint px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-wide text-ua">
                       {a.tecnica}
                     </span>
                     <p className="mt-2.5 text-sm font-medium leading-[1.65]">{a.accion}</p>
-                    <p className="mt-3 border-t border-border pt-3 text-xs leading-[1.65] text-muted-2">
-                      Por qué: {a.porQue}
-                    </p>
-                  </li>
-                ))}
+                    <div className="mt-3 grid gap-2 border-t border-border pt-3 text-xs leading-[1.65] text-muted-2 sm:grid-cols-2">
+                      <p><span className="font-semibold text-foreground">Por qué:</span> {a.porQue}</p>
+                      {a.indicadorExito && <p><span className="font-semibold text-foreground">Cómo sabremos si funcionó:</span> {a.indicadorExito}</p>}
+                    </div>
+                    {fuente && <a href={fuente.url} target="_blank" rel="noreferrer" className="mt-3 inline-flex text-xs font-medium text-ua hover:underline">Base pedagógica: {fuente.fuente} ↗</a>}
+                  </li>;
+                })}
               </ul>
             </div>
           )}
@@ -381,6 +386,8 @@ type AcuerdoFila = {
   texto: string;
   responsable: string | null;
   plazo: string | null;
+  criterioExito: string | null;
+  evidenciaEsperada: string | null;
   estado: keyof typeof ESTADO_ACUERDO;
   competencia: { codigo: string; nombre: string } | null;
   reunion: { numero: number };
@@ -419,6 +426,12 @@ function FilaAcuerdo({ a, nivelId }: { a: AcuerdoFila; nivelId: string }) {
               {a.responsable && a.plazo && " · "}
               {a.plazo && <>Plazo: {a.plazo}</>}
             </p>
+          )}
+          {(a.criterioExito || a.evidenciaEsperada) && (
+            <div className="mt-3 grid gap-2 rounded-xl bg-surface-muted/70 p-3 text-xs leading-relaxed sm:grid-cols-2">
+              {a.criterioExito && <p><span className="font-semibold">Se considera logrado cuando:</span> {a.criterioExito}</p>}
+              {a.evidenciaEsperada && <p><span className="font-semibold">Se revisará:</span> {a.evidenciaEsperada}</p>}
+            </div>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">

@@ -38,7 +38,7 @@ const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }
   },
   asignaturas: {
     titulo: "Las asignaturas del nivel",
-    ayuda: "Las que se dictan este trimestre.",
+    ayuda: "Las que se dictan durante este período académico.",
     pendiente: "Agrega al menos una asignatura para continuar.",
   },
   docentes: {

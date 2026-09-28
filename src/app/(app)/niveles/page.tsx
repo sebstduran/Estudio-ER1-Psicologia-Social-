@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import { resumenNiveles, type ResumenNivel } from "@/lib/panel";
 import { Button, Card } from "@/components/ui";
+import { RutaProgreso } from "@/components/ruta-progreso";
 import { NuevoNivelPanel } from "./nuevo-nivel-panel";
 
 const FASE_LABEL = { BASE: "línea base", SEGUIMIENTO: "seguimiento", CIERRE: "cierre" } as const;
@@ -33,13 +34,7 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
   const enRiesgo = nivel.severidades.EN_RIESGO;
   return (
     <>
-      <nav aria-label="Proceso de coordinación" className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {ETAPAS.map((etapa) => {
-          const completa = etapa.numero < etapaActual;
-          const activa = etapa.numero === etapaActual;
-          return <div key={etapa.numero} aria-current={activa ? "step" : undefined} className={`rounded-2xl border p-4 ${activa ? "border-transparent bg-[#111318] text-white shadow-lg" : completa ? "border-logrado-line bg-logrado-tint" : "border-border bg-surface text-muted-2"}`}><div className="flex items-center justify-between"><span className="font-mono text-xs font-semibold">{completa ? "✓" : `0${etapa.numero}`}</span>{activa && <span className="h-2 w-2 rounded-full bg-ua" />}</div><p className="mt-5 text-sm font-semibold">{etapa.titulo}</p><p className={`mt-0.5 text-xs ${activa ? "text-white/50" : "text-muted-2"}`}>{etapa.apoyo}</p></div>;
-        })}
-      </nav>
+      <RutaProgreso etapas={ETAPAS} actual={etapaActual} className="mb-4" />
 
       <section aria-labelledby="siguiente-paso" className="relative overflow-hidden rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-42px_rgba(31,20,25,0.38)] sm:p-9">
         <div aria-hidden="true" className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-ua-tint blur-3xl" />
@@ -57,15 +52,15 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
       </div>
       </section>
 
-      <section aria-labelledby="revisar-todo" className="mt-5 rounded-[1.75rem] border border-border bg-surface/78 p-5 shadow-[0_18px_50px_-42px_rgba(17,19,24,.38)] backdrop-blur-xl sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+      <details className="group mt-4 rounded-[1.5rem] border border-border bg-surface/68 shadow-[0_18px_50px_-44px_rgba(17,19,24,.38)] backdrop-blur-xl">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
           <div>
-            <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-ua">ACCESO DIRECTO</p>
-            <h2 id="revisar-todo" className="mt-1 text-xl font-semibold tracking-tight">Revisa cualquier parte</h2>
+            <p className="font-mono text-[0.64rem] font-medium uppercase tracking-[0.14em] text-ua">OPCIONAL</p>
+            <h2 id="revisar-todo" className="mt-0.5 text-base font-semibold tracking-tight">Revisar otra etapa</h2>
           </div>
-          <p className="text-xs text-muted">No necesitas completar el paso anterior para mirar.</p>
-        </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full border border-border bg-surface text-muted transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+        </summary>
+        <div className="grid gap-2 border-t border-border px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           {[
             { numero: "01", titulo: "Preparación", apoyo: "Nivel, equipo y competencias", href: `/niveles/${nivel.id}` },
             { numero: "02", titulo: "Formulario docente", apoyo: "Lo que recibirá el equipo", href: `/evaluar/${nivel.id}` },
@@ -79,7 +74,7 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
             </Link>
           ))}
         </div>
-      </section>
+      </details>
     </>
   );
 }
@@ -94,7 +89,7 @@ export default async function NivelesPage() {
   const niveles = await resumenNiveles(user.id);
   const principal = niveles.length > 0 ? prioridad(niveles) : null;
   const restantes = niveles.filter((n) => n.id !== principal?.id);
-  return <main className="product-page"><header className="mb-10 flex flex-wrap items-end justify-between gap-5"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-ua">Hola, {user.name?.split(" ")[0] ?? ""}</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">Tu comunidad académica</h1><p className="mt-3 text-base text-muted">Aquí siempre verás una sola prioridad: lo siguiente que debes hacer.</p></div>{niveles.length > 0 && <NuevoNivelPanel />}</header>{principal ? <><NivelPrincipal nivel={principal} />{restantes.length > 0 && <section className="mt-12" aria-labelledby="otros-niveles"><div className="mb-5 flex items-center justify-between"><h2 id="otros-niveles" className="text-xl font-semibold">Otros niveles</h2><span className="font-mono text-xs text-muted">{restantes.length}</span></div><div className="grid gap-4 md:grid-cols-2">{restantes.map((n) => <NivelCompacto key={n.id} nivel={n} />)}</div></section>}</> : <Card className="flex flex-col items-start gap-6 !rounded-[2rem] !p-8 sm:!p-12"><p className="font-mono text-xs font-medium tracking-[0.16em] text-ua">PRIMER PASO</p><div><h2 className="text-3xl font-semibold tracking-[-0.04em]">Crea el nivel que vas a acompañar</h2><p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Elige la jornada y el nivel. Las asignaturas, competencias y reuniones se cargarán automáticamente.</p></div><NuevoNivelPanel abiertoPorDefecto /></Card>}</main>;
+  return <main className="product-page"><header className="mb-7 flex flex-wrap items-end justify-between gap-5"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-ua">Hola, {user.name?.split(" ")[0] ?? ""}</p><h1 className="mt-3 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">Tu comunidad académica</h1><p className="mt-3 text-base text-muted">Una sola prioridad visible: lo que corresponde hacer ahora.</p></div>{niveles.length > 0 && <NuevoNivelPanel />}</header>{principal ? <><NivelPrincipal nivel={principal} />{restantes.length > 0 && <section className="mt-12" aria-labelledby="otros-niveles"><div className="mb-5 flex items-center justify-between"><h2 id="otros-niveles" className="text-xl font-semibold">Otros niveles</h2><span className="font-mono text-xs text-muted">{restantes.length}</span></div><div className="grid gap-4 md:grid-cols-2">{restantes.map((n) => <NivelCompacto key={n.id} nivel={n} />)}</div></section>}</> : <Card className="flex flex-col items-start gap-6 !rounded-[2rem] !p-8 sm:!p-12"><p className="font-mono text-xs font-medium tracking-[0.16em] text-ua">PRIMER PASO</p><div><h2 className="text-3xl font-semibold tracking-[-0.04em]">Crea el nivel que vas a acompañar</h2><p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Elige la jornada y el nivel. Las asignaturas, competencias y reuniones se cargarán automáticamente.</p></div><NuevoNivelPanel abiertoPorDefecto /></Card>}</main>;
 }
 
 export const dynamic = "force-dynamic";

@@ -3,12 +3,13 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireCoordinador } from "@/lib/require-coordinador";
 import { Button, CLASE_ROTULO, Eyebrow } from "@/components/ui";
+import { RutaProgreso } from "@/components/ruta-progreso";
 import { actualizarReunionActual } from "@/lib/actions/niveles";
 import { subirActaCoordinador } from "@/lib/actions/actas";
 import { EnlaceDocentes } from "./enlace-docentes";
 import { crearAccesoDocente } from "@/lib/acceso-docente";
 
-const MODALIDAD_LABEL = { DIURNO: "Diurno", VESPERTINO_TECH: "Vespertino/TECH" } as const;
+const MODALIDAD_LABEL = { DIURNO: "Diurno", VESPERTINO_TECH: "Vespertino" } as const;
 
 const FASE_LABEL = {
   BASE: "Línea base",
@@ -52,7 +53,10 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
       },
       reuniones: {
         orderBy: { numero: "asc" },
-        include: { _count: { select: { evaluaciones: true, actas: true, informes: true } } },
+        include: {
+          evaluaciones: { select: { docenteId: true } },
+          _count: { select: { evaluaciones: true, actas: true, informes: true } },
+        },
       },
     },
   });
@@ -72,9 +76,11 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         orderBy: { createdAt: "desc" },
       })
     : [];
-  const totalEvaluaciones = reunionActual?._count.evaluaciones ?? 0;
+  const docentesQueRespondieron = new Set(
+    reunionActual?.evaluaciones.map((evaluacion) => evaluacion.docenteId) ?? []
+  ).size;
   const esCierre = reunionActual?.fase === "CIERRE";
-  const hayRespuestas = totalEvaluaciones > 0;
+  const hayRespuestas = docentesQueRespondieron > 0;
   const hayActa = actas.length > 0;
   const etapaActual = !hayRespuestas ? 2 : !hayActa ? 3 : 4;
   const enlacesDocentes = reunionActual
@@ -99,7 +105,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
 
   return (
     <div className="product-page !max-w-6xl">
-      <section className="product-hero mb-6 flex flex-wrap items-end justify-between gap-7">
+      <section className="product-hero mb-5 flex flex-wrap items-end justify-between gap-7">
         <div className="relative z-10">
         <Eyebrow className="!text-white/45">Comunidad académica</Eyebrow>
         <h1 className="mt-2 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">{nivel.nombre}</h1>
@@ -108,9 +114,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           {plural(nivel.reuniones.length, "reunión", "reuniones")}
         </p>
         </div>
-        <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="relative z-10 rounded-full border border-white/16 bg-white/[.07] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/[.13]">
-          Revisar configuración
-        </Link>
+        {reunionActual && <span className="relative z-10 rounded-full border border-white/16 bg-white/[.07] px-4 py-2.5 text-xs font-medium text-white/72">R{reunionActual.numero} · {FASE_LABEL[reunionActual.fase]}</span>}
       </section>
 
       {aviso && (
@@ -124,54 +128,22 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
         </p>
       )}
 
-      <nav aria-label="Proceso de la comunidad académica" className="mb-6 grid grid-cols-2 gap-2 rounded-[1.75rem] border border-white/70 bg-surface/62 p-2 shadow-[0_24px_60px_-48px_rgba(17,19,24,.45)] backdrop-blur-xl sm:grid-cols-4">
-        {etapas.map((etapa) => {
-          const completa = etapa.numero < etapaActual;
-          const activa = etapa.numero === etapaActual;
-          return (
-            <div
-              key={etapa.numero}
-              aria-current={activa ? "step" : undefined}
-              className={`rounded-2xl border p-4 transition-colors ${
-                activa
-                  ? "border-transparent bg-[#111318] text-white shadow-lg"
-                  : completa
-                    ? "border-logrado-line bg-logrado-tint text-foreground"
-                    : "border-border bg-surface text-muted-2"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-semibold">{completa ? "✓" : `0${etapa.numero}`}</span>
-                {activa && <span className="h-2 w-2 rounded-full bg-ua" />}
-              </div>
-              <p className="mt-5 text-sm font-semibold">{etapa.titulo}</p>
-              <p className={`mt-0.5 text-xs ${activa ? "text-white/50" : "text-muted-2"}`}>{etapa.apoyo}</p>
-            </div>
-          );
-        })}
-      </nav>
+      <RutaProgreso etapas={etapas} actual={etapaActual} className="mb-4" />
 
-      <section aria-labelledby="accesos-revision" className="mb-6 rounded-[1.75rem] border border-border bg-surface/80 p-5 backdrop-blur-xl sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div><p className={CLASE_ROTULO}>ACCESOS PARA REVISAR</p><h2 id="accesos-revision" className="mt-1 text-xl font-semibold">Puedes mirar todo el recorrido</h2></div>
-          <p className="text-xs text-muted">La vista previa no modifica tus datos.</p>
-        </div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          <Link href={`/evaluar/${nivel.id}`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">02</span><b className="mt-3 block text-sm">Formulario docente</b><span className="mt-1 block text-xs text-muted">Ver lo que responderán</span></Link>
-          <Link href={`/niveles/${nivel.id}?revision=acta#cargar-acta`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">03</span><b className="mt-3 block text-sm">Carga de acta</b><span className="mt-1 block text-xs text-muted">Abrir aunque falten respuestas</span></Link>
-          <Link href={`/niveles/${nivel.id}/resultados/vista-previa`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">04</span><b className="mt-3 block text-sm">Resultados</b><span className="mt-1 block text-xs text-muted">Previsualizar con datos simulados</span></Link>
-        </div>
-      </section>
-
-      <section className="mb-6 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div><p className={CLASE_ROTULO}>RECORRIDO DEL PERÍODO</p><h2 className="mt-1 text-xl font-semibold">Elige la reunión de hoy</h2></div>
-          <p className="text-xs text-muted">{nivel.modalidad === "DIURNO" ? "4 reuniones · cierre en R4" : "3 reuniones · cierre en R3"}</p>
-        </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <details className="group mb-5 rounded-[1.35rem] border border-border bg-surface/72 backdrop-blur-xl">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <p className={CLASE_ROTULO}>REUNIÓN ACTUAL</p>
+            <p className="mt-1 truncate text-sm font-semibold">R{reunionActual?.numero} · {reunionActual ? FASE_LABEL[reunionActual.fase] : ""}</p>
+            <p className="mt-0.5 text-xs text-muted">{docentesQueRespondieron} de {plural(nivel.docentes.length, "docente", "docentes")} · {hayActa ? "acta lista" : "acta pendiente"}</p>
+          </div>
+          <span className="flex shrink-0 items-center gap-2 text-xs font-medium text-muted">Cambiar reunión <i className="not-italic transition-transform group-open:rotate-180" aria-hidden="true">⌄</i></span>
+        </summary>
+        <div className="grid gap-2 border-t border-border p-4 sm:grid-cols-2 lg:grid-cols-4">
           {nivel.reuniones.map((r) => {
             const activa = r.numero === nivel.reunionActualNumero;
-            const tieneDatos = r._count.evaluaciones > 0;
+            const respondieron = new Set(r.evaluaciones.map((evaluacion) => evaluacion.docenteId)).size;
+            const tieneDatos = respondieron > 0;
             const tieneActa = r._count.actas > 0;
             const action = async () => {
               "use server";
@@ -180,6 +152,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
             return (
               <form action={action} key={r.id}>
                 <button
+                  disabled={activa}
                   className={`w-full rounded-2xl border p-4 text-left transition-all ${
                     activa
                       ? "border-transparent bg-[#12141b] text-white shadow-lg"
@@ -188,29 +161,29 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
                 >
                   <span className="flex items-center justify-between"><b className="font-mono text-lg">R{r.numero}</b><i className={`h-2 w-2 rounded-full ${tieneActa ? "bg-logrado" : tieneDatos ? "bg-proceso" : "bg-border-strong"}`} /></span>
                   <span className="mt-1 block text-xs opacity-65">{FASE_LABEL[r.fase]}</span>
-                  <span className="mt-3 block text-[0.68rem] opacity-55">{tieneDatos ? `${r._count.evaluaciones} respuestas` : "Sin respuestas"} · {tieneActa ? "Acta lista" : "Sin acta"}</span>
+                  <span className="mt-3 block text-[0.68rem] opacity-55">{tieneDatos ? `${respondieron}/${nivel.docentes.length} docentes` : "Sin respuestas"} · {tieneActa ? "Acta lista" : "Sin acta"}</span>
                 </button>
               </form>
             );
           })}
         </div>
-      </section>
+      </details>
 
       {!hayRespuestas && (
-        <section className="rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
+        <section className="mb-5 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
           <Eyebrow>Paso 2 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Envía el enlace al equipo docente</h2>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">Cada persona recibe su acceso directo y responde únicamente las preguntas de sus asignaturas. Sin cuenta, correo ni contraseña.</p>
           <div className="mt-7"><EnlaceDocentes nivelId={nivel.id} enlaces={enlacesDocentes} /></div>
-          <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">Aún no hay respuestas. Cuando llegue la primera, se habilitará el paso del acta.</p>
+          <p className="mt-6 rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">Esperando respuestas · cuando llegue la primera, podrás incorporar el acta.</p>
         </section>
       )}
 
       {!hayActa && reunionActual && (hayRespuestas || revisarActa) && (
-        <section id="cargar-acta" className="scroll-mt-24 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
+        <section id="cargar-acta" className="mb-5 scroll-mt-24 rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-52px_rgba(17,19,24,.42)] sm:p-9">
           <Eyebrow>Paso 3 de 4</Eyebrow>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Sube el acta de la reunión</h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">{hayRespuestas ? `Ya recibimos ${plural(totalEvaluaciones, "respuesta", "respuestas")}. Ahora agrega el acta para completar la evidencia de esta reunión.` : "Puedes revisar o utilizar la carga desde ahora. Los resultados reales se habilitarán cuando también exista al menos una respuesta docente."}</p>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted">{hayRespuestas ? `${docentesQueRespondieron === 1 ? "Ya respondió" : "Ya respondieron"} ${docentesQueRespondieron} de ${plural(nivel.docentes.length, "docente", "docentes")}. Ahora agrega el acta para completar la evidencia de esta reunión.` : "Puedes revisar o utilizar la carga desde ahora. Los resultados reales se habilitarán cuando también exista al menos una respuesta docente."}</p>
           <form action={subirActaCoordinador.bind(null, nivel.id, reunionActual.id)} className="mt-7 flex flex-col gap-4 rounded-2xl border border-dashed border-border-strong bg-surface-muted p-5 sm:flex-row sm:items-center">
             <input type="file" name="archivo" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" required className="min-w-0 flex-1 text-[0.8125rem] text-muted file:mr-3 file:rounded-full file:border file:border-border-strong file:bg-surface file:px-3.5 file:py-2 file:text-xs file:font-medium file:text-foreground" />
             <Button type="submit">Subir acta de R{reunionActual.numero}</Button>
@@ -219,7 +192,7 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
       )}
 
       {hayRespuestas && hayActa && (
-        <section className="product-hero">
+        <section className="product-hero mb-5">
           <div className="relative z-10">
             <p className="font-mono text-xs tracking-[.14em] text-white/45">PASO 4 DE 4 · TODO LISTO</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Ya puedes conocer cómo está el nivel</h2>
@@ -232,6 +205,19 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
           </div>
         </section>
       )}
+
+      <details className="group rounded-[1.35rem] border border-border bg-surface/68 backdrop-blur-xl">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
+          <div><p className={CLASE_ROTULO}>OPCIONAL</p><h2 id="accesos-revision" className="mt-0.5 text-base font-semibold">Revisar otra parte</h2></div>
+          <span className="grid size-9 shrink-0 place-items-center rounded-full border border-border bg-surface text-muted transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+        </summary>
+        <div className="grid gap-2 border-t border-border p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">01</span><b className="mt-3 block text-sm">Configuración</b><span className="mt-1 block text-xs text-muted">Nivel, equipo y competencias</span></Link>
+          <Link href={`/evaluar/${nivel.id}`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">02</span><b className="mt-3 block text-sm">Formulario docente</b><span className="mt-1 block text-xs text-muted">Ver lo que responderán</span></Link>
+          <Link href={`/niveles/${nivel.id}?revision=acta#cargar-acta`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">03</span><b className="mt-3 block text-sm">Carga de acta</b><span className="mt-1 block text-xs text-muted">Abrir la carga de esta reunión</span></Link>
+          <Link href={`/niveles/${nivel.id}/resultados/vista-previa`} className="rounded-2xl border border-border bg-surface-muted/60 p-4 transition-colors hover:border-border-strong hover:bg-surface"><span className="font-mono text-[0.65rem] text-ua">04</span><b className="mt-3 block text-sm">Resultados</b><span className="mt-1 block text-xs text-muted">Ver una demostración completa</span></Link>
+        </div>
+      </details>
 
     </div>
   );

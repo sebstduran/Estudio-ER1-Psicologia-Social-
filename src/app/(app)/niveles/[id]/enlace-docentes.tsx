@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Button, CLASE_ROTULO, inputClass } from "@/components/ui";
+import { Button, CLASE_ROTULO } from "@/components/ui";
 
 const sinSuscripcion = () => () => {};
 const enCliente = () => window.location.origin;
@@ -17,6 +17,7 @@ export type EnlaceDocente = {
 export function EnlaceDocentes({ nivelId, enlaces }: { nivelId: string; enlaces: EnlaceDocente[] }) {
   const origen = useSyncExternalStore(sinSuscripcion, enCliente, enServidor);
   const [copiado, setCopiado] = useState<string | null>(null);
+  const [fallo, setFallo] = useState<string | null>(null);
 
   function urlDe(token: string) {
     return origen ? `${origen}/evaluar/${nivelId}?acceso=${encodeURIComponent(token)}` : "";
@@ -25,50 +26,39 @@ export function EnlaceDocentes({ nivelId, enlaces }: { nivelId: string; enlaces:
   async function copiar(id: string, url: string) {
     try {
       await navigator.clipboard.writeText(url);
+      setFallo(null);
       setCopiado(id);
       setTimeout(() => setCopiado(null), 2000);
     } catch {
-      // El campo queda seleccionable si el navegador no permite usar el portapapeles.
+      setFallo(id);
     }
   }
 
   return (
     <div className="border-t border-border pt-5">
-      <p className={`${CLASE_ROTULO} mb-2.5 block`}>Un enlace para cada docente</p>
+      <p className={`${CLASE_ROTULO} mb-2.5 block`}>Listos para enviar</p>
       <p className="mb-4 max-w-2xl text-xs leading-relaxed text-muted-2">
-        Copia el enlace junto al nombre y envíalo por WhatsApp o correo. La persona entra
-        directamente a sus asignaturas: no crea cuenta, no usa contraseña y no ve nombres ajenos.
+        Copia el acceso junto al nombre y envíalo por WhatsApp o correo. Cada persona entra directamente a sus asignaturas.
       </p>
 
       <ul className="grid gap-3">
         {enlaces.map((enlace) => {
           const url = urlDe(enlace.token);
           return (
-            <li key={enlace.id} className="rounded-2xl border border-border bg-surface-muted/55 p-4">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold">{enlace.nombre}</p>
-                  <p className="mt-0.5 text-xs text-muted-2">
-                    {enlace.asignaturas.join(" · ") || "Sin asignatura asignada"}
-                  </p>
-                </div>
-                <span className="rounded-full border border-logrado-line bg-logrado-tint px-2.5 py-1 text-[0.65rem] font-medium text-logrado">
-                  Acceso personal
-                </span>
+            <li key={enlace.id} className="grid min-w-0 gap-4 rounded-2xl border border-border bg-surface-muted/55 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">{enlace.nombre}</p>
+                <p className="mt-1 truncate text-xs text-muted-2">
+                  {enlace.asignaturas.join(" · ") || "Sin asignatura asignada"}
+                </p>
+                {fallo === enlace.id && <p className="mt-2 text-xs text-incipiente">No se pudo copiar. Ábrelo y copia la dirección del navegador.</p>}
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  readOnly
-                  value={url}
-                  onFocus={(event) => event.currentTarget.select()}
-                  aria-label={`Enlace de ${enlace.nombre}`}
-                  className={`${inputClass} min-w-0 flex-1 font-mono !text-xs`}
-                />
-                <Button type="button" variant="secondary" size="sm" onClick={() => copiar(enlace.id, url)}>
-                  {copiado === enlace.id ? "Copiado" : "Copiar"}
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+                <Button type="button" size="sm" className="flex-1 sm:flex-none" onClick={() => copiar(enlace.id, url)}>
+                  {copiado === enlace.id ? "Enlace copiado ✓" : "Copiar enlace"}
                 </Button>
-                <a href={url} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 text-xs font-medium text-muted transition-colors hover:bg-surface hover:text-foreground">
-                  Probar
+                <a href={url} target="_blank" rel="noreferrer" className="shrink-0 rounded-full border border-border-strong bg-surface px-3.5 py-2 text-xs font-medium text-muted transition-colors hover:border-foreground/30 hover:text-foreground">
+                  Abrir
                 </a>
               </div>
             </li>

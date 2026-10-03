@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { prisma } from "@/lib/prisma";
-import { Button, Card, Eyebrow, RubricaControl, TipoMapeoBadge, inputClass } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { guardarEvaluacion } from "@/lib/actions/evaluar";
 import { FormularioEvaluacion } from "./formulario-evaluacion";
 import { auth } from "@/lib/auth";
@@ -74,28 +74,40 @@ function MarcoDocente({
   step: 1 | 2 | 3;
   children: ReactNode;
 }) {
+  const compacto = step === 3;
+
   return (
-    <main className="assessment-page min-h-screen pb-20">
+    <main className="assessment-page min-h-screen pb-16">
       <header className="relative overflow-hidden bg-[#12141a] text-white">
         <div aria-hidden="true" className="absolute -right-32 -top-40 h-[30rem] w-[30rem] rounded-full bg-ua/35 blur-3xl" />
         <div aria-hidden="true" className="absolute -bottom-36 left-[18%] h-72 w-72 rounded-full bg-[#167b75]/20 blur-3xl" />
-        <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-7 sm:pb-24 sm:pt-9">
-          <Link href="/" className="inline-flex items-center gap-2.5 text-sm font-medium text-white/78">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white shadow-lg"><Image src="/logo-ua.png" alt="" width={29} height={23} className="h-auto w-7" /></span>
-            Comunidades Académicas
-          </Link>
-          <div className="mt-14 flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <p className="font-mono text-[.65rem] font-medium uppercase tracking-[.16em] text-[#f0a4b2]">{ciclo} · {trimestre}</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">{nivel}</h1>
-              <p className="mt-3 text-sm text-white/48">Tu observación profesional se integra al análisis del nivel.</p>
-            </div>
-            {reunion && <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/72">{reunion}</span>}
+        <div className={`relative mx-auto max-w-5xl px-5 sm:px-6 ${compacto ? "py-4 sm:py-5" : "pb-20 pt-7 sm:pb-24 sm:pt-9"}`}>
+          <div className="flex items-center justify-between gap-5">
+            <Link href="/" className="inline-flex min-w-0 items-center gap-2.5 text-sm font-medium text-white/78">
+              <span className={`grid shrink-0 place-items-center bg-white shadow-lg ${compacto ? "h-9 w-9 rounded-xl" : "h-10 w-10 rounded-2xl"}`}><Image src="/logo-ua.png" alt="" width={29} height={23} className="h-auto w-7" /></span>
+              <span className={compacto ? "hidden sm:inline" : ""}>Comunidades Académicas</span>
+            </Link>
+            {compacto && (
+              <div className="min-w-0 text-right">
+                <p className="truncate text-sm font-medium text-white/84">{nivel}</p>
+                <p className="mt-0.5 text-[0.68rem] text-white/42">{reunion ?? `${ciclo} · ${trimestre}`}</p>
+              </div>
+            )}
           </div>
+          {!compacto && (
+            <div className="mt-14 flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="font-mono text-[.65rem] font-medium uppercase tracking-[.16em] text-[#f0a4b2]">{ciclo} · {trimestre}</p>
+                <h1 className="mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">{nivel}</h1>
+                <p className="mt-3 text-sm text-white/48">Tu observación profesional se integra al análisis del nivel.</p>
+              </div>
+              {reunion && <span className="liquid-glass rounded-full px-4 py-2 text-xs text-white/72">{reunion}</span>}
+            </div>
+          )}
         </div>
       </header>
-      <div className="relative mx-auto -mt-8 max-w-5xl px-6">
-        <Stepper step={step} />
+      <div className={`relative mx-auto ${compacto ? "max-w-4xl px-4 pt-5 sm:px-6" : "-mt-8 max-w-5xl px-6"}`}>
+        {!compacto && <Stepper step={step} />}
         {children}
       </div>
     </main>
@@ -284,18 +296,20 @@ export default async function EvaluarPage({
 
   return (
     <MarcoDocente nivel={nivel.nombre} ciclo={CICLO_LABEL[nivel.cicloTipo]} trimestre={nivel.trimestre} reunion={reunionTexto} step={3}>
-      <div className="surface-glass mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl px-5 py-4">
+      <div className="surface-glass mb-4 flex items-center justify-between gap-4 rounded-2xl px-4 py-3.5 sm:px-5">
         <div>
           <p className="font-mono text-[.6rem] font-medium uppercase tracking-[.13em] text-ua">RESPONDIENDO COMO {docente.nombre}</p>
           <p className="mt-1 text-base font-semibold">{asignatura.nombre}</p>
-          <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "competencia" : "competencias"} · alrededor de 5 minutos</p>
+          <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "competencia" : "competencias"} · una a la vez</p>
         </div>
-        <Link
-          href={rutaDocente}
-          className="rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted transition-colors hover:border-border-strong hover:text-foreground"
-        >
-          Cambiar asignatura
-        </Link>
+        {docente.asignaturas.length > 1 && (
+          <Link
+            href={rutaDocente}
+            className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted transition-colors hover:border-border-strong hover:text-foreground"
+          >
+            Cambiar
+          </Link>
+        )}
       </div>
 
       <ErrorBanner error={error} />
@@ -306,97 +320,27 @@ export default async function EvaluarPage({
           complete el mapeo en la configuración del nivel.
         </Card>
       ) : (
-        <FormularioEvaluacion action={guardarAction}>
-          {competenciasTributadas.map(({ competencia, tipo }, competenciaIndex) => (
-            <details key={competencia.id} open={competenciaIndex === 0} className="assessment-competency group animate-fade-in overflow-hidden rounded-[1.5rem] border border-white/70 bg-surface/80 shadow-[0_24px_70px_-52px_rgba(17,19,24,.52)] backdrop-blur-xl">
-              <summary className="relative cursor-pointer list-none overflow-hidden bg-[#17191f] p-6 text-white marker:content-none sm:p-7">
-                <div aria-hidden="true" className="absolute -right-12 -top-20 h-44 w-44 rounded-full bg-ua/24 blur-3xl" />
-                <div className="relative flex items-start gap-4">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white/12 bg-white/[.07] font-mono text-xs text-white/70">{String(competenciaIndex + 1).padStart(2, "0")}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <Eyebrow className="!text-white/48">{competencia.codigo} · {competencia.componenteEpg.nombre}</Eyebrow>
-                      <span className="flex items-center gap-3"><TipoMapeoBadge tipo={tipo} /><span aria-hidden="true" className="text-white/38 transition-transform group-open:rotate-180">⌄</span></span>
-                    </div>
-                    <h3 className="text-xl font-semibold tracking-[-.03em]">{competencia.nombre}</h3>
-                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/52">{competencia.descriptor}</p>
-                  </div>
-                </div>
-              </summary>
-
-              <div className="flex flex-col gap-3 p-4 sm:p-6">
-                {competencia.indicadores.map((ind) => {
-                  const previa = previaPorIndicador.get(ind.id);
-                  return (
-                    <div key={ind.id} className="rounded-2xl border border-border/80 bg-surface/72 p-4 sm:p-5">
-                      <p className="text-sm font-medium leading-relaxed">{ind.texto}</p>
-                      <p className="mb-3 mt-1 text-xs text-muted-2">¿Dónde se encuentra hoy la mayoría del curso?</p>
-                      <RubricaControl name={`logro:${ind.id}`} defaultValue={previa?.nivelLogro} />
-                      <textarea
-                        className={`${inputClass} mt-3 min-h-16 text-sm`}
-                        name={`comentario:${ind.id}`}
-                        placeholder="¿Algo que quieras agregar? (opcional)"
-                        defaultValue={previa?.comentario ?? ""}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </details>
-          ))}
-
-          {/* Dos preguntas dirigidas, no una caja en blanco: una caja en blanco
-              se devuelve en blanco. Esto es lo que antes se decía en la reunión
-              y se perdía en el acta, así que va aquí, mientras la persona
-              todavía tiene el curso en la cabeza. */}
-          <Card className="animate-fade-in !rounded-[2rem] !p-6 sm:!p-8">
-            <Eyebrow>Tu lectura profesional</Eyebrow>
-            <h3 className="mt-3 text-2xl font-semibold tracking-[-.035em]">Lo que los números no alcanzan a mostrar</h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              Opcional, pero es lo que más ayuda a decidir qué hacer. Lo lee quien coordina
-              y alimenta las recomendaciones.
-            </p>
-
-            <div className="mt-5 flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="dificultad" className="text-sm font-medium">
-                  ¿Qué te está costando más con este curso?
-                </label>
-                <p className="text-xs leading-relaxed text-muted-2">
-                  Lo que ves en clases y no aparece en la rúbrica.
-                </p>
-                <textarea
-                  id="dificultad"
-                  name="dificultad"
-                  className={`${inputClass} min-h-20 text-sm`}
-                  placeholder="Ej. Llegan sin lectura previa, así que la clase se va en explicar lo básico."
-                  defaultValue={percepcionPrevia?.dificultad ?? ""}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="sugerencia" className="text-sm font-medium">
-                  ¿Qué crees que ayudaría?
-                </label>
-                <p className="text-xs leading-relaxed text-muted-2">
-                  Aunque no dependa de ti.
-                </p>
-                <textarea
-                  id="sugerencia"
-                  name="sugerencia"
-                  className={`${inputClass} min-h-20 text-sm`}
-                  placeholder="Ej. Un control de lectura corto al inicio, o coordinar la pauta con Metodología."
-                  defaultValue={percepcionPrevia?.sugerencia ?? ""}
-                />
-              </div>
-            </div>
-          </Card>
-
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/70 bg-surface/88 px-5 py-4 shadow-[0_24px_70px_-35px_rgba(17,19,24,.48)] backdrop-blur-2xl">
-            <p className="text-xs text-muted">Al guardar, podrás responder otra asignatura.</p>
-            <Button type="submit" size="md">Guardar evaluación <span aria-hidden="true">→</span></Button>
-          </div>
-        </FormularioEvaluacion>
+        <FormularioEvaluacion
+          action={guardarAction}
+          competencias={competenciasTributadas.map(({ competencia }) => ({
+            id: competencia.id,
+            codigo: competencia.codigo,
+            nombre: competencia.nombre,
+            descriptor: competencia.descriptor,
+            componente: competencia.componenteEpg.nombre,
+            indicadores: competencia.indicadores.map((indicador) => {
+              const previa = previaPorIndicador.get(indicador.id);
+              return {
+                id: indicador.id,
+                texto: indicador.texto,
+                nivelLogro: previa?.nivelLogro,
+                comentario: previa?.comentario ?? undefined,
+              };
+            }),
+          }))}
+          dificultadPrevia={percepcionPrevia?.dificultad ?? undefined}
+          sugerenciaPrevia={percepcionPrevia?.sugerencia ?? undefined}
+        />
       )}
     </MarcoDocente>
   );

@@ -101,7 +101,9 @@ export async function guardarCompetenciasDeAsignatura(
     select: { id: true },
   });
 
-  // Cada competencia llega como "tipo:<id>" con valor NADA | DIRECTA | TRANSVERSAL.
+  // Cada competencia marcada llega como "tipo:<id>". Si no llega, queda fuera
+  // del cruce. La interfaz decide el tipo según el programa oficial para que el
+  // coordinador solo tenga que confirmar qué competencias están incluidas.
   const deseado = new Map<string, "DIRECTA" | "TRANSVERSAL">();
   for (const c of competencias) {
     const valor = formData.get(`tipo:${c.id}`);

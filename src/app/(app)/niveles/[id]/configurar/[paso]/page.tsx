@@ -47,8 +47,8 @@ const TEXTO: Record<PasoId, { titulo: string; ayuda: string; pendiente: string }
     pendiente: "Agrega al menos un docente para continuar.",
   },
   vinculos: {
-    titulo: "Qué competencia trabaja cada asignatura",
-    ayuda: "Ya cargamos lo declarado en cada programa. Abre una asignatura solo si quieres revisarla.",
+    titulo: "Confirma el cruce de las asignaturas",
+    ayuda: "Los programas ya vienen vinculados con las competencias del ciclo. Revisa solo si algo no calza.",
     pendiente: "Marca al menos un vínculo para terminar.",
   },
 };
@@ -88,10 +88,9 @@ export default async function ConfigurarPasoPage({
   const programasEncontrados = nivel.asignaturas.filter((asignatura) =>
     tributacionDePrograma(asignatura.nombre)
   ).length;
-  const vinculosDeclarados = nivel.asignaturas.reduce(
-    (total, asignatura) => total + (tributacionDePrograma(asignatura.nombre)?.lineas.length ?? 0),
-    0
-  );
+  const asignaturasParaRevisar = nivel.asignaturas.filter(
+    (asignatura) => !tributacionDePrograma(asignatura.nombre) && asignatura.mapeos.length === 0
+  ).length;
 
   const resuelto: Record<PasoId, boolean> = {
     competencias: nivel.competencias.length > 0,
@@ -249,22 +248,59 @@ export default async function ConfigurarPasoPage({
             </p>
           ) : (
             <div className="flex flex-col gap-4">
-              <div className="rounded-2xl border border-logrado-line bg-logrado-tint/60 p-5">
-                <div className="flex items-start gap-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-logrado text-sm font-semibold text-white" aria-hidden="true">✓</span>
-                  <div>
-                    <h2 className="text-base font-semibold">Cruce curricular preparado</h2>
-                    <p className="mt-1 text-sm leading-relaxed text-muted">
-                      {programasEncontrados} de {nivel.asignaturas.length} programas identificados · {vinculosDeclarados} relaciones declaradas.
-                    </p>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-2">
-                      “Del programa” significa que la competencia aparece expresamente en el programa de la asignatura. “Transversal” sirve para un refuerzo adicional acordado por el equipo.
-                    </p>
+              <section className="relative overflow-hidden rounded-[1.75rem] bg-[#15171d] p-6 text-white shadow-[0_28px_70px_-48px_rgba(17,19,24,.8)] sm:p-7">
+                <div aria-hidden="true" className="absolute -right-16 -top-24 size-64 rounded-full bg-[#167b75]/22 blur-3xl" />
+                <div aria-hidden="true" className="absolute -bottom-24 left-[28%] size-52 rounded-full bg-ua/25 blur-3xl" />
+                <div className="relative">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#58c7a1] text-sm font-bold text-[#101915]" aria-hidden="true">✓</span>
+                    <div>
+                      <Eyebrow className="!text-white/45">Cruce preparado</Eyebrow>
+                      <h2 className="mt-1 text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
+                        {asignaturasParaRevisar === 0
+                          ? "Ya puedes confirmar"
+                          : `Solo ${asignaturasParaRevisar === 1 ? "falta una asignatura" : `faltan ${asignaturasParaRevisar} asignaturas`}`}
+                      </h2>
+                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/58">
+                        {asignaturasParaRevisar === 0
+                          ? "Las relaciones están resumidas abajo. Abre una asignatura solo si algo no calza."
+                          : "Las relaciones automáticas ya están marcadas. Abre solo las asignaturas señaladas para completar el cruce."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-3 gap-2">
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3.5 backdrop-blur-sm sm:p-4">
+                      <strong className="block text-2xl font-semibold tracking-tight sm:text-3xl">
+                        {programasEncontrados}<span className="text-sm font-normal text-white/38">/{nivel.asignaturas.length}</span>
+                      </strong>
+                      <span className="mt-1 block text-[0.6875rem] leading-snug text-white/48 sm:text-xs">programas reconocidos</span>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3.5 backdrop-blur-sm sm:p-4">
+                      <strong className="block text-2xl font-semibold tracking-tight text-[#67d8bc] sm:text-3xl">{totalMapeos}</strong>
+                      <span className="mt-1 block text-[0.6875rem] leading-snug text-white/48 sm:text-xs">relaciones activas</span>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-3.5 backdrop-blur-sm sm:p-4">
+                      <strong className={`block text-2xl font-semibold tracking-tight sm:text-3xl ${asignaturasParaRevisar === 0 ? "text-[#67d8bc]" : "text-[#f0bd5b]"}`}>
+                        {asignaturasParaRevisar}
+                      </strong>
+                      <span className="mt-1 block text-[0.6875rem] leading-snug text-white/48 sm:text-xs">pendientes de revisar</span>
+                    </div>
                   </div>
                 </div>
+              </section>
+
+              <div className="flex items-center justify-between gap-4 px-1 pb-1 pt-2">
+                <div>
+                  <h2 className="text-sm font-semibold">Asignaturas del nivel</h2>
+                  <p className="mt-0.5 text-xs text-muted-2">Abre “Revisar” solo para corregir o agregar una relación.</p>
+                </div>
+                <span className="hidden rounded-full border border-logrado-line bg-logrado-tint px-3 py-1 text-[0.6875rem] font-medium text-logrado sm:inline-flex">
+                  Revisión por excepción
+                </span>
               </div>
 
-              {nivel.asignaturas.map((a, asignaturaIndex) => {
+              {nivel.asignaturas.map((a) => {
                 const guardar = guardarCompetenciasDeAsignatura.bind(null, nivel.id, a.id);
                 const tipoDe = (cid: string) => mapeoPorPar.get(`${a.id}:${cid}`) ?? "NADA";
                 const competenciasMarcadas = nivel.competencias.filter((c) => tipoDe(c.id) !== "NADA");
@@ -279,21 +315,23 @@ export default async function ConfigurarPasoPage({
                     })
                   : false;
                 const estado = programa?.soloGenericas
-                  ? "Solo declara competencia genérica"
+                  ? "Programa revisado"
                   : coincideConPrograma
-                    ? "Cargada desde el programa"
+                    ? "Listo"
                     : programa
                       ? "Ajustada por el equipo"
-                      : "Revisión manual";
-                const estadoListo = coincideConPrograma;
+                      : competenciasMarcadas.length > 0
+                        ? "Definida por el equipo"
+                        : "Revisar";
+                const estadoListo = Boolean(programa) || competenciasMarcadas.length > 0;
 
                 return (
                   <details
                     key={a.id}
-                    open={asignaturaIndex === 0 || !programa}
+                    open={!programa && competenciasMarcadas.length === 0}
                     className="group overflow-hidden rounded-2xl border border-border bg-surface open:shadow-[0_22px_55px_-42px_rgba(17,19,24,.45)]"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 marker:content-none">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition-colors marker:content-none hover:bg-surface-muted/45 sm:px-6">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-[1.0625rem] font-semibold">{a.nombre}</h2>
@@ -302,10 +340,13 @@ export default async function ConfigurarPasoPage({
                           </span>
                         </div>
                         {competenciasMarcadas.length > 0 ? (
-                          <div className="mt-2 flex flex-wrap gap-1.5">
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            <span className="mr-1 text-xs text-muted-2">
+                              {competenciasMarcadas.length} {competenciasMarcadas.length === 1 ? "competencia" : "competencias"}
+                            </span>
                             {competenciasMarcadas.map((competencia) => (
-                              <span key={competencia.id} className="rounded-md border border-border bg-surface-muted px-2 py-1 text-xs text-muted">
-                                {competencia.codigo} {competencia.nombre}
+                              <span key={competencia.id} title={competencia.nombre} className="rounded-md border border-border bg-surface-muted px-2 py-0.5 font-mono text-[0.6875rem] text-muted">
+                                {competencia.codigo}
                               </span>
                             ))}
                           </div>
@@ -317,59 +358,69 @@ export default async function ConfigurarPasoPage({
                           </p>
                         )}
                       </div>
-                      <span className="shrink-0 text-lg text-muted-2 transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+                      <span className="flex shrink-0 items-center gap-2 text-xs font-medium text-muted transition-colors group-hover:text-foreground">
+                        Revisar
+                        <i className="grid size-7 place-items-center rounded-full border border-border bg-surface text-base not-italic text-muted-2 transition-transform group-open:rotate-180" aria-hidden="true">⌄</i>
+                      </span>
                     </summary>
 
-                    <form action={guardar} className="border-t border-border bg-surface-muted/35 px-5 pb-5">
-                      <ul className="flex flex-col divide-y divide-border">
+                    <form action={guardar} className="border-t border-border bg-surface-muted/35 p-5 sm:p-6">
+                      <div className="mb-4">
+                        <h3 className="text-sm font-semibold">¿Qué competencias trabaja?</h3>
+                        <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted">
+                          Las que aparecen en el programa ya están marcadas. Agrega otra solo si esta asignatura también la refuerza de forma intencionada.
+                        </p>
+                      </div>
+
+                      <ul className="grid gap-2">
                         {nivel.competencias.map((c) => {
                           const actual = tipoDe(c.id);
+                          const linea = lineaDeCodigo(c.codigo);
+                          const declaradaPorPrograma = Boolean(
+                            programa && linea && programa.lineas.includes(linea)
+                          );
+                          const seleccionada = actual !== "NADA";
+                          const valorAlGuardar = declaradaPorPrograma || !programa
+                            ? "DIRECTA"
+                            : "TRANSVERSAL";
                           return (
-                            <li
-                              key={c.id}
-                              className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 py-4"
-                            >
-                              <div className="min-w-0 flex-1 sm:max-w-[25rem]">
-                                <div className="flex items-baseline gap-2.5">
+                            <li key={c.id}>
+                              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-surface p-4 transition-all hover:border-border-strong has-[:checked]:border-logrado-line has-[:checked]:bg-logrado-tint/55">
+                                <input
+                                  type="checkbox"
+                                  name={`tipo:${c.id}`}
+                                  value={valorAlGuardar}
+                                  defaultChecked={seleccionada}
+                                  className="mt-1 size-4 shrink-0 accent-[var(--logrado)]"
+                                />
+                                <span className="min-w-0 flex-1">
+                                  <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
                                   <span className="font-mono text-[0.6875rem] font-medium text-muted-2">
                                     {c.codigo}
                                   </span>
                                   <span className="text-[0.9375rem] font-medium">{c.nombre}</span>
-                                </div>
-                                <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-                                  {c.descriptor}
-                                </p>
-                              </div>
-                              <div className="flex shrink-0 gap-1">
-                                {(
-                                  [
-                                    ["NADA", "No corresponde"],
-                                    ["DIRECTA", "Del programa"],
-                                    ["TRANSVERSAL", "Transversal"],
-                                  ] as const
-                                ).map(([valor, etiqueta]) => (
-                                  <label
-                                    key={valor}
-                                    className="cursor-pointer select-none rounded-[7px] border border-border-strong px-2.5 py-1 text-xs text-muted transition-colors hover:border-muted-2 hover:text-foreground has-[:checked]:border-ua has-[:checked]:bg-ua-tint has-[:checked]:font-medium has-[:checked]:text-ua"
-                                  >
-                                    <input
-                                      type="radio"
-                                      name={`tipo:${c.id}`}
-                                      value={valor}
-                                      defaultChecked={actual === valor}
-                                      className="sr-only"
-                                    />
-                                    {etiqueta}
-                                  </label>
-                                ))}
-                              </div>
+                                    {declaradaPorPrograma ? (
+                                      <span className="rounded-full border border-logrado-line bg-surface px-2 py-0.5 text-[0.625rem] font-medium text-logrado">
+                                        Programa oficial
+                                      </span>
+                                    ) : seleccionada ? (
+                                      <span className="rounded-full border border-ua/20 bg-ua-tint px-2 py-0.5 text-[0.625rem] font-medium text-ua">
+                                        Agregada por el equipo
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                  <span className="mt-1 block text-[0.8125rem] leading-relaxed text-muted">
+                                    {c.descriptor}
+                                  </span>
+                                </span>
+                              </label>
                             </li>
                           );
                         })}
                       </ul>
 
-                      <Button type="submit" size="sm" variant="secondary" className="mt-4">
-                        Guardar cambios
+                      <Button type="submit" size="sm" className="mt-5">
+                        Guardar este ajuste
                       </Button>
                     </form>
                   </details>
@@ -387,7 +438,7 @@ export default async function ConfigurarPasoPage({
         </Link>
         {resuelto[pasoId] ? (
           <Link href={siguiente}>
-            <Button>{numero < total ? "Listo, siguiente" : "Terminar"}</Button>
+            <Button>{numero < total ? "Listo, siguiente" : pasoId === "vinculos" ? "Confirmar y terminar" : "Terminar"}</Button>
           </Link>
         ) : (
           <span className="text-[0.8125rem] text-muted-2">{TEXTO[pasoId].pendiente}</span>

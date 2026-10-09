@@ -84,28 +84,35 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
         <LogroStackedBar counts={c.conteo} thin />
       </div>
 
-      {/* La evidencia más débil: el dato con el que se toma la decisión */}
+      {/* El foco señalado por el equipo, o el indicador más débil del historial. */}
       {c.indicadorMasDebil && c.severidad !== "CONSOLIDADO" && (
         <div className="mt-5 rounded-xl bg-surface-muted p-4">
           <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-muted-2">
-            Evidencia más débil
+            {c.indicadorMasDebil.focosMarcados > 0 ? "Foco señalado por el equipo" : "Evidencia más débil"}
           </p>
           <p className="text-sm leading-relaxed">{c.indicadorMasDebil.texto}</p>
-          <div className="mt-2.5 flex items-center gap-3">
-            <div className="max-w-[220px] flex-1">
-              <LogroStackedBar thin counts={c.indicadorMasDebil.conteo} />
-            </div>
-            <span className="font-mono text-xs tabular-nums text-muted">
-              {Math.round(c.indicadorMasDebil.score ?? 0)}/100
+          {c.indicadorMasDebil.focosMarcados > 0 ? (
+            <span className="mt-3 inline-flex items-center gap-2 rounded-full border border-proceso-line bg-proceso-tint px-3 py-1.5 text-xs font-medium text-proceso">
+              <span aria-hidden="true">◆</span>
+              {c.indicadorMasDebil.focosMarcados} {c.indicadorMasDebil.focosMarcados === 1 ? "mención" : "menciones"}
             </span>
-          </div>
+          ) : (
+            <div className="mt-2.5 flex items-center gap-3">
+              <div className="max-w-[220px] flex-1">
+                <LogroStackedBar thin counts={c.indicadorMasDebil.conteo} />
+              </div>
+              <span className="font-mono text-xs tabular-nums text-muted">
+                {Math.round(c.indicadorMasDebil.score ?? 0)}/100
+              </span>
+            </div>
+          )}
         </div>
       )}
 
       {/* Detalle completo, plegado para no saturar la vista */}
       <details className="group mt-4">
         <summary className="cursor-pointer list-none text-xs text-muted transition-colors hover:text-foreground">
-          <span className="group-open:hidden">Ver los tres indicadores y los comentarios ▾</span>
+          <span className="group-open:hidden">Ver elementos curriculares y comentarios ▾</span>
           <span className="hidden group-open:inline">Ocultar detalle ▴</span>
         </summary>
 
@@ -122,12 +129,18 @@ function TarjetaCompetencia({ c }: { c: CompetenciaDiagnostico }) {
                   )}
                 </p>
                 <span className="shrink-0 font-mono text-xs tabular-nums text-muted-2">
-                  {ind.score === null ? "—" : `${Math.round(ind.score)}`}
+                  {ind.score === null
+                    ? ind.focosMarcados > 0
+                      ? `${ind.focosMarcados}× foco`
+                      : "—"
+                    : `${Math.round(ind.score)}${ind.focosMarcados > 0 ? ` · ◆${ind.focosMarcados}` : ""}`}
                 </span>
               </div>
-              <div className="mt-2">
-                <LogroStackedBar thin counts={ind.conteo} />
-              </div>
+              {ind.score !== null && (
+                <div className="mt-2">
+                  <LogroStackedBar thin counts={ind.conteo} />
+                </div>
+              )}
               {ind.comentarios.length > 0 && (
                 <ul className="mt-3 flex flex-col gap-2 border-l-2 border-border pl-3.5">
                   {ind.comentarios.map((com, i) => (
@@ -525,7 +538,7 @@ export default async function ResultadosPage({
           <div className="relative mt-5 flex flex-wrap gap-2 text-[0.7rem]">
             <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="text-white">{NOMBRE_CICLO[d.nivel.ciclo as CicloMalla]}</b> · {HITO_CICLO[d.nivel.ciclo as CicloMalla]}</span>
             <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.participacion.filter((p) => p.completo).length}</b> docentes</span>
-            <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.totalVotos}</b> respuestas</span>
+            <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/60"><b className="font-mono text-white">{d.totalVotos}</b> juicios de competencia</span>
             <span className={`rounded-full border px-3 py-1.5 ${hayActa ? "border-logrado/30 bg-logrado/15 text-white" : "border-white/12 bg-white/6 text-white/60"}`}><b className="font-mono">{totalActas}</b> {totalActas === 1 ? "acta" : "actas"}</span>
           </div>
         </div>

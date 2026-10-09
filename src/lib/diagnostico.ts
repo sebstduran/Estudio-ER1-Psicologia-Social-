@@ -13,6 +13,35 @@ function conteoVacio(): ConteoLogro {
   return { LOGRADO: 0, EN_PROCESO: 0, INCIPIENTE: 0, NO_TRABAJADO: 0 };
 }
 
+/** Convierte las filas de una respuesta en un solo juicio de peso 1. */
+export function normalizarJuicio(niveles: Array<keyof ConteoLogro>): ConteoLogro {
+  const conteo = conteoVacio();
+  if (niveles.length === 0) return conteo;
+  const peso = 1 / niveles.length;
+  for (const nivel of niveles) conteo[nivel] += peso;
+  return conteo;
+}
+
+type EvaluacionAgrupable = {
+  reunionId: string;
+  docenteId: string;
+  asignaturaId: string;
+  competenciaId: string;
+  nivelLogro: keyof ConteoLogro;
+};
+
+/** Una persona aporta el mismo peso aunque responda con el instrumento antiguo o el breve. */
+function agruparJuicios<T extends EvaluacionAgrupable>(evaluaciones: T[]) {
+  const grupos = new Map<string, T[]>();
+  for (const evaluacion of evaluaciones) {
+    const clave = `${evaluacion.reunionId}:${evaluacion.docenteId}:${evaluacion.asignaturaId}:${evaluacion.competenciaId}`;
+    const grupo = grupos.get(clave) ?? [];
+    grupo.push(evaluacion);
+    grupos.set(clave, grupo);
+  }
+  return grupos;
+}
+
 /**
  * Denominador del puntaje: SOLO los juicios de logro. "Aún no lo trabajo" no es
  * un juicio —es la ausencia de uno— así que no entra ni arriba ni abajo. Si
@@ -85,6 +114,7 @@ export const ORDEN_SEVERIDAD: Record<Severidad, number> = {
 export type IndicadorDiagnostico = {
   id: string;
   texto: string;
+  focosMarcados: number;
   conteo: ConteoLogro;
   score: number | null;
   severidad: Severidad;
@@ -225,26 +255,47 @@ export async function construirDiagnostico(
   const porCompAsig = new Map<string, ConteoLogro>();
   const comentariosPorIndicador = new Map<string, IndicadorDiagnostico["comentarios"]>();
   const docentesPorCompetencia = new Map<string, Set<string>>();
-  const respondidasPorDocente = new Map<string, number>();
+  const respondidasPorDocente = new Map<string, Set<string>>();
+  const focosPorIndicador = new Map<string, number>();
+  const juiciosDeLaReunion = agruparJuicios(deLaReunion);
+
+  // Cada combinación docente + asignatura + competencia pesa exactamente 1.
+  // En respuestas antiguas ese peso se reparte entre sus indicadores; en el
+  // formulario breve, las filas replicadas vuelven a sumar 1. El puntaje queda
+  // comparable entre reuniones sin multiplicar artificialmente participantes.
+  for (const grupo of juiciosDeLaReunion.values()) {
+    const muestra = grupo[0];
+    const c = porCompetencia.get(muestra.competenciaId) ?? conteoVacio();
+    const ca = porCompAsig.get(`${muestra.competenciaId}:${muestra.asignaturaId}`) ?? conteoVacio();
+    const juicio = normalizarJuicio(grupo.map((evaluacion) => evaluacion.nivelLogro));
+    for (const nivel of Object.keys(juicio) as Array<keyof ConteoLogro>) {
+      c[nivel] += juicio[nivel];
+      ca[nivel] += juicio[nivel];
+    }
+    porCompetencia.set(muestra.competenciaId, c);
+    porCompAsig.set(`${muestra.competenciaId}:${muestra.asignaturaId}`, ca);
+
+    const docentes = docentesPorCompetencia.get(muestra.competenciaId) ?? new Set<string>();
+    docentes.add(muestra.docenteId);
+    docentesPorCompetencia.set(muestra.competenciaId, docentes);
+
+    const respondidas = respondidasPorDocente.get(muestra.docenteId) ?? new Set<string>();
+    respondidas.add(`${muestra.asignaturaId}:${muestra.competenciaId}`);
+    respondidasPorDocente.set(muestra.docenteId, respondidas);
+  }
 
   for (const e of deLaReunion) {
-    const c = porCompetencia.get(e.competenciaId) ?? conteoVacio();
-    c[e.nivelLogro] += 1;
-    porCompetencia.set(e.competenciaId, c);
+    // El pulso general no fabrica un puntaje por indicador. El indicador solo
+    // conserva su puntaje cuando proviene de la rúbrica detallada anterior.
+    if (!e.esPulso) {
+      const i = porIndicador.get(e.indicadorId) ?? conteoVacio();
+      i[e.nivelLogro] += 1;
+      porIndicador.set(e.indicadorId, i);
+    }
 
-    const i = porIndicador.get(e.indicadorId) ?? conteoVacio();
-    i[e.nivelLogro] += 1;
-    porIndicador.set(e.indicadorId, i);
-
-    const ca = porCompAsig.get(`${e.competenciaId}:${e.asignaturaId}`) ?? conteoVacio();
-    ca[e.nivelLogro] += 1;
-    porCompAsig.set(`${e.competenciaId}:${e.asignaturaId}`, ca);
-
-    const set = docentesPorCompetencia.get(e.competenciaId) ?? new Set<string>();
-    set.add(e.docenteId);
-    docentesPorCompetencia.set(e.competenciaId, set);
-
-    respondidasPorDocente.set(e.docenteId, (respondidasPorDocente.get(e.docenteId) ?? 0) + 1);
+    if (e.esPulso && e.esFoco) {
+      focosPorIndicador.set(e.indicadorId, (focosPorIndicador.get(e.indicadorId) ?? 0) + 1);
+    }
 
     if (e.comentario) {
       const lista = comentariosPorIndicador.get(e.indicadorId) ?? [];
@@ -260,31 +311,34 @@ export async function construirDiagnostico(
 
   // Trayectoria: puntaje de cada competencia en cada reunión.
   const porReunionCompetencia = new Map<string, ConteoLogro>();
-  for (const e of evaluaciones) {
-    const k = `${e.reunionId}:${e.competenciaId}`;
+  for (const grupo of agruparJuicios(evaluaciones).values()) {
+    const muestra = grupo[0];
+    const k = `${muestra.reunionId}:${muestra.competenciaId}`;
     const c = porReunionCompetencia.get(k) ?? conteoVacio();
-    c[e.nivelLogro] += 1;
+    const juicio = normalizarJuicio(grupo.map((evaluacion) => evaluacion.nivelLogro));
+    for (const nivel of Object.keys(juicio) as Array<keyof ConteoLogro>) {
+      c[nivel] += juicio[nivel];
+    }
     porReunionCompetencia.set(k, c);
   }
 
-  // Cuántos indicadores debería responder cada docente: los de las competencias
-  // que tributan las asignaturas que dicta.
-  const indicadoresPorAsignatura = new Map<string, number>();
+  // Una respuesta esperada por competencia que tributa cada asignatura.
+  const competenciasPorAsignatura = new Map<string, number>();
   for (const comp of nivel.competencias) {
     for (const m of comp.mapeos) {
-      indicadoresPorAsignatura.set(
+      competenciasPorAsignatura.set(
         m.asignaturaId,
-        (indicadoresPorAsignatura.get(m.asignaturaId) ?? 0) + comp.indicadores.length
+        (competenciasPorAsignatura.get(m.asignaturaId) ?? 0) + 1
       );
     }
   }
 
   const participacion: ParticipacionDocente[] = nivel.docentes.map((d) => {
     const esperadas = d.asignaturas.reduce(
-      (n, da) => n + (indicadoresPorAsignatura.get(da.asignaturaId) ?? 0),
+      (n, da) => n + (competenciasPorAsignatura.get(da.asignaturaId) ?? 0),
       0
     );
-    const respondidas = respondidasPorDocente.get(d.id) ?? 0;
+    const respondidas = respondidasPorDocente.get(d.id)?.size ?? 0;
     return {
       id: d.id,
       nombre: d.nombre,
@@ -305,6 +359,7 @@ export async function construirDiagnostico(
       return {
         id: ind.id,
         texto: ind.texto,
+        focosMarcados: focosPorIndicador.get(ind.id) ?? 0,
         conteo: ic,
         score: iscore,
         severidad: clasificar(iscore),
@@ -313,9 +368,18 @@ export async function construirDiagnostico(
       };
     });
 
-    const conDatos = indicadores.filter((i) => i.score !== null);
-    const indicadorMasDebil =
-      conDatos.length > 0 ? conDatos.reduce((a, b) => (a.score! <= b.score! ? a : b)) : null;
+    const marcadosComoFoco = indicadores.filter((indicador) => indicador.focosMarcados > 0);
+    const conDatos = indicadores.filter((indicador) => indicador.score !== null);
+    const indicadorMasDebil = marcadosComoFoco.length > 0
+      ? marcadosComoFoco.reduce((a, b) => {
+          if (a.focosMarcados !== b.focosMarcados) {
+            return a.focosMarcados > b.focosMarcados ? a : b;
+          }
+          return (a.score ?? 101) <= (b.score ?? 101) ? a : b;
+        })
+      : conDatos.length > 0
+        ? conDatos.reduce((a, b) => (a.score! <= b.score! ? a : b))
+        : null;
 
     const asignaturas: AsignaturaDiagnostico[] = comp.mapeos.map((m) => {
       const ac = porCompAsig.get(`${comp.id}:${m.asignaturaId}`) ?? conteoVacio();
@@ -358,7 +422,10 @@ export async function construirDiagnostico(
       trayectoria,
       indicadores,
       indicadorMasDebil,
-      indicadoresConDisenso: indicadores.filter((i) => i.disenso).length,
+      indicadoresConDisenso: Math.max(
+        indicadores.filter((i) => i.disenso).length,
+        hayDisenso(conteo) ? 1 : 0
+      ),
       asignaturas,
       docentesQueEvaluaron,
       docentesEsperados,
@@ -390,7 +457,7 @@ export async function construirDiagnostico(
     competencias,
     participacion,
     percepciones,
-    totalVotos: deLaReunion.length,
+    totalVotos: juiciosDeLaReunion.size,
     resumen: {
       criticas: competencias.filter((c) => c.severidad === "CRITICO").length,
       enRiesgo: competencias.filter((c) => c.severidad === "EN_RIESGO").length,

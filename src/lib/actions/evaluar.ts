@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { verificarAccesoDocente } from "@/lib/acceso-docente";
 
 const NIVEL_LOGRO = ["LOGRADO", "EN_PROCESO", "INCIPIENTE", "NO_TRABAJADO"] as const;
+const REQUIERE_FOCO = new Set<(typeof NIVEL_LOGRO)[number]>(["INCIPIENTE", "EN_PROCESO"]);
 
 /** Recorta un texto libre; devuelve null si quedó vacío. */
 function textoLibre(valor: FormDataEntryValue | null, maximo = 2000): string | null {
@@ -49,63 +50,83 @@ export async function guardarEvaluacion(
     redirect(`${volver}&error=${encodeURIComponent("Esa asignatura no está vinculada a tu nombre.")}`);
   }
 
-  const indicadorIds = Array.from(
-    new Set(
-      Array.from(formData.keys())
-        .filter((k) => k.startsWith("logro:"))
-        .map((k) => k.slice("logro:".length))
-    )
-  );
-
-  if (indicadorIds.length === 0) {
-    redirect(`${volver}&asignatura=${asignaturaId}&error=No hay indicadores para evaluar.`);
-  }
-
-  const indicadores = await prisma.indicador.findMany({
+  const mapeos = await prisma.mapeoAsignaturaCompetencia.findMany({
     where: {
-      id: { in: indicadorIds },
-      competencia: { mapeos: { some: { asignaturaId } } },
+      asignaturaId,
+      competencia: { nivelId },
     },
-    select: { id: true, competenciaId: true },
+    include: {
+      competencia: { include: { indicadores: { orderBy: { orden: "asc" } } } },
+    },
   });
-  const competenciaPorIndicador = new Map(indicadores.map((i) => [i.id, i.competenciaId]));
 
   const operaciones = [];
-  for (const indicadorId of indicadorIds) {
-    const logroRaw = formData.get(`logro:${indicadorId}`);
-    const competenciaId = competenciaPorIndicador.get(indicadorId);
-    if (!competenciaId) continue;
-    if (typeof logroRaw !== "string" || !NIVEL_LOGRO.includes(logroRaw as never)) continue;
+  for (const { competencia } of mapeos) {
+    const logroRaw = formData.get(`pulso:${competencia.id}`);
+    if (typeof logroRaw !== "string" || !NIVEL_LOGRO.includes(logroRaw as never)) {
+      redirect(
+        `${volver}&asignatura=${asignaturaId}&error=${encodeURIComponent("Indica cómo está el curso en cada competencia.")}`
+      );
+    }
+    if (competencia.indicadores.length === 0) {
+      redirect(
+        `${volver}&asignatura=${asignaturaId}&error=${encodeURIComponent("Esta competencia aún no tiene elementos curriculares configurados.")}`
+      );
+    }
 
-    const comentarioRaw = formData.get(`comentario:${indicadorId}`);
-    const comentario = typeof comentarioRaw === "string" && comentarioRaw.trim() ? comentarioRaw.trim() : null;
+    const indicadorIdsValidos = new Set(competencia.indicadores.map((indicador) => indicador.id));
+    const focos = Array.from(
+      new Set(
+        formData
+          .getAll(`foco:${competencia.id}`)
+          .filter((valor): valor is string => typeof valor === "string" && indicadorIdsValidos.has(valor))
+      )
+    );
+    const nivelLogro = logroRaw as (typeof NIVEL_LOGRO)[number];
+    if (REQUIERE_FOCO.has(nivelLogro) && (focos.length === 0 || focos.length > 2)) {
+      redirect(
+        `${volver}&asignatura=${asignaturaId}&error=${encodeURIComponent("Cuando hay una dificultad, elige uno o dos focos para reforzar.")}`
+      );
+    }
+    const focosGuardados = new Set(REQUIERE_FOCO.has(nivelLogro) ? focos : []);
 
-    operaciones.push(
-      prisma.evaluacion.upsert({
-        where: {
-          reunionId_docenteId_asignaturaId_indicadorId: {
+    for (const indicador of competencia.indicadores) {
+      operaciones.push(
+        prisma.evaluacion.upsert({
+          where: {
+            reunionId_docenteId_asignaturaId_indicadorId: {
+              reunionId: reunion.id,
+              docenteId,
+              asignaturaId,
+              indicadorId: indicador.id,
+            },
+          },
+          // No se borra comentario: una edición con el formulario breve no
+          // debe eliminar observaciones guardadas con la rúbrica anterior.
+          update: {
+            nivelLogro,
+            esPulso: true,
+            esFoco: focosGuardados.has(indicador.id),
+          },
+          create: {
             reunionId: reunion.id,
             docenteId,
             asignaturaId,
-            indicadorId,
+            indicadorId: indicador.id,
+            competenciaId: competencia.id,
+            nivelLogro,
+            esPulso: true,
+            esFoco: focosGuardados.has(indicador.id),
           },
-        },
-        update: { nivelLogro: logroRaw as (typeof NIVEL_LOGRO)[number], comentario },
-        create: {
-          reunionId: reunion.id,
-          docenteId,
-          asignaturaId,
-          indicadorId,
-          competenciaId,
-          nivelLogro: logroRaw as (typeof NIVEL_LOGRO)[number],
-          comentario,
-        },
-      })
-    );
+        })
+      );
+    }
   }
 
   if (operaciones.length === 0) {
-    redirect(`${volver}&asignatura=${asignaturaId}&error=Completa la rúbrica de al menos un indicador.`);
+    redirect(
+      `${volver}&asignatura=${asignaturaId}&error=${encodeURIComponent("Esta asignatura todavía no tiene competencias para evaluar.")}`
+    );
   }
 
   // Las dos preguntas abiertas del final. Se guardan junto con la rúbrica y no

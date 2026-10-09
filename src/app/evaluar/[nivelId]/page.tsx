@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { prisma } from "@/lib/prisma";
 import { Button, Card } from "@/components/ui";
 import { guardarEvaluacion } from "@/lib/actions/evaluar";
-import { FormularioEvaluacion } from "./formulario-evaluacion";
+import { FormularioPulso } from "./formulario-pulso";
 import { auth } from "@/lib/auth";
 import { crearAccesoDocente, verificarAccesoDocente } from "@/lib/acceso-docente";
 
@@ -20,6 +20,33 @@ const FASE_LABEL = {
   SEGUIMIENTO: "Seguimiento",
   CIERRE: "Cierre comparativo",
 } as const;
+
+type NivelLogroGuardado = "LOGRADO" | "EN_PROCESO" | "INCIPIENTE" | "NO_TRABAJADO";
+
+/**
+ * Traduce una respuesta antigua por indicadores al nuevo pulso único. Las
+ * reuniones anteriores conservan todo su detalle; esto solo permite editar la
+ * reunión actual sin obligar a responder de nuevo desde cero.
+ */
+function pulsoPrevio(
+  evaluaciones: Array<{ nivelLogro: NivelLogroGuardado; esPulso: boolean }>
+): NivelLogroGuardado | undefined {
+  const pulso = evaluaciones.find((evaluacion) => evaluacion.esPulso);
+  if (pulso) return pulso.nivelLogro;
+  if (evaluaciones.length === 0) return undefined;
+
+  const juicios = evaluaciones.filter((evaluacion) => evaluacion.nivelLogro !== "NO_TRABAJADO");
+  if (juicios.length === 0) return "NO_TRABAJADO";
+  const score =
+    juicios.reduce(
+      (total, evaluacion) =>
+        total + (evaluacion.nivelLogro === "LOGRADO" ? 1 : evaluacion.nivelLogro === "EN_PROCESO" ? 0.5 : 0),
+      0
+    ) / juicios.length;
+  if (score >= 0.7) return "LOGRADO";
+  if (score >= 0.4) return "EN_PROCESO";
+  return "INCIPIENTE";
+}
 
 function ErrorBanner({ error }: { error?: string }) {
   if (!error) return null;
@@ -300,7 +327,7 @@ export default async function EvaluarPage({
         <div>
           <p className="font-mono text-[.6rem] font-medium uppercase tracking-[.13em] text-ua">RESPONDIENDO COMO {docente.nombre}</p>
           <p className="mt-1 text-base font-semibold">{asignatura.nombre}</p>
-          <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "competencia" : "competencias"} · una a la vez</p>
+          <p className="mt-1 text-xs text-muted">{competenciasTributadas.length} {competenciasTributadas.length === 1 ? "decisión breve" : "decisiones breves"} · una competencia a la vez</p>
         </div>
         {docente.asignaturas.length > 1 && (
           <Link
@@ -320,7 +347,7 @@ export default async function EvaluarPage({
           complete el mapeo en la configuración del nivel.
         </Card>
       ) : (
-        <FormularioEvaluacion
+        <FormularioPulso
           action={guardarAction}
           competencias={competenciasTributadas.map(({ competencia }) => ({
             id: competencia.id,
@@ -328,13 +355,15 @@ export default async function EvaluarPage({
             nombre: competencia.nombre,
             descriptor: competencia.descriptor,
             componente: competencia.componenteEpg.nombre,
+            nivelLogro: pulsoPrevio(
+              evaluacionesPrevias.filter((evaluacion) => evaluacion.competenciaId === competencia.id)
+            ),
             indicadores: competencia.indicadores.map((indicador) => {
               const previa = previaPorIndicador.get(indicador.id);
               return {
                 id: indicador.id,
                 texto: indicador.texto,
-                nivelLogro: previa?.nivelLogro,
-                comentario: previa?.comentario ?? undefined,
+                esFoco: previa?.esFoco ?? false,
               };
             }),
           }))}

@@ -224,11 +224,16 @@ enum NivelLogro {
   NO_TRABAJADO
 }
 
-// Un voto: un docente, para una asignatura, sobre un indicador, en una reunión.
+// Un juicio docente, para una asignatura y una competencia, en una reunión.
+// Las filas siguen vinculadas a indicadores para conservar el historial del
+// instrumento anterior. En el formulario breve, el mismo pulso se replica en
+// los tres indicadores y esFoco marca únicamente dónde conviene profundizar.
 model Evaluacion {
   id         String     @id @default(cuid())
   nivelLogro NivelLogro
   comentario String?
+  esPulso    Boolean    @default(false)
+  esFoco     Boolean    @default(false)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 

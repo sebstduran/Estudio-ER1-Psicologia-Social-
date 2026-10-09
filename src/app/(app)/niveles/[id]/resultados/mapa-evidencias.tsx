@@ -23,10 +23,18 @@ const NOMBRE: Record<Severidad, string> = {
 };
 
 function Celda({ i }: { i: IndicadorDiagnostico }) {
+  const tieneFoco = i.focosMarcados > 0;
   const descripcion =
     `${i.texto} — ` +
-    (i.score === null ? "sin evaluar" : `${Math.round(i.score)} de 100, ${NOMBRE[i.severidad]}`) +
+    (i.score === null
+      ? tieneFoco
+        ? `${i.focosMarcados} ${i.focosMarcados === 1 ? "mención" : "menciones"} como foco`
+        : "sin evaluar"
+      : `${Math.round(i.score)} de 100, ${NOMBRE[i.severidad]}`) +
     (i.disenso ? ". Criterio no compartido entre docentes" : "");
+  const tono = i.score === null && tieneFoco
+    ? "border-proceso-line bg-proceso-tint text-proceso"
+    : CELDA[i.severidad];
 
   return (
     <div
@@ -34,7 +42,7 @@ function Celda({ i }: { i: IndicadorDiagnostico }) {
       aria-label={descripcion}
       title={descripcion}
       tabIndex={0}
-      className={`flex items-center justify-between gap-2 rounded-[7px] border px-2.5 py-2.5 ${CELDA[i.severidad]}`}
+      className={`flex items-center justify-between gap-2 rounded-[7px] border px-2.5 py-2.5 ${tono}`}
     >
       {/* El signo antes del medidor: se ve en blanco y negro y se nombra. */}
       {i.disenso && (
@@ -42,9 +50,13 @@ function Celda({ i }: { i: IndicadorDiagnostico }) {
           ⇄
         </span>
       )}
-      <Medidor lleno={LLENO[i.severidad]} />
+      {i.score === null && tieneFoco ? (
+        <span className="text-xs font-semibold" aria-hidden="true">◆</span>
+      ) : (
+        <Medidor lleno={LLENO[i.severidad]} />
+      )}
       <span className="font-mono text-[0.8125rem] font-medium tabular-nums">
-        {i.score === null ? "—" : Math.round(i.score)}
+        {i.score === null ? (tieneFoco ? `${i.focosMarcados}×` : "—") : Math.round(i.score)}
       </span>
     </div>
   );
@@ -70,6 +82,7 @@ export function MapaEvidencias({ competencias }: { competencias: CompetenciaDiag
           <Leyenda cls="border-incipiente-line bg-incipiente-tint">Crítico</Leyenda>
           <Leyenda cls="border-proceso-line bg-proceso-tint">En riesgo</Leyenda>
           <Leyenda cls="border-logrado-line bg-logrado-tint">Logrado</Leyenda>
+          <Leyenda cls="border-proceso-line bg-proceso-tint">Foco docente</Leyenda>
         </div>
       }
       className="!p-0 [&>div:last-child]:p-0"
@@ -114,11 +127,11 @@ export function MapaEvidencias({ competencias }: { competencias: CompetenciaDiag
       </div>
 
       <Ayuda pregunta="¿Cómo se lee esta tabla?">
-        El número va de 0 a 100 y resume cómo evaluaron tus docentes esa evidencia: 100 es que
-        todos la dieron por lograda, 0 que ninguno. Las barritas de la izquierda repiten lo mismo
-        sin depender del color. La línea de la derecha muestra si la competencia subió, bajó o
-        quedó igual desde la primera reunión del trimestre. El signo ⇄ marca las evidencias donde
-        tus docentes no coincidieron: ahí el puntaje está midiendo dos cosas distintas.
+        El puntaje de la competencia resume cómo ve el equipo al curso. En los elementos
+        curriculares, ◆ indica cuántas veces fueron elegidos como foco para reforzar; no es un
+        puntaje inventado. Cuando existe una evaluación detallada anterior, aparece su valor de
+        0 a 100. La línea de la derecha muestra el cambio desde la primera reunión y ⇄ señala
+        criterios no compartidos entre docentes.
       </Ayuda>
     </Panel>
   );

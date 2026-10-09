@@ -111,6 +111,7 @@ export default async function MaterialReunionPage({
       score: indicador.score,
       estado: ESTADO[indicador.severidad],
       disenso: indicador.disenso,
+      focosMarcados: indicador.focosMarcados,
     })),
   }));
   const decisiones = contenido?.competencias
@@ -172,7 +173,7 @@ export default async function MaterialReunionPage({
                 </ol>
               </div>
             </div>
-            <footer className="mt-7 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-white/38"><span>{ciclo} · {HITO_CICLO[diagnostico.nivel.ciclo as CicloMalla]}</span><span>{diagnostico.totalVotos} respuestas docentes · {totalActas} {totalActas === 1 ? "acta" : "actas"}</span></footer>
+            <footer className="mt-7 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-white/38"><span>{ciclo} · {HITO_CICLO[diagnostico.nivel.ciclo as CicloMalla]}</span><span>{diagnostico.totalVotos} juicios de competencia · {totalActas} {totalActas === 1 ? "acta" : "actas"}</span></footer>
           </div>
         </section>
 

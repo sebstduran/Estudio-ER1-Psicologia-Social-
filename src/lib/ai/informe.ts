@@ -313,8 +313,13 @@ function describirConteo(c: {
   INCIPIENTE: number;
   NO_TRABAJADO: number;
 }) {
-  const base = `logrado ${c.LOGRADO}, en proceso ${c.EN_PROCESO}, incipiente ${c.INCIPIENTE}`;
-  return c.NO_TRABAJADO > 0 ? `${base}; ${c.NO_TRABAJADO} aún no lo trabaja` : base;
+  const total = c.LOGRADO + c.EN_PROCESO + c.INCIPIENTE + c.NO_TRABAJADO;
+  if (total === 0) return "sin respuestas";
+  const porcentaje = (cantidad: number) => Math.round((cantidad / total) * 100);
+  const base = `logrado ${porcentaje(c.LOGRADO)}%, en proceso ${porcentaje(c.EN_PROCESO)}%, incipiente ${porcentaje(c.INCIPIENTE)}%`;
+  return c.NO_TRABAJADO > 0
+    ? `${base}; ${porcentaje(c.NO_TRABAJADO)}% aún no lo trabaja`
+    : base;
 }
 
 /** Convierte el diagnóstico en el texto que lee el modelo. */
@@ -333,7 +338,7 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
     d.reunionActual
       ? `Reunión en curso: R${d.reunionActual.numero} (${d.reunionActual.fase})`
       : "Sin reunión en curso.",
-    `Votos registrados en esta reunión: ${d.totalVotos}`,
+    `Juicios de competencia registrados en esta reunión: ${d.totalVotos}`,
     ""
   );
 
@@ -375,13 +380,16 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
   }
 
   partes.push(
-    "ESCALA: cada indicador se califica Logrado / En proceso / Incipiente.",
+    "ESCALA: cada docente emite un pulso general por competencia: Logrado / En proceso / Incipiente.",
     "El puntaje va de 0 a 100 (Logrado=1, En proceso=0,5, Incipiente=0).",
     "Bajo 40 se considera crítico; entre 40 y 69, en riesgo; 70 o más, consolidado.",
     'Un docente también puede responder "aún no lo trabaja": significa que esa evidencia',
     "todavía no se ve en su asignatura. NO es un juicio de logro y queda fuera del puntaje.",
     "Si muchos responden eso, el dato es de secuencia curricular (cuándo se enseña), no de",
     "desempeño: no recomiendes reforzar algo que sencillamente aún no se ha enseñado.",
+    "Cuando el pulso es Incipiente o En proceso, el docente elige uno o dos elementos",
+    "curriculares como foco. Esas menciones indican DÓNDE profundizar, pero no son un puntaje.",
+    "Solo informa puntaje de un elemento cuando existe evidencia detallada histórica para él.",
     ""
   );
 
@@ -413,10 +421,13 @@ export function construirPrompt(d: Diagnostico, actas: ActaParaAnalisis[] = []):
         "Trayectoria: " + serie.map((t) => `R${t.numero} ${Math.round(t.score!)}`).join(" → ")
       );
     }
-    partes.push("Indicadores observables:");
+    partes.push("Elementos curriculares y focos señalados:");
     for (const i of c.indicadores) {
       const marcas = [
-        i.id === c.indicadorMasDebil?.id ? "← el más débil" : "",
+        i.id === c.indicadorMasDebil?.id ? "← foco prioritario" : "",
+        i.focosMarcados > 0
+          ? `← señalado como foco ${i.focosMarcados} ${i.focosMarcados === 1 ? "vez" : "veces"}`
+          : "",
         i.disenso ? "← DISENSO: alguien lo calificó logrado y alguien incipiente" : "",
       ]
         .filter(Boolean)

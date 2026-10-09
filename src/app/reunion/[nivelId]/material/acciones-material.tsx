@@ -7,6 +7,7 @@ export type IndicadorParaExportar = {
   score: number | null;
   estado: string;
   disenso: boolean;
+  focosMarcados: number;
 };
 
 export type CompetenciaParaExportar = {
@@ -195,6 +196,7 @@ export function AccionesMaterial(props: Props) {
       "Cambio desde línea base",
       "Docentes que evaluaron",
       "Docentes esperados",
+      "Menciones como foco",
       "Disenso",
     ];
     const filas: Array<Array<string | number | null>> = [];
@@ -214,6 +216,7 @@ export function AccionesMaterial(props: Props) {
         competencia.cambio === null ? null : Math.round(competencia.cambio),
         competencia.docentesQueEvaluaron,
         competencia.docentesEsperados,
+        competencia.indicadores.reduce((total, indicador) => total + indicador.focosMarcados, 0),
         competencia.indicadores.some((i) => i.disenso) ? "Sí" : "No",
       ]);
       competencia.indicadores.forEach((indicador, indice) => {
@@ -231,6 +234,7 @@ export function AccionesMaterial(props: Props) {
           null,
           competencia.docentesQueEvaluaron,
           competencia.docentesEsperados,
+          indicador.focosMarcados,
           indicador.disenso ? "Sí" : "No",
         ]);
       });

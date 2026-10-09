@@ -31,6 +31,7 @@ function competenciaSimulada(
   const indicador = {
     id: indicadorBase.id,
     texto: indicadorBase.texto,
+    focosMarcados: index % 3 === 0 ? 2 : 0,
     conteo,
     score,
     severidad: clasificar(score),

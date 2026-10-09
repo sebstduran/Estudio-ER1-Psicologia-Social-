@@ -535,6 +535,11 @@ export default async function ResultadosPage({
               <Button className="!bg-white !text-[#111318] hover:!bg-white/90">Presentar la reunión</Button>
             </Link>
           )}
+          {d.totalVotos > 0 && (
+            <Link href={`/reunion/${id}/material`}>
+              <Button variant="secondary" className="!border-white/20 !bg-white/8 !text-white hover:!bg-white/14">Descargar resultados</Button>
+            </Link>
+          )}
           <Link href={`/niveles/${id}`}>
             <Button variant="secondary" className="!border-white/20 !bg-white/8 !text-white hover:!bg-white/14">Configurar</Button>
           </Link>

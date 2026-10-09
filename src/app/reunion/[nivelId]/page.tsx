@@ -113,12 +113,17 @@ export default async function ReunionPage({
           {d.nivel.nombre}
           {d.reunionActual && ` · Reunión ${d.reunionActual.numero}`}
         </p>
-        <Link
-          href={`/niveles/${nivelId}/resultados`}
-          className="text-sm text-muted-2 transition-colors hover:text-foreground"
-        >
-          Salir de la presentación
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href={`/reunion/${nivelId}/material`} className="text-sm font-medium text-ua transition-colors hover:text-ua-dark">
+            Descargar resultados
+          </Link>
+          <Link
+            href={`/niveles/${nivelId}/resultados`}
+            className="text-sm text-muted-2 transition-colors hover:text-foreground"
+          >
+            Salir de la presentación
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-8 py-12 sm:px-14">

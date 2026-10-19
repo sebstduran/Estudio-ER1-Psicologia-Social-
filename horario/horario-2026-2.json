@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "semestre": "2026-2",
+  "profile": {
+    "name": "Sebastián",
+    "emoji": "🦉",
+    "semStart": "2026-08-10",
+    "semEnd": "2026-12-11",
+    "notify20": true,
+    "notifyEve": true
+  },
+  "events": [
+    {
+      "id": "c-etica-mar",
+      "title": "Desempeño ético",
+      "kind": "catedra",
+      "day": 2,
+      "start": "14:00",
+      "end": "18:20",
+      "place": "Sala E-31"
+    },
+    {
+      "id": "c-etica-vie",
+      "title": "Desempeño ético",
+      "kind": "catedra",
+      "day": 5,
+      "start": "14:00",
+      "end": "18:20"
+    },
+    {
+      "id": "a-diurno",
+      "title": "Asesorías practicantes (diurno)",
+      "kind": "asesoria",
+      "day": 3,
+      "start": "15:00",
+      "end": "17:00"
+    },
+    {
+      "id": "c-grupos",
+      "title": "Intervención Psicosocial con Grupos",
+      "kind": "catedra",
+      "day": 3,
+      "start": "19:00",
+      "end": "22:00"
+    },
+    {
+      "id": "c-opt-1",
+      "title": "Optativo · bloque 1",
+      "kind": "catedra",
+      "day": 4,
+      "start": "09:30",
+      "end": "10:50"
+    },
+    {
+      "id": "c-opt-2",
+      "title": "Optativo · bloque 2",
+      "kind": "catedra",
+      "day": 4,
+      "start": "11:00",
+      "end": "12:20"
+    },
+    {
+      "id": "a-vesp",
+      "title": "Asesorías practicantes (vespertino)",
+      "kind": "asesoria",
+      "day": 4,
+      "start": "15:00",
+      "end": "16:20"
+    },
+    {
+      "id": "t-g1",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G1 · Sala E-37",
+      "day": 1,
+      "start": "14:30",
+      "end": "15:15",
+      "place": "Sala E-37",
+      "group": "Grupo 1",
+      "estEnd": true,
+      "note": "El documento indica lunes 26/10; confirma si se repite el lunes 2/11. Término estimado (45 min)."
+    },
+    {
+      "id": "t-g2",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G2 · Mundo Mágico",
+      "day": 3,
+      "start": "15:10",
+      "end": "15:55",
+      "place": "Mundo Mágico",
+      "group": "Grupo 2"
+    },
+    {
+      "id": "t-g3",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G3 · Mundo Mágico",
+      "day": 4,
+      "start": "15:10",
+      "end": "15:55",
+      "place": "Mundo Mágico",
+      "group": "Grupo 3"
+    },
+    {
+      "id": "t-g4",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G4 · Coliseo",
+      "day": 3,
+      "start": "17:30",
+      "end": "18:15",
+      "place": "Coliseo",
+      "group": "Grupo 4",
+      "estEnd": true,
+      "note": "Término estimado (45 min)."
+    },
+    {
+      "id": "t-g5",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G5 · Liceo Pablo Neruda",
+      "day": 2,
+      "start": "19:00",
+      "end": "19:45",
+      "place": "Liceo Pablo Neruda",
+      "group": "Grupo 5",
+      "estEnd": true,
+      "note": "Término estimado (45 min)."
+    },
+    {
+      "id": "t-g6",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G6 · Mundo Mágico",
+      "day": 0,
+      "start": "15:10",
+      "end": "15:55",
+      "place": "Mundo Mágico",
+      "group": "Grupo 6",
+      "note": "El documento no indica el día. Asígnalo para ver si choca."
+    },
+    {
+      "id": "t-g7",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G7 · Jardín UA",
+      "day": 2,
+      "start": "11:00",
+      "end": "11:45",
+      "place": "Jardín UA",
+      "group": "Grupo 7",
+      "estEnd": true,
+      "note": "Término estimado (45 min)."
+    },
+    {
+      "id": "t-g8",
+      "kind": "terreno",
+      "dateFrom": "2026-10-26",
+      "dateTo": "2026-11-06",
+      "title": "Terreno G8",
+      "day": 5,
+      "start": "10:30",
+      "end": "11:15",
+      "group": "Grupo 8",
+      "note": "El documento no indica lugar."
+    }
+  ]
+}

@@ -1,7 +1,10 @@
+import Link from "next/link";
+
 type Etapa = {
   numero: number;
   titulo: string;
   apoyo: string;
+  href?: string;
 };
 
 export function RutaProgreso({
@@ -22,6 +25,30 @@ export function RutaProgreso({
         {etapas.map((etapa) => {
           const completa = etapa.numero < actual;
           const activa = etapa.numero === actual;
+          const contenido = (
+            <>
+              <div className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
+                <span
+                  className={`grid size-6 shrink-0 place-items-center rounded-full border font-mono text-[0.6rem] font-semibold ${
+                    activa
+                      ? "border-white/15 bg-white/10 text-white"
+                      : completa
+                        ? "border-logrado-line bg-logrado text-white"
+                        : "border-border-strong bg-surface text-muted-2"
+                  }`}
+                >
+                  {completa ? "✓" : `0${etapa.numero}`}
+                </span>
+                <span className="text-center text-[0.6rem] font-semibold leading-tight sm:truncate sm:text-left sm:text-sm">{etapa.titulo}</span>
+                {etapa.href && completa && (
+                  <span className="hidden text-[0.62rem] font-medium text-logrado sm:inline">Editar</span>
+                )}
+              </div>
+              <span className={`mt-1.5 hidden truncate pl-8 text-[0.65rem] lg:block ${activa ? "text-white/48" : "text-muted-2"}`}>
+                {etapa.apoyo}
+              </span>
+            </>
+          );
 
           return (
             <li
@@ -36,23 +63,15 @@ export function RutaProgreso({
                     : "text-muted-2"
               }`}
             >
-              <div className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
-                <span
-                  className={`grid size-6 shrink-0 place-items-center rounded-full border font-mono text-[0.6rem] font-semibold ${
-                    activa
-                      ? "border-white/15 bg-white/10 text-white"
-                      : completa
-                        ? "border-logrado-line bg-logrado text-white"
-                        : "border-border-strong bg-surface text-muted-2"
-                  }`}
+              {etapa.href ? (
+                <Link
+                  href={etapa.href}
+                  aria-label={`Editar ${etapa.titulo}: ${etapa.apoyo}`}
+                  className="block rounded-[0.8rem] outline-none transition-opacity hover:opacity-75 focus-visible:ring-2 focus-visible:ring-ua/45"
                 >
-                  {completa ? "✓" : `0${etapa.numero}`}
-                </span>
-                <span className="text-center text-[0.6rem] font-semibold leading-tight sm:truncate sm:text-left sm:text-sm">{etapa.titulo}</span>
-              </div>
-              <span className={`mt-1.5 hidden truncate pl-8 text-[0.65rem] lg:block ${activa ? "text-white/48" : "text-muted-2"}`}>
-                {etapa.apoyo}
-              </span>
+                  {contenido}
+                </Link>
+              ) : contenido}
             </li>
           );
         })}

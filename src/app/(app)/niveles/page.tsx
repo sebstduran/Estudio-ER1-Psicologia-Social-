@@ -30,11 +30,16 @@ function prioridad(niveles: ResumenNivel[]) {
 function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
   const paso = siguientePaso(nivel);
   const etapaActual = nivel.pasoConfiguracion < 5 ? 1 : !nivel.evaluado ? 2 : !nivel.actaSubida ? 3 : 4;
+  const etapas = ETAPAS.map((etapa) =>
+    etapa.numero === 1
+      ? { ...etapa, href: `/niveles/${nivel.id}/configurar/asignaturas` }
+      : etapa
+  );
   const criticas = nivel.severidades.CRITICO;
   const enRiesgo = nivel.severidades.EN_RIESGO;
   return (
     <>
-      <RutaProgreso etapas={ETAPAS} actual={etapaActual} className="mb-4" />
+      <RutaProgreso etapas={etapas} actual={etapaActual} className="mb-4" />
 
       <section aria-labelledby="siguiente-paso" className="relative overflow-hidden rounded-[2rem] border border-border bg-surface p-6 shadow-[0_24px_70px_-42px_rgba(31,20,25,0.38)] sm:p-9">
         <div aria-hidden="true" className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-ua-tint blur-3xl" />
@@ -62,7 +67,7 @@ function NivelPrincipal({ nivel }: { nivel: ResumenNivel }) {
         </summary>
         <div className="grid gap-2 border-t border-border px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           {[
-            { numero: "01", titulo: "Preparación", apoyo: "Nivel, equipo y competencias", href: `/niveles/${nivel.id}` },
+            { numero: "01", titulo: "Preparación", apoyo: "Nivel, equipo y competencias", href: `/niveles/${nivel.id}/configurar/asignaturas` },
             { numero: "02", titulo: "Formulario docente", apoyo: "Lo que recibirá el equipo", href: `/evaluar/${nivel.id}` },
             { numero: "03", titulo: "Subir un acta", apoyo: `Acta de la reunión ${nivel.reunionNumero}`, href: `/niveles/${nivel.id}?revision=acta#cargar-acta` },
             { numero: "04", titulo: "Vista de resultados", apoyo: "Ejemplo completo y seguro", href: `/niveles/${nivel.id}/resultados/vista-previa` },

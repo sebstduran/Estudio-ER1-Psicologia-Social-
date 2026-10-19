@@ -97,7 +97,12 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
     : [];
 
   const etapas = [
-    { numero: 1, titulo: "Preparar", apoyo: "Nivel y equipo" },
+    {
+      numero: 1,
+      titulo: "Preparar",
+      apoyo: "Nivel y equipo",
+      href: `/niveles/${nivel.id}/configurar/asignaturas`,
+    },
     { numero: 2, titulo: "Responder", apoyo: "Voz docente" },
     { numero: 3, titulo: "Subir acta", apoyo: `Reunión ${reunionActual?.numero ?? ""}` },
     { numero: 4, titulo: "Resultados", apoyo: "Análisis y acciones" },
@@ -129,6 +134,22 @@ export default async function NivelPage({ params, searchParams }: PageProps<"/ni
       )}
 
       <RutaProgreso etapas={etapas} actual={etapaActual} className="mb-4" />
+
+      <section className="mb-5 flex flex-col gap-4 rounded-[1.35rem] border border-logrado-line/70 bg-logrado-tint/65 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex items-start gap-3.5">
+          <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-logrado text-sm font-semibold text-white" aria-hidden="true">✓</span>
+          <div>
+            <p className={CLASE_ROTULO}>PREPARACIÓN LISTA</p>
+            <p className="mt-1 text-sm font-medium text-foreground">Puedes volver a cambiar asignaturas, docentes o su relación con las competencias.</p>
+            {hayRespuestas && (
+              <p className="mt-1 text-xs leading-relaxed text-muted">Ya hay respuestas guardadas. Revisa con cuidado antes de eliminar una persona o asignatura.</p>
+            )}
+          </div>
+        </div>
+        <Link href={`/niveles/${nivel.id}/configurar/asignaturas`} className="shrink-0">
+          <Button variant="secondary" size="sm">Editar nivel y equipo <span aria-hidden="true">→</span></Button>
+        </Link>
+      </section>
 
       <details className="group mb-5 rounded-[1.35rem] border border-border bg-surface/72 backdrop-blur-xl">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">

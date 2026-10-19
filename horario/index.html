@@ -240,7 +240,7 @@ svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .drawer{position:fixed;z-index:51;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--sh-3);display:flex;flex-direction:column;animation:slide .26s cubic-bezier(.2,.9,.25,1);padding-top:env(safe-area-inset-top,0px)}
 .dr-h{display:flex;align-items:center;gap:8px;padding:14px max(18px,env(safe-area-inset-right,0px)) 12px 20px;border-bottom:1px solid var(--line-2)}
 .dr-h h2{font-size:15px;flex:1}
-.dr-b{padding:20px max(18px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) 20px;overflow:auto;display:grid;gap:18px;align-content:start}
+.dr-b{padding:20px max(18px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) 20px;overflow:auto;display:grid;gap:18px;align-content:start;grid-auto-rows:max-content;flex:1;min-height:0}
 .dt-title{font-size:24px;line-height:1.15;font-weight:600;letter-spacing:-.025em}
 .rows{display:grid;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .rowi{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:10px 12px;align-items:start;font-size:13.5px}
@@ -301,6 +301,37 @@ svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .toast button{border:0;background:color-mix(in srgb,var(--on-primary) 14%,transparent);color:inherit;border-radius:7px;padding:5px 10px;font-weight:600;white-space:nowrap}
 .toast .x{background:none;opacity:.6;padding:4px;display:grid}
 
+/* ---------- estados, traslados, supervisión ---------- */
+.ev.off{--k:var(--faint);background:repeating-linear-gradient(135deg,var(--sunken) 0 6px,var(--panel) 6px 12px);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.ev.off .t,.item.off .ti{text-decoration:line-through;text-decoration-thickness:1.5px}
+.item.off{opacity:.6}
+.item.done .tm::after{content:"✓";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ase);color:#fff;font-size:11px;margin-top:6px}
+.hol{font-size:10.5px;font-weight:600;color:var(--clash);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.free.tight{color:var(--ter-ink);font-weight:600}
+.free.tight::after{border-color:color-mix(in srgb,var(--ter) 55%,transparent)}
+.titem{border:1px solid color-mix(in srgb,var(--ter) 30%,var(--line));background:var(--ter-soft);color:var(--ter-ink);border-radius:10px;padding:8px 10px;text-align:left;display:grid;gap:2px;font-size:12.5px;width:100%}
+.titem b{font-weight:600}
+.prog{display:grid;gap:6px}
+.prog .bar{height:5px;border-radius:9px;background:var(--line-2);overflow:hidden;display:flex}
+.prog .bar i{display:block;height:100%;background:var(--accent)}
+.prog .bar i.g{background:var(--ase)}
+.prog small{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.prog .btn{height:30px;font-size:12.5px;justify-self:start}
+.sess{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:12px}
+.sess h3{font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sess h3 small{color:var(--muted);font-weight:500;font-size:12px}
+.att{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13.5px;cursor:pointer}
+.att input{width:18px;height:18px;accent-color:var(--ase);flex:none;margin:0}
+.att small{display:block;color:var(--muted);font-size:11.5px;word-break:break-all}
+.seg.full{display:grid;grid-template-columns:repeat(3,1fr)}
+.seg button[data-st="realizada"][aria-pressed="true"]{color:var(--ase-ink);background:var(--ase-soft)}
+.seg button[data-st="suspendida"][aria-pressed="true"]{color:var(--clash-ink);background:var(--clash-soft)}
+.warnbox .dr-actions{margin-top:6px}
+.warnbox .btn{height:30px;font-size:12.5px;color:var(--ink)}
+.infobox{border-radius:12px;padding:11px 12px;background:var(--ter-soft);color:var(--ter-ink);font-size:13px;display:grid;gap:4px;border:1px solid color-mix(in srgb,var(--ter) 30%,transparent)}
+.mob-up{display:none}
+a.btn{text-decoration:none;color:inherit}
+
 /* ---------- móvil ---------- */
 .mobile-only{display:none}
 .tabs,.fab{display:none}
@@ -324,6 +355,23 @@ svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stro
   .scroller{max-height:calc(100vh - 300px)}
   .drawer{top:auto;left:0;width:100%;max-height:92vh;border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;animation:sheet .3s cubic-bezier(.2,.9,.25,1);padding-top:0}
   .drawer::before{content:"";width:38px;height:4px;border-radius:9px;background:var(--line);margin:8px auto 0;flex:none}
+  .mob-up{display:grid}
+}
+@media (max-width:720px){
+  #wgrid{min-width:0;--tc:40px;--cw:0px}
+  .gh{padding:6px 2px 5px;justify-items:center;text-align:center}
+  .gh .d{flex-direction:column;gap:0;align-items:center}
+  .gh .d b{font-size:17px}
+  .gh .hrs{font-size:9.5px}
+  .gh .load,.gh .hol{display:none}
+  .times div{font-size:9.5px;right:4px}
+  .ev{padding:3px 3px 3px 6px;border-radius:6px}
+  .ev .t{font-size:10.5px;white-space:normal;line-height:1.15;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+  .ev .h{font-size:9px}
+  .ev .p{display:none}
+  .ev.compact{flex-direction:column;align-items:flex-start;gap:0}
+  .ev.is-clash{padding-right:3px}
+  .badge{width:12px;height:12px;font-size:8px;top:2px;right:2px;border-radius:4px}
 }
 @media (max-width:560px){
   .form{grid-template-columns:minmax(0,1fr)}
@@ -371,7 +419,7 @@ svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stro
   <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
 </svg>
 
-<div class="shell">
+<div class="shell" lang="es">
   <aside class="side" id="side" aria-label="Panel lateral"></aside>
   <div class="main">
     <header class="top">
@@ -424,6 +472,8 @@ const KCLS={catedra:'kc',asesoria:'ka',terreno:'kt',otro:'ko'};
 const KVAR={catedra:'var(--cat)',asesoria:'var(--ase)',terreno:'var(--ter)',otro:'var(--otr)'};
 const EMOJIS=['🦉','🧠','🌱','☕','🚀','🐙','🦊','📚','✨','🐢','🎧','🌈','🦄','🐝','🌻','🧉'];
 const DEFAULT_PROFILE={name:'Sebastián',emoji:'🦉',semStart:'2026-08-10',semEnd:'2026-12-11',notify20:true,notifyEve:true};
+const HOLIDAYS={'2026-09-18':'Independencia Nacional','2026-09-19':'Glorias del Ejército','2026-10-12':'Encuentro de Dos Mundos','2026-10-31':'Iglesias Evangélicas','2026-11-01':'Todos los Santos','2026-12-08':'Inmaculada Concepción','2026-12-25':'Navidad','2027-01-01':'Año Nuevo','2027-03-26':'Viernes Santo','2027-03-27':'Sábado Santo','2027-05-01':'Día del Trabajo','2027-05-21':'Glorias Navales','2027-06-21':'Pueblos Indígenas','2027-06-28':'San Pedro y San Pablo','2027-07-16':'Virgen del Carmen','2027-08-15':'Asunción de la Virgen','2027-09-17':'Feriado Fiestas Patrias','2027-09-18':'Independencia Nacional','2027-09-19':'Glorias del Ejército','2027-10-11':'Encuentro de Dos Mundos','2027-10-31':'Iglesias Evangélicas','2027-11-01':'Todos los Santos','2027-12-08':'Inmaculada Concepción','2027-12-25':'Navidad'};
+const TIGHT=45; // minutos mínimos para trasladarse a/desde un terreno
 const LS='horarioUA.v1';
 const mq=matchMedia('(max-width:1023px)');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -431,7 +481,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S={profile:{...DEFAULT_PROFILE},events:[],loaded:false,
   view:matchMedia('(max-width:720px)').matches?'dia':'semana',
   week:mondayOf(new Date()),sel:startOfDay(new Date()),mini:startOfDay(new Date()),
-  hidden:new Set(lsGet(LS+'.hidden',[])),db:null,mode:'local',grid:null,drag:null,syncOn:false,syncMsg:'Conectando…'};
+  hidden:new Set(lsGet(LS+'.hidden',[])),sessions:{},detail:null,db:null,mode:'local',grid:null,drag:null,syncOn:false,syncMsg:'Conectando…'};
 
 /* ---------- tiempo ---------- */
 function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x}
@@ -458,10 +508,34 @@ function occursOn(e,date){
   const k=ymd(date);return !(e.dateFrom&&k<e.dateFrom)&&!(e.dateTo&&k>e.dateTo);
 }
 function eventsOn(date,all){return S.events.filter(e=>occursOn(e,date)&&(all||!S.hidden.has(e.kind||'otro'))).sort((a,b)=>toMin(a.start)-toMin(b.start)||toMin(a.end)-toMin(b.end))}
+function skey(id,date){return id+'__'+ymd(date)}
+function sessOf(id,date){return S.sessions[skey(id,date)]||null}
+function stateOf(e,date){if(HOLIDAYS[ymd(date)])return 'feriado';const s=sessOf(e.id,date);return s&&s.status==='suspendida'?'suspendida':'ok'}
+function activeOn(date){return eventsOn(date,true).filter(e=>stateOf(e,date)==='ok')}
 function clashesOn(date){
-  const l=eventsOn(date,true),ids=new Set(),pairs=[];
+  const l=activeOn(date),ids=new Set(),pairs=[];
   for(let i=0;i<l.length;i++)for(let j=i+1;j<l.length;j++){const a=l[i],b=l[j];const ov=Math.min(toMin(a.end),toMin(b.end))-Math.max(toMin(a.start),toMin(b.start));if(ov>0){ids.add(a.id);ids.add(b.id);pairs.push({a,b,ov,date})}}
   return{ids,pairs};
+}
+function tightOn(date){
+  const l=activeOn(date),out=[];let prev=null;
+  l.forEach(b=>{if(prev){const g=toMin(b.start)-toMin(prev.end);if(g>=0&&g<TIGHT&&(prev.place||'')!==(b.place||'')&&(prev.kind==='terreno'||b.kind==='terreno'))out.push({a:prev,b,g,date})}if(!prev||toMin(b.end)>toMin(prev.end))prev=b});
+  return out;
+}
+function terrenoSessions(){
+  const out=[],t=startOfDay(new Date());
+  S.events.filter(e=>e.kind==='terreno'&&e.day&&e.dateFrom&&e.dateTo).forEach(e=>{
+    for(let d=parseYmd(e.dateFrom);ymd(d)<=e.dateTo;d=addDays(d,1))if(occursOn(e,d)&&!HOLIDAYS[ymd(d)]){const s=sessOf(e.id,d);out.push({e,d,s,past:d<t||(sameDay(d,t)&&toMin(e.end)<=nowMin())})}
+  });
+  return out.sort((a,b)=>a.d-b.d||toMin(a.e.start)-toMin(b.e.start));
+}
+function gcalURL(e){
+  const first=nextOccurrence(e)||(e.dateFrom?parseYmd(e.dateFrom):null);if(!first)return null;
+  const f=(d,m)=>ymd(d).replace(/-/g,'')+'T'+fmtMin(m).replace(':','')+'00';
+  const until=(e.dateTo||S.profile.semEnd||'').replace(/-/g,'');
+  const q=new URLSearchParams({action:'TEMPLATE',text:e.title,dates:f(first,toMin(e.start))+'/'+f(first,toMin(e.end)),ctz:'America/Santiago',location:e.place||'',details:[KINDS[e.kind],e.group,e.note].filter(Boolean).join(' · ')});
+  if(until)q.set('recur','RRULE:FREQ=WEEKLY;UNTIL='+until+'T235959Z');
+  return 'https://calendar.google.com/calendar/render?'+q.toString();
 }
 function weekDays(){return Array.from({length:7},(_,i)=>addDays(S.week,i))}
 function layoutDay(list){
@@ -477,15 +551,20 @@ function nextOccurrence(e){
 }
 function findNext(){
   const n=new Date(),nm=nowMin();
-  for(let i=0;i<21;i++){const d=addDays(startOfDay(n),i);const l=eventsOn(d,true).filter(e=>i>0||toMin(e.start)>nm);if(l.length){const at=new Date(d);at.setMinutes(toMin(l[0].start));return{ev:l[0],at}}}
+  for(let i=0;i<21;i++){const d=addDays(startOfDay(n),i);const l=activeOn(d).filter(e=>i>0||toMin(e.start)>nm);if(l.length){const at=new Date(d);at.setMinutes(toMin(l[0].start));return{ev:l[0],at}}}
   return null;
 }
 
 /* ---------- persistencia ---------- */
 function lsGet(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch{return f}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
-function clean(e){const o={};for(const k of['title','kind','day','start','end','place','dateFrom','dateTo','group','people','note','estEnd'])if(e[k]!==undefined&&e[k]!==''&&e[k]!==null&&!(Array.isArray(e[k])&&!e[k].length))o[k]=e[k];o.day=Number(o.day||0);o.kind=o.kind||'otro';return o}
-function persistLocal(){lsSet(LS,{profile:S.profile,events:S.events})}
+function clean(e){const o={};for(const k of['title','kind','day','start','end','place','dateFrom','dateTo','group','people','emails','note','estEnd'])if(e[k]!==undefined&&e[k]!==''&&e[k]!==null&&!(Array.isArray(e[k])&&!e[k].length))o[k]=e[k];o.day=Number(o.day||0);o.kind=o.kind||'otro';return o}
+function persistLocal(){lsSet(LS,{profile:S.profile,events:S.events,sessions:S.sessions})}
+async function saveSession(key,data){
+  S.sessions[key]={...data};render();
+  if(S.mode==='db'){try{await S.db.collection('sessions').doc(key).set(S.sessions[key])}catch{toast('No se pudo guardar la sesión','Inténtalo otra vez.')}}
+  else persistLocal();
+}
 async function saveEvent(ev){
   const id=ev.id||uid(),body=clean(ev),i=S.events.findIndex(x=>x.id===id);
   if(i>=0)S.events[i]={id,...body};else S.events.push({id,...body});
@@ -507,12 +586,13 @@ function setSync(on,msg){S.syncOn=on;S.syncMsg=msg||(on?'Sincronizado · PC y ce
 
 async function boot(){
   const local=lsGet(LS,null);
-  if(local){S.profile={...DEFAULT_PROFILE,...local.profile};S.events=local.events||[];S.loaded=true}
+  if(local){S.profile={...DEFAULT_PROFILE,...local.profile};S.events=local.events||[];S.sessions=local.sessions||{};S.loaded=true}
   render();
   let db=null;try{db=window.claude?.use?await window.claude.use('db'):null}catch{db=null}
   if(!db){S.loaded=true;setSync(false);render();return}
   S.db=db;S.mode='db';setSync(true);
   db.collection('events').onSnapshot(snap=>{S.events=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded=true;if(!S.drag)render()},()=>setSync(false,'Sin conexión con la nube'));
+  db.collection('sessions').onSnapshot(snap=>{const m={};snap.docs.forEach(d=>m[d.id]=d.data());S.sessions=m;if(!S.drag)render()},()=>{});
   db.doc('config/profile').onSnapshot(snap=>{if(snap.exists){S.profile={...DEFAULT_PROFILE,...snap.data()};if(!S.drag)render()}},()=>{});
 }
 
@@ -534,17 +614,31 @@ function render(){
 
 function renderSide(){
   const side=document.getElementById('side'),p=S.profile;
-  const counts={catedra:0,asesoria:0,terreno:0,otro:0};S.events.forEach(e=>counts[e.kind]!==undefined?counts[e.kind]++:counts.otro++);
-  const wc=[];weekDays().forEach(d=>wc.push(...clashesOn(d).pairs));
+  const wc=[],wt=[];weekDays().forEach(d=>{wc.push(...clashesOn(d).pairs);wt.push(...tightOn(d))});
   side.innerHTML=`
   <div class="brand"><button class="avatar" id="avatar" aria-label="Cambiar emoji" title="Cambiar emoji">${esc(p.emoji||'🦉')}</button><div><b>${esc(p.name||'Mi horario')}</b><span>Semestre ${semLabel()} · U. Autónoma</span></div></div>
+  ${semProgHTML()}
   ${upHTML()}
   ${miniHTML()}
   <div class="sect"><div class="lbl" style="padding:0 8px 2px">Calendarios</div>${filtersHTML(true)}</div>
   <div class="sect"><div class="lbl" style="padding:0 8px 2px">Choques esta semana</div>
     ${wc.length?`<div class="clist">${wc.map(c=>`<button class="citem" data-open="${esc(c.b.id)}" data-date="${ymd(c.date)}"><b>${DSH[c.date.getDay()]} ${sd(c.date)} · ${dur(c.ov)} superpuestos</b><span>${esc(c.a.title)} ↔ ${esc(c.b.title)}</span></button>`).join('')}</div>`:`<div class="okline">Sin choques esta semana 👌</div>`}
   </div>
+  ${wt.length?`<div class="sect"><div class="lbl" style="padding:0 8px 2px">Traslados ajustados</div><div class="clist">${wt.map(t=>`<button class="titem" data-open="${esc(t.b.id)}" data-date="${ymd(t.date)}"><b>${DSH[t.date.getDay()]} ${sd(t.date)} · ${t.g} min para llegar</b><span>${esc(t.a.place||t.a.title)} → ${esc(t.b.place||t.b.title)} (${esc(t.b.start)})</span></button>`).join('')}</div></div>`:''}
+  ${supHTML()}
   <div class="side-foot"><span class="sync${S.syncOn?' on':''}"><i></i>${esc(S.syncMsg)}</span><span style="font-size:11.5px;color:var(--faint);line-height:1.9"><kbd>N</kbd> nuevo · <kbd>T</kbd> hoy · <kbd>←</kbd><kbd>→</kbd> semana · <kbd>⌘K</kbd> buscar</span></div>`;
+}
+function semProgHTML(){
+  const p=S.profile;if(!p.semStart||!p.semEnd)return '';
+  const a=parseYmd(p.semStart),b=parseYmd(p.semEnd),t=startOfDay(new Date());
+  const total=Math.max(1,Math.ceil((b-a)/(7*864e5))),cur=Math.max(0,Math.min(total,Math.floor((t-a)/(7*864e5))+1));
+  const left=Math.max(0,Math.ceil((b-t)/(7*864e5)));
+  return `<div class="prog"><small><span>Semana ${cur} de ${total}</span><span>${t>b?'Semestre terminado':left===1?'Queda 1 semana':`Quedan ${left} semanas`}</span></small><div class="bar"><i style="width:${cur/total*100}%"></i></div></div>`;
+}
+function supHTML(){
+  const l=terrenoSessions();if(!l.length)return '';
+  const done=l.filter(x=>x.s&&x.s.status==='realizada').length,sus=l.filter(x=>x.s&&x.s.status==='suspendida').length,pend=l.filter(x=>x.past&&!x.s);
+  return `<div class="sect"><div class="lbl" style="padding:0 8px 2px">Supervisión de terrenos</div><div class="prog" style="padding:0 8px"><small><span><b style="color:var(--ink)">${done}</b> de ${l.length} sesiones realizadas</span>${sus?`<span>${sus} suspendidas</span>`:''}</small><div class="bar"><i class="g" style="width:${done/l.length*100}%"></i></div>${pend.length?`<button class="btn" data-open="${esc(pend[0].e.id)}" data-date="${ymd(pend[0].d)}">Registrar ${pend.length} ${pend.length===1?'sesión pasada':'sesiones pasadas'}</button>`:`<small>Registra asistencia y bitácora desde cada terreno.</small>`}</div></div>`;
 }
 function filtersHTML(withCount){
   const counts={catedra:0,asesoria:0,terreno:0,otro:0};S.events.forEach(e=>counts[e.kind]!==undefined?counts[e.kind]++:counts.otro++);
@@ -553,7 +647,7 @@ function filtersHTML(withCount){
 function semLabel(){const s=S.profile.semStart?parseYmd(S.profile.semStart):new Date();return s.getFullYear()+'-'+(s.getMonth()<6?1:2)}
 
 function upHTML(){
-  const n=new Date(),nm=nowMin(),live=eventsOn(n,true).find(e=>toMin(e.start)<=nm&&toMin(e.end)>nm);
+  const n=new Date(),nm=nowMin(),live=activeOn(n).find(e=>toMin(e.start)<=nm&&toMin(e.end)>nm);
   if(live){const pct=Math.round((nm-toMin(live.start))/(toMin(live.end)-toMin(live.start))*100);
     return `<button class="up" data-open="${esc(live.id)}" data-date="${ymd(n)}"><span class="pulse"></span><div class="lbl">En curso</div><div class="t">${esc(live.title)}</div><div class="m">${esc(live.place||'Sin sala')} · hasta las ${esc(live.end)}</div><div class="c">${dur(toMin(live.end)-nm)}</div><div class="bar"><i style="width:${pct}%"></i></div></button>`}
   const nx=findNext();
@@ -581,7 +675,7 @@ function renderTop(){
   document.getElementById('avatar-m').textContent=p.emoji||'🦉';
   document.getElementById('eyebrow').textContent=`${DAYS[n.getDay()]} ${n.getDate()} de ${MONTHS[n.getMonth()]} · Semana ${isoWeek(n)}`;
   document.getElementById('greet').innerHTML=`${sal}, <em>${esc((p.name||'profe').split(' ')[0])}</em>`;
-  const today=eventsOn(n,true),nm=nowMin(),left=today.filter(e=>toMin(e.end)>nm);
+  const today=activeOn(n),nm=nowMin(),left=today.filter(e=>toMin(e.end)>nm);
   document.getElementById('greet-sub').textContent=!S.events.length?'Arma tu semana en segundos.':left.length?`Hoy te ${left.length===1?'queda 1 bloque':'quedan '+left.length+' bloques'}. Sigue: ${left[0].title} a las ${left[0].start}.`:today.length?'Terminaste por hoy. Buen trabajo 🎉':'Hoy no tienes bloques agendados.';
   const end=addDays(S.week,6),same=S.week.getMonth()===end.getMonth();
   document.getElementById('wktitle').innerHTML=`${same?S.week.getDate():sd(S.week)} – ${sd(end)} ${end.getFullYear()}<small>Semana ${isoWeek(S.week)}</small>`;
@@ -589,18 +683,18 @@ function renderTop(){
 }
 
 function renderMetrics(){
-  const days=weekDays();let mins=0,blocks=0,ter=0,cl=0,ov=0;
-  const per=days.map(d=>{const l=eventsOn(d,true);let m=0;l.forEach(e=>{m+=toMin(e.end)-toMin(e.start);if(e.kind==='terreno')ter++});blocks+=l.length;mins+=m;clashesOn(d).pairs.forEach(x=>{cl++;ov+=x.ov});return[d,m]});
-  const busy=per.slice().sort((a,b)=>b[1]-a[1])[0],free=days.slice(0,5).filter(d=>!eventsOn(d,true).length).length;
+  const days=weekDays();let mins=0,blocks=0,ter=0,cl=0,ov=0,tight=0;
+  const per=days.map(d=>{const l=activeOn(d);let m=0;l.forEach(e=>{m+=toMin(e.end)-toMin(e.start);if(e.kind==='terreno')ter++});blocks+=l.length;mins+=m;clashesOn(d).pairs.forEach(x=>{cl++;ov+=x.ov});tight+=tightOn(d).length;return[d,m]});
+  const busy=per.slice().sort((a,b)=>b[1]-a[1])[0],hol=days.filter(d=>HOLIDAYS[ymd(d)]&&(dowOf(d)<=5||eventsOn(d,true).length));
   document.getElementById('metrics').innerHTML=`
     <div class="metric"><b>${(mins/60).toFixed(1).replace('.',',')} h</b><span>Carga semanal</span></div>
     <div class="metric"><b>${blocks}</b><span>Bloques</span></div>
     <div class="metric"><b style="color:var(--ter)">${ter}</b><span>Terrenos</span></div>
     <div class="metric"><b style="color:${cl?'var(--clash)':'var(--ase)'}">${cl}</b><span>${cl?'Choques · '+dur(ov):'Choques'}</span></div>
+    <div class="metric"><b style="color:${tight?'var(--ter)':'var(--ase)'}">${tight}</b><span>Traslados ajustados</span></div>
     <div class="metric"><b>${busy&&busy[1]?DAYS[busy[0].getDay()]:'—'}</b><span>Día más cargado${busy&&busy[1]?' · '+dur(busy[1]):''}</span></div>
-    <div class="metric"><b>${free}</b><span>Días hábiles libres</span></div>`;
+    ${hol.length?`<div class="metric"><b style="color:var(--clash)">${hol.length}</b><span>${hol.length===1?'Feriado':'Feriados'} · ${hol.map(d=>DSH[d.getDay()]).join(', ')}</span></div>`:''}`;
 }
-
 function banners(){
   let h='';const days=weekDays(),pend=S.events.filter(e=>!e.day);
   if(pend.length)h+=`<div class="banner info">${ico('cal')}<span><b>Falta el día de ${pend.length===1?'1 actividad':pend.length+' actividades'}:</b> ${pend.map(e=>esc(e.title)).join(', ')}</span><button data-open="${esc(pend[0].id)}">Asignar día</button></div>`;
@@ -618,16 +712,17 @@ function weekHTML(){
   const H=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour'))||60;
   const px=m=>(m-lo)/60*H,total=px(hi),today=new Date();
   S.grid={lo,hi,H};
-  const loads=dates.map(d=>eventsOn(d,true).reduce((a,e)=>a+toMin(e.end)-toMin(e.start),0));
-  let h=`<div class="board"><div class="scroller" id="scroller"><div class="grid" id="wgrid" style="grid-template-columns:56px repeat(${dates.length},minmax(124px,1fr))"><div class="gh corner"></div>`;
-  dates.forEach((d,i)=>h+=`<button class="gh${sameDay(d,today)?' today':''}" data-jump="${ymd(d)}" title="Abrir ${DAYS[d.getDay()].toLowerCase()} ${sd(d)}"><div class="d"><small>${DSH[d.getDay()]}</small><b>${d.getDate()}</b></div><div class="load${loads[i]>=6*60?' hot':''}"><i style="width:${Math.min(100,loads[i]/600*100)}%"></i></div><span class="hrs">${loads[i]?dur(loads[i]):'Libre'}</span></button>`);
+  const loads=dates.map(d=>activeOn(d).reduce((a,e)=>a+toMin(e.end)-toMin(e.start),0));
+  let h=`<div class="board"><div class="scroller" id="scroller"><div class="grid" id="wgrid" style="grid-template-columns:var(--tc,56px) repeat(${dates.length},minmax(var(--cw,124px),1fr))"><div class="gh corner"></div>`;
+  dates.forEach((d,i)=>{const hol=HOLIDAYS[ymd(d)];h+=`<button class="gh${sameDay(d,today)?' today':''}" data-jump="${ymd(d)}" title="Abrir ${DAYS[d.getDay()].toLowerCase()} ${sd(d)}${hol?' · Feriado: '+hol:''}"><div class="d"><small>${DSH[d.getDay()]}</small><b>${d.getDate()}</b></div><div class="load${loads[i]>=6*60?' hot':''}"><i style="width:${Math.min(100,loads[i]/600*100)}%"></i></div>${hol?`<span class="hol">Feriado · ${esc(hol)}</span>`:`<span class="hrs">${loads[i]?dur(loads[i]):'Libre'}</span>`}</button>`});
   h+=`<div class="times" style="height:${total}px">`;for(let m=lo+60;m<hi;m+=60)h+=`<div style="top:${px(m)}px">${fmtMin(m)}</div>`;h+='</div>';
   dates.forEach(d=>{
     const{ids}=clashesOn(d),isT=sameDay(d,today);
     h+=`<div class="col${isT?' today':''}" data-date="${ymd(d)}" style="height:${total}px">`;
     layoutDay(eventsOn(d)).forEach(e=>{
-      const top=px(toMin(e.start)),hh=Math.max(px(toMin(e.end))-top-2,20),w=100/e._n,clash=ids.has(e.id),compact=hh<34;
-      h+=`<button class="ev ${KCLS[e.kind]||'ko'}${clash?' is-clash':''}${compact?' compact':''}" data-open="${esc(e.id)}" data-date="${ymd(d)}" style="top:${top+1}px;height:${hh}px;left:calc(${w*e._c}% + 3px);width:calc(${w}% - 6px)" title="${esc(e.title)} · ${esc(e.start)}–${esc(e.end)}${clash?' · choque de horario':''}">${clash?'<span class="badge">!</span>':''}<span class="t">${esc(e.title)}</span><span class="h">${esc(e.start)}–${esc(e.end)}${e.estEnd?' ≈':''}</span>${hh>=58&&e.place?`<span class="p">${esc(e.place)}</span>`:''}<span class="rz" data-rz="1"></span></button>`;
+      const st=stateOf(e,d),top=px(toMin(e.start)),hh=Math.max(px(toMin(e.end))-top-2,20),w=100/e._n,clash=ids.has(e.id),compact=hh<34,ses=sessOf(e.id,d);
+      const tag=st==='feriado'?' · feriado':st==='suspendida'?' · suspendida':ses&&ses.status==='realizada'?' · realizada':'';
+      h+=`<button class="ev ${KCLS[e.kind]||'ko'}${clash?' is-clash':''}${st!=='ok'?' off':''}${compact?' compact':''}" data-open="${esc(e.id)}" data-date="${ymd(d)}" style="top:${top+1}px;height:${hh}px;left:calc(${w*e._c}% + 3px);width:calc(${w}% - 6px)" title="${esc(e.title)} · ${esc(e.start)}–${esc(e.end)}${clash?' · choque de horario':''}${tag}">${clash?'<span class="badge">!</span>':''}<span class="t">${ses&&ses.status==='realizada'?'✓ ':''}${esc(e.title)}</span><span class="h">${esc(e.start)}–${esc(e.end)}${e.estEnd?' ≈':''}</span>${hh>=58&&e.place?`<span class="p">${esc(e.place)}</span>`:''}<span class="rz" data-rz="1"></span></button>`;
     });
     if(isT){const nm=nowMin();if(nm>=lo&&nm<=hi)h+=`<div class="nowline" style="top:${px(nm)}px"></div>`}
     h+='</div>';
@@ -644,27 +739,37 @@ function afterWeek(keep){
 
 /* ---------- día y agenda ---------- */
 function itemHTML(e,d,{clash,isT,nm}){
-  const live=isT&&toMin(e.start)<=nm&&toMin(e.end)>nm,past=isT&&toMin(e.end)<=nm;
-  return `<button class="item ${KCLS[e.kind]||'ko'}${clash?' is-clash':''}${live?' live':''}${past?' past':''}" data-open="${esc(e.id)}" data-date="${ymd(d)}">
+  const st=stateOf(e,d),ses=sessOf(e.id,d),done=ses&&ses.status==='realizada';
+  const live=st==='ok'&&isT&&toMin(e.start)<=nm&&toMin(e.end)>nm,past=isT&&toMin(e.end)<=nm;
+  const att=e.people?.length&&ses&&Array.isArray(ses.present)?`<span class="chip">${ses.present.length}/${e.people.length} asistieron</span>`:'';
+  return `<button class="item ${KCLS[e.kind]||'ko'}${clash?' is-clash':''}${live?' live':''}${past&&!done?' past':''}${st!=='ok'?' off':''}${done?' done':''}" data-open="${esc(e.id)}" data-date="${ymd(d)}">
     <div class="tm">${esc(e.start)}<small>${esc(e.end)}${e.estEnd?' ≈':''}</small></div>
     <div style="min-width:0"><div class="ti">${esc(e.title)}</div>
       <div class="meta">${e.place?`<span>${ico('pin')}${esc(e.place)}</span>`:''}${e.group?`<span>${ico('users')}${esc(e.group)}${e.people?.length?' · '+e.people.length:''}</span>`:''}<span>${ico('clock')}${dur(toMin(e.end)-toMin(e.start))}</span></div>
-      <div class="chips"><span class="chip k" style="--k:${KVAR[e.kind]||KVAR.otro}">${KINDS[e.kind]||'Otro'}</span>${clash?'<span class="chip red">Choque</span>':''}${live?'<span class="chip live">● Ahora</span>':''}${e.dateTo?`<span class="chip">hasta el ${sd(parseYmd(e.dateTo))}</span>`:''}</div>
+      <div class="chips"><span class="chip k" style="--k:${KVAR[e.kind]||KVAR.otro}">${KINDS[e.kind]||'Otro'}</span>${st==='feriado'?`<span class="chip red">Feriado</span>`:''}${st==='suspendida'?'<span class="chip red">Suspendida</span>':''}${done?'<span class="chip k" style="--k:var(--ase)">✓ Realizada</span>':''}${att}${clash?'<span class="chip red">Choque</span>':''}${live?'<span class="chip live">● Ahora</span>':''}${e.dateTo&&st==='ok'&&!done?`<span class="chip">hasta el ${sd(parseYmd(e.dateTo))}</span>`:''}</div>
     </div><span class="chev">${ico('r')}</span></button>`;
+}
+function sepHTML(prev,e,d,tight){
+  const g=toMin(e.start)-toMin(prev.end),t=tight.find(x=>x.b.id===e.id);
+  if(t)return `<div class="free tight">${ico('warn')}${t.g} min para llegar a ${esc(e.place||e.title)}</div>`;
+  return g>=15?`<div class="free">${dur(g)} libre</div>`:'';
 }
 function dayHTML(){
   const all=weekDays();
   if(!all.some(d=>sameDay(d,S.sel)))S.sel=all.find(d=>sameDay(d,new Date()))||all.find(d=>eventsOn(d).length)||all[0];
   const today=new Date();
-  let h=`<div class="daystrip" role="group" aria-label="Día">`;
+  let h=`<div class="mob-up">${upHTML()}</div><div class="daystrip" role="group" aria-label="Día">`;
   all.forEach(d=>{const l=eventsOn(d),k=[...new Set(l.map(e=>e.kind))],cl=clashesOn(d).pairs.length;
     h+=`<button data-day="${ymd(d)}" aria-pressed="${sameDay(d,S.sel)}" aria-label="${DAYS[d.getDay()]} ${d.getDate()}">${sameDay(d,today)?'<span class="tdot"></span>':''}<small>${DSH[d.getDay()]}</small><b>${d.getDate()}</b><span class="dots">${k.map(x=>`<i style="background:${KVAR[x]||KVAR.otro}"></i>`).join('')}${cl?'<i style="background:var(--clash)"></i>':''}</span></button>`});
   h+='</div>';
-  const l=eventsOn(S.sel),{ids}=clashesOn(S.sel),isT=sameDay(S.sel,today),nm=nowMin(),tot=l.reduce((a,e)=>a+toMin(e.end)-toMin(e.start),0);
+  const l=eventsOn(S.sel),{ids}=clashesOn(S.sel),isT=sameDay(S.sel,today),nm=nowMin(),tot=l.filter(e=>stateOf(e,S.sel)==='ok').reduce((a,e)=>a+toMin(e.end)-toMin(e.start),0);
   h+=`<div class="dayhead"><h2>${DAYS[S.sel.getDay()]} ${S.sel.getDate()} de ${MONTHS[S.sel.getMonth()]}</h2><span>${l.length?`${l.length} ${l.length===1?'bloque':'bloques'} · ${dur(tot)}`:'Día libre'}</span>${isT?'<span class="chip live">Hoy</span>':''}</div>`;
+  const hol=HOLIDAYS[ymd(S.sel)];
+  if(hol)h+=`<div class="banner clash">${ico('cal')}<span><b>Feriado: ${esc(hol)}.</b> Los bloques de este día no cuentan para choques ni avisos.</span></div>`;
   if(!l.length)return h+`<div class="empty"><div class="e">🌤️</div><b style="color:var(--ink)">Día libre</b><span>No hay bloques este día.</span><button class="btn" data-act="new">${ico('plus')}Agregar bloque</button></div>`;
+  const tight=tightOn(S.sel);
   h+='<div class="tl">';
-  l.forEach((e,i)=>{if(i){const g=toMin(e.start)-toMin(l[i-1].end);if(g>=15)h+=`<div class="free">${dur(g)} libre</div>`}h+=itemHTML(e,S.sel,{clash:ids.has(e.id),isT,nm})});
+  l.forEach((e,i)=>{if(i)h+=sepHTML(l[i-1],e,S.sel,tight);h+=itemHTML(e,S.sel,{clash:ids.has(e.id),isT,nm})});
   return h+'</div>';
 }
 function agendaHTML(){
@@ -690,12 +795,19 @@ function closeLayer(){document.getElementById('layer').innerHTML=''}
 function openDetail(id,dateStr){
   const e=S.events.find(x=>x.id===id);if(!e)return;
   const d=dateStr?parseYmd(dateStr):nextOccurrence(e);
+  S.detail={id,date:d?ymd(d):null};
+  const st=d?stateOf(e,d):'ok',hol=d&&HOLIDAYS[ymd(d)];
   const clashes=d?clashesOn(d).pairs.filter(c=>c.a.id===id||c.b.id===id):[];
-  const nx=nextOccurrence(e);
+  const tight=d?tightOn(d).filter(t=>t.a.id===id||t.b.id===id):[];
+  const nx=nextOccurrence(e),ses=d?sessOf(id,d):null,status=ses?.status||'pendiente';
   const range=e.dateFrom||e.dateTo?`Del ${e.dateFrom?sd(parseYmd(e.dateFrom)):'inicio'} al ${e.dateTo?sd(parseYmd(e.dateTo)):'fin del semestre'}`:'Todo el semestre';
+  const gc=gcalURL(e),dl=d?`${DAYS[d.getDay()].toLowerCase()} ${sd(d)}`:'';
+  const present=new Set(ses?.present||[]);
   openDrawer(KINDS[e.kind]||'Bloque',`
     <div style="display:grid;gap:10px"><span class="chip k" style="--k:${KVAR[e.kind]||KVAR.otro};justify-self:start">${KINDS[e.kind]||'Otro'}${e.group?' · '+esc(e.group):''}</span><div class="dt-title">${esc(e.title)}</div></div>
-    ${clashes.length?`<div class="warnbox"><b>${ico('warn')}Choque de horario${d?' · '+DAYS[d.getDay()].toLowerCase()+' '+sd(d):''}</b>${clashes.map(c=>{const o=c.a.id===id?c.b:c.a;return `<span>Se superpone ${dur(c.ov)} con <b style="display:inline">${esc(o.title)}</b> (${esc(o.start)}–${esc(o.end)}).</span>`}).join('')}</div>`:''}
+    ${hol?`<div class="warnbox"><b>${ico('cal')}Feriado · ${esc(hol)}</b><span>El ${dl} no hay clases. Este bloque no cuenta para choques ni avisos.</span></div>`:''}
+    ${clashes.length?`<div class="warnbox"><b>${ico('warn')}Choque de horario · ${dl}</b>${clashes.map(c=>{const o=c.a.id===id?c.b:c.a;return `<span>Se superpone ${dur(c.ov)} con <b style="display:inline">${esc(o.title)}</b> (${esc(o.start)}–${esc(o.end)}).</span><div class="dr-actions"><button class="btn" data-act="suspend" data-id="${esc(o.id)}" data-date="${ymd(d)}">Suspender «${esc(o.title)}» ese día</button><button class="btn" data-act="suspend" data-id="${esc(id)}" data-date="${ymd(d)}">Suspender este</button></div>`}).join('')}<span style="font-size:12px;opacity:.85">También puedes moverlo con Editar o arrastrándolo en la semana.</span></div>`:''}
+    ${tight.map(t=>`<div class="infobox"><b>${ico('warn')} Traslado ajustado · ${dl}</b><span>Tienes ${t.g} min entre ${esc(t.a.title)} (termina ${esc(t.a.end)}${t.a.place?' en '+esc(t.a.place):''}) y ${esc(t.b.title)} (${esc(t.b.start)}${t.b.place?' en '+esc(t.b.place):''}).</span></div>`).join('')}
     <div class="rows">
       <div class="rowi">${ico('clock')}<div><b>${e.day?DAYS[e.day%7]:'Día por confirmar'} · ${esc(e.start)}–${esc(e.end)}</b><small>${dur(toMin(e.end)-toMin(e.start))}${e.estEnd?' · término estimado':''}</small></div></div>
       <div class="rowi">${ico('repeat')}<div>Cada semana<small>${range}</small></div></div>
@@ -703,10 +815,18 @@ function openDetail(id,dateStr){
       ${e.place?`<div class="rowi">${ico('pin')}<div>${esc(e.place)}</div></div>`:''}
       ${e.note?`<div class="rowi">${ico('note')}<div>${esc(e.note)}</div></div>`:''}
     </div>
-    ${e.people?.length?`<div style="display:grid;gap:10px"><div class="lbl">Integrantes · ${e.people.length}</div><div class="people">${e.people.map(n=>`<div class="person"><span class="ini">${esc(initials(n))}</span>${esc(n)}</div>`).join('')}</div></div>`:''}
-    <div class="dr-actions"><button class="btn pri" data-act="edit" data-id="${esc(e.id)}">${ico('edit')}Editar</button><button class="btn" data-act="dup" data-id="${esc(e.id)}">${ico('copy')}Duplicar</button><span class="spacer"></span><button class="btn danger" data-act="del" data-id="${esc(e.id)}">Eliminar</button></div>`);
+    ${d&&!hol?`<div class="sess"><h3>Sesión del ${dl}<small id="att-count">${e.people?.length?`${present.size}/${e.people.length} presentes`:''}</small></h3>
+      <div class="seg full" role="group" aria-label="Estado de la sesión">${[['pendiente','Pendiente'],['realizada','Realizada'],['suspendida','Suspendida']].map(([k,n])=>`<button data-st="${k}" aria-pressed="${status===k}">${n}</button>`).join('')}</div>
+      ${e.people?.length?`<div>${e.people.map((n,i)=>`<label class="att"><input type="checkbox" data-att="${esc(n)}"${present.has(n)?' checked':''}><span class="ini">${esc(initials(n))}</span><span style="min-width:0">${esc(n)}${e.emails?.[i]?`<small>${esc(e.emails[i])}</small>`:''}</span></label>`).join('')}</div>`:''}
+      <label class="f">Bitácora de la sesión<textarea id="sess-note" placeholder="Qué se trabajó, acuerdos, observaciones del grupo…">${esc(ses?.note||'')}</textarea></label>
+      <span style="font-size:12px;color:var(--muted)">Se guarda solo al salir del cuadro.</span>
+    </div>`:''}
+    ${!d&&e.people?.length?`<div style="display:grid;gap:10px"><div class="lbl">Integrantes · ${e.people.length}</div><div class="people">${e.people.map(n=>`<div class="person"><span class="ini">${esc(initials(n))}</span>${esc(n)}</div>`).join('')}</div></div>`:''}
+    <div class="dr-actions"><button class="btn pri" data-act="edit" data-id="${esc(e.id)}">${ico('edit')}Editar</button><button class="btn" data-act="dup" data-id="${esc(e.id)}">${ico('copy')}Duplicar</button>${e.emails?.length?`<button class="btn" data-act="mails" data-id="${esc(e.id)}">${ico('users')}Copiar correos</button>`:''}${gc?`<a class="btn" href="${esc(gc)}" target="_blank" rel="noopener">${ico('cal')}Google Calendar</a>`:''}<span class="spacer"></span><button class="btn danger" data-act="del" data-id="${esc(e.id)}">Eliminar</button></div>
+    <div id="mailbox"></div>`);
+  const note=document.getElementById('sess-note');
+  if(note)note.addEventListener('change',()=>{const k=skey(id,d),cur=S.sessions[k]||{eventId:id,date:ymd(d),status:'pendiente'};saveSession(k,{...cur,eventId:id,date:ymd(d),note:note.value.trim()});toast('Bitácora guardada',`${e.title} · ${dl}`)});
 }
-
 function openEditor(ev,preset){
   const isNew=!ev;
   const e=ev||{kind:'catedra',day:dowOf(S.sel),start:'09:00',end:'10:20',...preset};
@@ -723,6 +843,7 @@ function openEditor(ev,preset){
     <label class="f">Hasta (opcional)<input id="f-to" type="date" value="${esc(e.dateTo||'')}"></label>
     <label class="f full">Grupo (opcional)<input id="f-group" value="${esc(e.group||'')}" placeholder="Ej: Grupo 3"></label>
     <label class="f full">Integrantes (uno por línea)<textarea id="f-people">${esc((e.people||[]).join('\n'))}</textarea></label>
+    <label class="f full">Correos (uno por línea, mismo orden)<textarea id="f-emails" style="min-height:64px">${esc((e.emails||[]).join('\n'))}</textarea></label>
     <label class="f full">Nota<input id="f-note" value="${esc(e.note||'')}"></label>
     <div id="f-clash" class="full"></div>
     <div class="full dr-actions"><button class="btn pri" type="submit">${isNew?'Crear bloque':'Guardar cambios'}</button><button type="button" class="btn" data-close>Cancelar</button></div>
@@ -737,7 +858,7 @@ function openEditor(ev,preset){
   f.addEventListener('input',check);check();
   f.addEventListener('submit',async ev2=>{
     ev2.preventDefault();if(toMin(f['f-end'].value)<=toMin(f['f-start'].value))return;
-    const out={...e,title:f['f-title'].value.trim(),kind:f.kind.value,day:Number(f['f-day'].value),place:f['f-place'].value.trim(),start:f['f-start'].value,end:f['f-end'].value,dateFrom:f['f-from'].value,dateTo:f['f-to'].value,group:f['f-group'].value.trim(),people:f['f-people'].value.split('\n').map(s=>s.trim()).filter(Boolean),note:f['f-note'].value.trim()};
+    const out={...e,title:f['f-title'].value.trim(),kind:f.kind.value,day:Number(f['f-day'].value),place:f['f-place'].value.trim(),start:f['f-start'].value,end:f['f-end'].value,dateFrom:f['f-from'].value,dateTo:f['f-to'].value,group:f['f-group'].value.trim(),people:f['f-people'].value.split('\n').map(s=>s.trim()).filter(Boolean),emails:f['f-emails'].value.split('\n').map(s=>s.trim()).filter(Boolean),note:f['f-note'].value.trim()};
     if(isNew)delete out.id;
     if(ev&&(ev.start!==out.start||ev.end!==out.end))delete out.estEnd;
     const prev=ev?{...ev}:null;
@@ -837,7 +958,9 @@ function buildICS(){
     if(to&&ymd(first)>to)return;
     const sm=toMin(e.start),em=toMin(e.end),eve=sm+180;
     L.push('BEGIN:VEVENT','UID:'+e.id+'@horario-ua','DTSTAMP:'+stamp,'DTSTART:'+dt(first,sm),'DTEND:'+dt(first,em));
-    if(to)L.push('RRULE:FREQ=WEEKLY;UNTIL='+to.replace(/-/g,'')+'T235959');
+    if(to){L.push('RRULE:FREQ=WEEKLY;UNTIL='+to.replace(/-/g,'')+'T235959');
+      const ex=[];for(let d=new Date(first);ymd(d)<=to;d=addDays(d,7))if(stateOf(e,d)!=='ok')ex.push(dt(d,sm));
+      if(ex.length)L.push('EXDATE:'+ex.join(','))}
     L.push('SUMMARY:'+ie(e.title),'LOCATION:'+ie(e.place),'DESCRIPTION:'+ie([KINDS[e.kind],e.group,(e.people||[]).join(', '),e.note].filter(Boolean).join('\n')));
     if(p.notify20!==false)L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+ie('En 20 min: '+e.title),'TRIGGER:-PT20M','END:VALARM');
     if(p.notifyEve!==false)L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+ie('Mañana: '+e.title+' '+e.start),'TRIGGER:-PT'+Math.floor(eve/60)+'H'+(eve%60)+'M','END:VALARM');
@@ -859,9 +982,9 @@ function notify(title,body){
 }
 function tick(){
   const p=S.profile,n=new Date(),k=ymd(n),seen=lsGet(LS+'.seen',{}),nm=nowMin();let ch=false;
-  if(p.notify20!==false)eventsOn(n,true).forEach(e=>{const d=toMin(e.start)-nm,key='20:'+k+':'+e.id;if(d>0&&d<=20&&!seen[key]){seen[key]=1;ch=true;notify(`En ${d} min: ${e.title}`,`${e.start}–${e.end}${e.place?' · '+e.place:''}`)}});
-  if(p.notifyEve!==false&&n.getHours()>=21&&!seen['eve:'+k]){seen['eve:'+k]=1;ch=true;const t=addDays(startOfDay(n),1),l=eventsOn(t,true),cl=clashesOn(t).pairs.length;
-    if(l.length)notify(`Mañana ${DAYS[t.getDay()].toLowerCase()}: ${l.length} ${l.length===1?'bloque':'bloques'} ${p.emoji||''}`,l.map(e=>`${e.start} ${e.title}`).join(' · ')+(cl?` · ${cl} choque${cl>1?'s':''}`:''))}
+  if(p.notify20!==false)activeOn(n).forEach(e=>{const d=toMin(e.start)-nm,key='20:'+k+':'+e.id;if(d>0&&d<=20&&!seen[key]){seen[key]=1;ch=true;notify(`En ${d} min: ${e.title}`,`${e.start}–${e.end}${e.place?' · '+e.place:''}`)}});
+  if(p.notifyEve!==false&&n.getHours()>=21&&!seen['eve:'+k]){seen['eve:'+k]=1;ch=true;const t=addDays(startOfDay(n),1),l=activeOn(t),cl=clashesOn(t).pairs.length,tg=tightOn(t).length;
+    if(l.length)notify(`Mañana ${DAYS[t.getDay()].toLowerCase()}: ${l.length} ${l.length===1?'bloque':'bloques'} ${p.emoji||''}`,l.map(e=>`${e.start} ${e.title}`).join(' · ')+(cl?` · ${cl} choque${cl>1?'s':''}`:'')+(tg?` · ${tg} traslado${tg>1?'s':''} ajustado${tg>1?'s':''}`:''))}
   if(ch){const y=ymd(addDays(n,-1));Object.keys(seen).forEach(x=>{if(!x.includes(k)&&!x.includes(y))delete seen[x]});lsSet(LS+'.seen',seen)}
 }
 
@@ -897,7 +1020,7 @@ function openPalette(){
   const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const draw=()=>{
     const s=norm(q.value.trim());
-    const evs=S.events.filter(e=>!s||norm([e.title,e.place,e.group,KINDS[e.kind],(e.people||[]).join(' '),e.day?DAYS[e.day%7]:''].join(' ')).includes(s)).sort((a,b)=>(a.day||9)-(b.day||9)||toMin(a.start)-toMin(b.start)).slice(0,14)
+    const evs=S.events.filter(e=>!s||norm([e.title,e.place,e.group,KINDS[e.kind],(e.people||[]).join(' '),(e.emails||[]).join(' '),e.day?DAYS[e.day%7]:''].join(' ')).includes(s)).sort((a,b)=>(a.day||9)-(b.day||9)||toMin(a.start)-toMin(b.start)).slice(0,14)
       .map(e=>{const nx=nextOccurrence(e),who=s&&(e.people||[]).find(p=>norm(p).includes(s));return{g:'Bloques',t:e.title,dot:KVAR[e.kind]||KVAR.otro,sub:(who?who+' · ':'')+(e.day?DSH[e.day%7]+' '+e.start:'Día por confirmar'),run:()=>openDetail(e.id,nx?ymd(nx):null)}});
     items=[...actions.filter(a=>!s||norm(a.t).includes(s)),...evs];idx=Math.min(idx,Math.max(0,items.length-1));
     let g='';list.innerHTML=items.length?items.map((it,i)=>{const head=it.g!==g?`<div class="pal-g">${it.g}</div>`:'';g=it.g;return head+`<button class="pal-i" role="option" data-i="${i}" aria-selected="${i===idx}">${it.dot?`<span class="dot" style="--k:${it.dot}"></span>`:ico('r')}<span>${esc(it.t)}</span><small>${it.k?`<kbd>${it.k}</kbd>`:esc(it.sub||'')}</small></button>`}).join(''):`<div class="pal-g">Sin resultados</div>`;
@@ -975,9 +1098,19 @@ document.addEventListener('click',e=>{
   if(ds.jump){const d=parseYmd(ds.jump);go(()=>{S.sel=d;S.week=mondayOf(d);S.view='dia'});return}
   if(ds.week){go(()=>{S.week=mondayOf(parseYmd(ds.week));S.sel=S.week;S.mini=S.week});return}
   if(ds.emoji)return;
+  if(ds.st&&S.detail?.date){const{id,date}=S.detail,d=parseYmd(date),k=skey(id,d),cur=S.sessions[k]||{eventId:id,date,status:'pendiente'};
+    const note=document.getElementById('sess-note');saveSession(k,{...cur,eventId:id,date,status:ds.st,note:note?note.value.trim():cur.note||''});
+    document.querySelectorAll('[data-st]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st===ds.st));
+    if(ds.st!=='pendiente')toast(ds.st==='realizada'?'Sesión realizada':'Sesión suspendida',`${S.events.find(x=>x.id===id)?.title||''} · ${sd(d)}`,()=>saveSession(k,cur));return}
   switch(ds.act){
     case 'new':openEditor(null);return;
     case 'settings':openSettings();return;
+    case 'suspend':{const d=parseYmd(ds.date),k=skey(ds.id,d),cur=S.sessions[k]||null,ev=S.events.find(x=>x.id===ds.id);
+      saveSession(k,{...(cur||{}),eventId:ds.id,date:ds.date,status:'suspendida'});const back=S.detail;if(back)openDetail(back.id,back.date);
+      toast('Suspendido solo ese día',`${ev?.title||''} · ${DAYS[d.getDay()].toLowerCase()} ${sd(d)}`,()=>{cur?saveSession(k,cur):saveSession(k,{eventId:ds.id,date:ds.date,status:'pendiente'});if(back)openDetail(back.id,back.date)});return}
+    case 'mails':{const ev=S.events.find(x=>x.id===ds.id),txt=(ev?.emails||[]).join(', ');
+      const fallback=()=>{const box=document.getElementById('mailbox');box.innerHTML=`<label class="f">Correos del grupo<textarea readonly>${esc(txt)}</textarea></label>`;const ta=box.querySelector('textarea');ta.focus();ta.select()};
+      try{navigator.clipboard.writeText(txt).then(()=>toast('Correos copiados',`${ev.emails.length} correos de ${ev.group||ev.title}`),fallback)}catch{fallback()}return}
     case 'edit':openEditor(S.events.find(x=>x.id===ds.id));return;
     case 'dup':{const s=S.events.find(x=>x.id===ds.id);if(s){const{id,...rest}=s;openEditor(null,{...rest,title:rest.title+' (copia)'})}return}
     case 'del':{if(!t.classList.contains('arm')){t.classList.add('arm');t.textContent='¿Eliminar? Toca otra vez';setTimeout(()=>{if(t.isConnected){t.classList.remove('arm');t.textContent='Eliminar'}},3500);return}
@@ -993,6 +1126,15 @@ document.addEventListener('click',e=>{
     case 'wktitle':if(mq.matches)openMini();break;
     case 'avatar':case 'avatar-m':{const i=EMOJIS.indexOf(S.profile.emoji);popAvatar();saveProfile({emoji:EMOJIS[(i+1)%EMOJIS.length]});break}
   }
+});
+document.addEventListener('change',e=>{
+  const c=e.target.closest('[data-att]');if(!c||!S.detail?.date)return;
+  const{id,date}=S.detail,d=parseYmd(date),k=skey(id,d),cur=S.sessions[k]||{eventId:id,date,status:'pendiente'};
+  const present=[...document.querySelectorAll('[data-att]')].filter(x=>x.checked).map(x=>x.dataset.att);
+  const ev=S.events.find(x=>x.id===id),status=cur.status==='pendiente'&&present.length?'realizada':cur.status;
+  saveSession(k,{...cur,eventId:id,date,present,status});
+  document.querySelectorAll('[data-st]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st===status));
+  const cnt=document.getElementById('att-count');if(cnt)cnt.textContent=`${present.length}/${ev?.people?.length||0} presentes`;
 });
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();return}
@@ -1014,6 +1156,7 @@ content.addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTou
 mq.addEventListener?.('change',render);
 
 boot();
+setTimeout(()=>{if(!mq.matches&&S.events.length&&!lsGet(LS+'.hint',false)){lsSet(LS+'.hint',true);toast('Tip','Arrastra un bloque para moverlo o sobre un espacio vacío para crear uno. ⌘K para buscar.')}},2500);
 setInterval(()=>{if(!S.drag){render();tick()}},30000);
 setTimeout(tick,1500);
 })();

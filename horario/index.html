@@ -396,6 +396,96 @@ a.btn{text-decoration:none}
 @keyframes popin{from{transform:translate(-50%,-8px) scale(.98);opacity:0}}
 @keyframes pop{40%{transform:scale(1.3) rotate(12deg)}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--now) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
+/* ---------- versión serena: una columna ---------- */
+.side,.tabs,.notice,.mob-up,.top{display:none!important}
+.app{max-width:1120px;margin:0 auto;padding:0 max(32px,env(safe-area-inset-right,0px)) 72px max(32px,env(safe-area-inset-left,0px))}
+.bar{display:flex;align-items:center;gap:2px;padding-block:22px 0}
+.bar .avatar{width:38px;height:38px;font-size:21px;background:var(--panel);box-shadow:var(--sh-1)}
+.ibtn{width:38px;height:38px;border-radius:50%;border:0;background:none;color:var(--muted);display:grid;place-items:center;position:relative;transition:background .15s,color .15s;flex:none}
+.ibtn:hover{background:var(--panel);color:var(--ink)}
+.ibtn svg{width:18px;height:18px}
+.pip{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--clash);box-shadow:0 0 0 2px var(--bg)}
+.pip.soft{background:var(--ter)}
+.bar .btn.pri{margin-left:10px;border-radius:999px;padding:0 16px 0 13px}
+.hero{padding-block:clamp(30px,7vw,64px) 34px;display:grid;gap:14px;justify-items:start}
+.hero h1{font-family:var(--f-serif);font-weight:400;font-size:clamp(42px,6.4vw,68px);line-height:1;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.upline{border:0;background:none;padding:0;text-align:left;font-size:16.5px;color:var(--muted);line-height:1.5;max-width:60ch}
+.upline b{color:var(--ink);font-weight:500}
+.upline[data-open]:hover b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.upline .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--now);margin-right:9px;vertical-align:2px;animation:pulse 2s infinite}
+.views{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:30px}
+.vt{display:flex;gap:28px}
+.vt button{border:0;background:none;padding:12px 0 14px;font-size:14.5px;color:var(--muted);position:relative;transition:color .15s}
+.vt button:hover{color:var(--ink)}
+.vt button[aria-pressed="true"]{color:var(--ink);font-weight:500}
+.vt button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);border-radius:2px}
+.views .wknav{gap:0;padding-bottom:8px}
+.views .wknav .title{font-size:14px;font-weight:500;color:var(--ink-2);height:32px;padding:0 6px}
+.views .wknav .title small{display:none}
+.views .wknav .title:hover{color:var(--ink)}
+.today{border:0;background:var(--panel);height:30px;padding:0 13px;border-radius:999px;font-size:13px;color:var(--ink-2);margin-left:8px;box-shadow:var(--sh-1)}
+.today:hover{color:var(--ink)}
+.content{padding:0;gap:18px}
+.content.narrow{max-width:700px}
+/* semana */
+.board{box-shadow:none;border:1px solid var(--line);border-radius:20px}
+.gh .hrs{display:none}
+.scroller{max-height:calc(100vh - 140px)}
+/* día y agenda: lista editorial, sin tarjetas */
+.daystrip{gap:0;margin-bottom:6px}
+.daystrip button{padding:6px 0 12px;border-radius:0}
+.daystrip button:hover{background:none}
+.daystrip button:hover b{color:var(--ink)}
+.daystrip button b{color:var(--faint);transition:color .15s}
+.daystrip button[aria-pressed="true"]{background:none;box-shadow:none}
+.daystrip button[aria-pressed="true"] b{color:var(--ink)}
+.daystrip button[aria-pressed="true"] small{color:var(--ink)}
+.daystrip button[aria-pressed="true"]::after{content:"";position:absolute;bottom:0;left:32%;right:32%;height:2px;background:var(--ink);border-radius:2px}
+.daystrip .dots{display:none}
+.daystrip .tdot{top:4px;right:calc(50% - 16px)}
+.dayhead{padding:0 0 4px}
+.dayhead h2{font-family:var(--f-ui);font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.dayhead .chip{display:none}
+.tl{gap:0}
+.item{background:none;box-shadow:none;border-radius:0;padding:20px 30px 20px 2px;border-bottom:1px solid var(--line);grid-template-columns:74px minmax(0,1fr);gap:18px;align-items:start}
+.tl>.item:first-child{border-top:1px solid var(--line)}
+.item:hover{box-shadow:none;transform:none;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.item::before{left:auto;right:8px;top:27px;bottom:auto;width:8px;height:8px;border-radius:50%}
+.item .chev{display:none}
+.item .tm{font-size:13.5px;padding-top:2px}
+.item .ti{font-size:17px;font-weight:500;letter-spacing:-.01em}
+.item .meta{font-size:13.5px;margin-top:4px}
+.item.is-clash,.item.live{box-shadow:none}
+.item.live .tm{color:var(--now)}
+.item.past,.item.off{opacity:.45}
+.free{padding:10px 0 10px 94px;font-size:12px;border-bottom:1px solid var(--line)}
+.free::after{display:none}
+.agenda{gap:40px}
+.agenda h3{padding-bottom:8px}
+.agenda h3 b{font-size:28px}
+.empty{background:none;box-shadow:none;border-top:1px solid var(--line);border-radius:0;padding:48px 0;justify-items:start;text-align:left}
+.empty .e{display:none}
+.empty b{font-size:30px}
+.fab{display:none}
+@media (max-width:1023px){
+  .app{padding:0 max(20px,env(safe-area-inset-right,0px)) calc(110px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+  .content{padding:0}
+  .fab{display:grid}
+  .scroller{max-height:calc(100vh - 120px)}
+}
+@media (max-width:560px){
+  .bar{padding-top:14px}
+  .hero{padding-block:26px 24px;gap:10px}
+  .hero h1{font-size:42px}
+  .upline{font-size:15px}
+  .views{margin-bottom:22px}
+  .vt{gap:22px}
+  .vt button{padding:10px 0 12px}
+  .views .wknav{width:100%;padding-bottom:10px;margin-top:-4px}
+  .item{grid-template-columns:56px minmax(0,1fr);gap:14px;padding:18px 26px 18px 0}
+  .free{padding-left:70px}
+}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
@@ -423,42 +513,27 @@ a.btn{text-decoration:none}
   <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
 </svg>
 
-<div class="shell" lang="es">
-  <aside class="side" id="side" aria-label="Panel lateral"></aside>
-  <div class="main">
-    <header class="top">
-      <div class="greet">
-        <button class="avatar mobile-only" id="avatar-m" aria-label="Cambiar emoji">🦉</button>
-        <div style="min-width:0"><div class="lbl" id="eyebrow" style="margin-bottom:8px">Universidad Autónoma de Chile</div><h1 id="greet">Hola</h1><p id="greet-sub">Cargando tu semana…</p></div>
-      </div>
-      <div class="top-r2">
-        <div class="wknav">
-          <button class="btn ic" id="prev" aria-label="Semana anterior" title="Semana anterior (←)"><svg class="i"><use href="#i-l"/></svg></button>
-          <button class="btn ic" id="next" aria-label="Semana siguiente" title="Semana siguiente (→)"><svg class="i"><use href="#i-r"/></svg></button>
-          <button class="title" id="wktitle" title="Elegir fecha"></button>
-        </div>
-        <button class="btn" id="goToday" title="Ir a hoy (T)">Hoy</button>
-        <span class="spacer"></span>
-        <div class="seg" role="group" aria-label="Vista">
-          <button data-view="semana" title="Semana (1)">Semana</button>
-          <button data-view="dia" title="Día (2)">Día</button>
-          <button data-view="agenda" title="Agenda (3)">Agenda</button>
-        </div>
-        <button class="btn search" id="openPal" aria-label="Buscar"><svg class="i"><use href="#i-search"/></svg><span class="st">Buscar o ejecutar…</span><kbd>⌘K</kbd></button>
-        <button class="btn ic hide-m" id="setBtn" aria-label="Ajustes" title="Ajustes"><svg class="i"><use href="#i-gear"/></svg></button>
-        <button class="btn pri hide-m" id="addBtn" title="Nuevo bloque (N)"><svg class="i"><use href="#i-plus"/></svg>Nuevo</button>
-      </div>
-    </header>
-    <main class="content" id="content"></main>
-  </div>
+<div class="app" lang="es">
+  <header class="bar">
+    <button class="avatar" id="avatar" aria-label="Cambiar emoji" title="Cambiar emoji">🦉</button>
+    <span class="spacer"></span>
+    <button class="ibtn" id="openPal" aria-label="Buscar" title="Buscar (⌘K)"><svg class="i"><use href="#i-search"/></svg></button>
+    <button class="ibtn" data-act="alerts" aria-label="Avisos" title="Avisos"><svg class="i"><use href="#i-bell"/></svg><i class="pip" id="pip" hidden></i></button>
+    <button class="ibtn" data-tab="ajustes" aria-label="Ajustes" title="Ajustes"><svg class="i"><use href="#i-gear"/></svg></button>
+    <button class="btn pri hide-m" id="addBtn" title="Nuevo bloque (N)"><svg class="i"><use href="#i-plus"/></svg>Nuevo</button>
+  </header>
+  <section class="hero">
+    <div class="lbl" id="eyebrow">Universidad Autónoma de Chile</div>
+    <h1 id="greet">Hola</h1>
+    <button class="upline" id="upline">Cargando tu semana…</button>
+  </section>
+  <nav class="views" aria-label="Vista">
+    <div class="vt" role="group"><button data-view="dia">Día</button><button data-view="semana">Semana</button><button data-view="agenda">Agenda</button></div>
+    <div class="wknav"><button class="ibtn" id="prev" aria-label="Semana anterior" title="Semana anterior (←)"><svg class="i"><use href="#i-l"/></svg></button><button class="title" id="wktitle" title="Abrir calendario"></button><button class="ibtn" id="next" aria-label="Semana siguiente" title="Semana siguiente (→)"><svg class="i"><use href="#i-r"/></svg></button><button class="today" id="goToday" title="Ir a hoy (T)">Hoy</button></div>
+  </nav>
+  <main class="content" id="content"></main>
 </div>
-
-<nav class="tabs" aria-label="Navegación">
-  <button data-view="dia"><svg class="i"><use href="#i-today"/></svg>Día</button>
-  <button data-view="semana"><svg class="i"><use href="#i-week"/></svg>Semana</button>
-  <button data-view="agenda"><svg class="i"><use href="#i-list"/></svg>Agenda</button>
-  <button data-tab="ajustes"><svg class="i"><use href="#i-gear"/></svg>Ajustes</button>
-</nav>
+<aside class="side" id="side" hidden></aside>
 <button class="fab" id="fab" aria-label="Nuevo bloque"><svg class="i"><use href="#i-plus"/></svg></button>
 <div id="layer"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -482,7 +557,7 @@ const mq=matchMedia('(max-width:1023px)');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const S={profile:{...DEFAULT_PROFILE},events:[],loaded:false,
-  view:matchMedia('(max-width:720px)').matches?'dia':'semana',
+  view:lsGet('horarioUA.v1.view','dia'),
   week:mondayOf(new Date()),sel:startOfDay(new Date()),mini:startOfDay(new Date()),
   hidden:new Set(lsGet(LS+'.hidden',[])),sessions:{},detail:null,db:null,mode:'local',grid:null,drag:null,syncOn:false,syncMsg:'Conectando…'};
 
@@ -609,21 +684,17 @@ function render(){
   const c=document.getElementById('content');
   if(!S.loaded){c.innerHTML='<div class="empty"><div class="e">⏳</div>Cargando tu horario…</div>';return}
   if(!S.events.length){c.innerHTML=`<div class="empty"><div class="e">${esc(S.profile.emoji)}</div><b style="color:var(--ink)">Tu horario está vacío</b><span>Crea tu primer bloque o deja que Claude ordene tu horario desde Ajustes → Nuevo semestre.</span><div class="dr-actions" style="justify-content:center"><button class="btn pri" data-act="new">${ico('plus')}Nuevo bloque</button><button class="btn" data-act="settings">${ico('spark')}Nuevo semestre</button></div></div>`;return}
-  let html=banners();
+  c.classList.toggle('narrow',S.view!=='semana');lsSet(LS+'.view',S.view);
+  let html='';
   html+=S.view==='semana'?weekHTML():S.view==='dia'?dayHTML():agendaHTML();
   c.innerHTML=html;
   if(S.view==='semana'){S._wk=ymd(S.week);afterWeek(keep)}else S._wk=null;
 }
 
 function renderSide(){
-  const side=document.getElementById('side'),p=S.profile,al=alertsList();
-  side.innerHTML=`
-  <div class="brand"><div class="brand-row"><button class="avatar" id="avatar" aria-label="Cambiar emoji" title="Cambiar emoji">${esc(p.emoji||'🦉')}</button><div><b>${esc(p.name||'Mi horario')}</b><span>Semestre ${semLabel()}</span></div></div>${semProgHTML()}</div>
-  ${upHTML()}
-  ${miniHTML()}
-  <div class="sect"><div class="lbl">Avisos</div>${al.length?al.slice(0,6).map(alertHTML).join('')+(al.length>6?`<button class="btn ghost" data-act="alerts" style="justify-self:start">Ver los ${al.length}</button>`:''):'<div class="calm">Todo en orden</div>'}</div>
-  <div class="sect"><div class="lbl">Calendarios</div>${filtersHTML(true)}</div>
-  <div class="side-foot"><span class="sync${S.syncOn?' on':''}"><i></i>${esc(S.syncMsg)}</span></div>`;
+  const al=alertsList(),pip=document.getElementById('pip');
+  if(pip){pip.hidden=!al.length;pip.className='pip'+(al.some(a=>a.tone==='clash')?'':' soft')}
+  const av=document.getElementById('avatar');if(av)av.textContent=S.profile.emoji||'🦉';
 }
 function alertsList(){
   const out=[],days=weekDays();
@@ -681,20 +752,24 @@ function miniHTML(){
 }
 
 function renderTop(){
-  const p=S.profile,n=new Date(),h=n.getHours();
+  const p=S.profile,n=new Date(),h=n.getHours(),nm=nowMin();
   const sal=h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
-  document.getElementById('avatar-m').textContent=p.emoji||'🦉';
-  document.getElementById('eyebrow').textContent=`${DAYS[n.getDay()]} ${n.getDate()} de ${MONTHS[n.getMonth()]}`;
+  let wk='';if(p.semStart&&p.semEnd){const a=parseYmd(p.semStart),b=parseYmd(p.semEnd),tot=Math.max(1,Math.ceil((b-a)/(7*864e5))),cur=Math.floor((startOfDay(n)-a)/(7*864e5))+1;if(cur>=1&&cur<=tot)wk=` · Semana ${cur} de ${tot}`}
+  document.getElementById('eyebrow').textContent=`${DAYS[n.getDay()]} ${n.getDate()} de ${MONTHS[n.getMonth()]}${wk}`;
   document.getElementById('greet').innerHTML=`${sal}, <em>${esc((p.name||'profe').split(' ')[0])}</em>`;
-  const days=weekDays();let mins=0,blocks=0,cl=0;
-  days.forEach(d=>{activeOn(d).forEach(e=>{mins+=toMin(e.end)-toMin(e.start);blocks++});cl+=clashesOn(d).pairs.length});
-  const today=activeOn(n),nm=nowMin(),left=today.filter(e=>toMin(e.end)>nm);
-  const todayTxt=!S.events.length?'Arma tu semana en segundos.':left.length?`Hoy te ${left.length===1?'queda 1 bloque':'quedan '+left.length+' bloques'}.`:today.length?'Terminaste por hoy.':'Hoy está libre.';
-  const isThis=sameDay(S.week,mondayOf(n));
-  const wk=blocks?`${isThis?'Esta semana':'Semana'}: ${blocks} bloques, ${(mins/60).toFixed(1).replace('.',',')} h${cl?` y ${cl} ${cl===1?'choque':'choques'}`:''}.`:'';
-  document.getElementById('greet-sub').textContent=`${todayTxt} ${wk}`.trim();
+  const up=document.getElementById('upline');
+  const live=activeOn(n).find(e=>toMin(e.start)<=nm&&toMin(e.end)>nm);
+  delete up.dataset.open;delete up.dataset.date;
+  if(!S.events.length){up.textContent='Tu horario está vacío. Agrega tu primer bloque.';}
+  else if(live){up.dataset.open=live.id;up.dataset.date=ymd(n);up.innerHTML=`<span class="live"></span>Ahora estás en <b>${esc(live.title)}</b>, hasta las ${esc(live.end)}${live.place?' · '+esc(live.place):''}.`}
+  else{const nx=findNext();
+    if(!nx)up.textContent='No tienes bloques en las próximas tres semanas.';
+    else{const mins=Math.round((nx.at-n)/60000);
+      const when=mins<60?`en ${mins} minutos`:sameDay(nx.at,n)?`hoy a las ${nx.ev.start}`:sameDay(nx.at,addDays(n,1))?`mañana a las ${nx.ev.start}`:`el ${DAYS[nx.at.getDay()].toLowerCase()} ${sd(nx.at)} a las ${nx.ev.start}`;
+      up.dataset.open=nx.ev.id;up.dataset.date=ymd(nx.at);
+      up.innerHTML=`Lo próximo es <b>${esc(nx.ev.title)}</b>, ${when}${nx.ev.place?', en '+esc(nx.ev.place):''}.`}}
   const end=addDays(S.week,6),same=S.week.getMonth()===end.getMonth();
-  document.getElementById('wktitle').innerHTML=`${same?S.week.getDate():sd(S.week)} – ${sd(end)}<small>Semana ${isoWeek(S.week)}</small>`;
+  document.getElementById('wktitle').innerHTML=`${same?S.week.getDate():sd(S.week)} – ${sd(end)}`;
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===S.view));
 }
 function renderMetrics(){}
@@ -1036,7 +1111,7 @@ function openPalette(){
   list.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)pick(+b.dataset.i)});
   draw();setTimeout(()=>q.focus(),30);
 }
-function openMini(){openDrawer('Elegir fecha',miniHTML()+`<div class="sect"><div class="lbl" style="padding:0 8px 2px">Calendarios</div>${filtersHTML(false)}</div>`)}
+function openMini(){openDrawer('Calendario',semProgHTML()+miniHTML()+`<div class="sect"><div class="lbl">Mostrar</div>${filtersHTML(true)}</div>`)}
 
 /* ---------- arrastrar en la semana (mouse / lápiz) ---------- */
 let suppressClick=false;
@@ -1094,7 +1169,7 @@ document.addEventListener('click',e=>{
   const ds=t.dataset;
   if(ds.view){go(()=>S.view=ds.view);return}
   if(ds.tab==='ajustes'){openSettings();return}
-  if(ds.open){openDetail(ds.open,ds.date);return}
+  if(ds.open){if(t.closest('.drawer')&&!t.closest('.dr-actions'))closeLayer();openDetail(ds.open,ds.date);return}
   if(ds.filter){S.hidden.has(ds.filter)?S.hidden.delete(ds.filter):S.hidden.add(ds.filter);lsSet(LS+'.hidden',[...S.hidden]);render();if(t.closest('.drawer'))openMini();return}
   if(ds.pick){const d=parseYmd(ds.pick);go(()=>{S.week=mondayOf(d);S.sel=d;S.mini=d});if(t.closest('.drawer'))closeLayer();return}
   if(ds.mini){S.mini=new Date(S.mini.getFullYear(),S.mini.getMonth()+Number(ds.mini),1);t.closest('.drawer')?openMini():renderSide();return}
@@ -1109,7 +1184,7 @@ document.addEventListener('click',e=>{
   switch(ds.act){
     case 'new':openEditor(null);return;
     case 'settings':openSettings();return;
-    case 'alerts':{const al=alertsList();openDrawer('Avisos',al.length?`<div class="sect">${al.map(alertHTML).join('')}</div>`:'<div class="calm">Todo en orden</div>');return}
+    case 'alerts':{const al=alertsList();openDrawer('Avisos',(al.length?`<div class="sect">${al.map(alertHTML).join('')}</div>`:'<div class="calm">Todo en orden esta semana</div>')+supHTML());return}
     case 'suspend':{const d=parseYmd(ds.date),k=skey(ds.id,d),cur=S.sessions[k]||null,ev=S.events.find(x=>x.id===ds.id);
       saveSession(k,{...(cur||{}),eventId:ds.id,date:ds.date,status:'suspendida'});const back=S.detail;if(back)openDetail(back.id,back.date);
       toast('Suspendido solo ese día',`${ev?.title||''} · ${DAYS[d.getDay()].toLowerCase()} ${sd(d)}`,()=>{cur?saveSession(k,cur):saveSession(k,{eventId:ds.id,date:ds.date,status:'pendiente'});if(back)openDetail(back.id,back.date)});return}
@@ -1128,7 +1203,7 @@ document.addEventListener('click',e=>{
     case 'addBtn':case 'fab':openEditor(null);break;
     case 'setBtn':openSettings();break;
     case 'openPal':openPalette();break;
-    case 'wktitle':if(mq.matches)openMini();break;
+    case 'wktitle':openMini();break;
     case 'avatar':case 'avatar-m':{const i=EMOJIS.indexOf(S.profile.emoji);popAvatar();saveProfile({emoji:EMOJIS[(i+1)%EMOJIS.length]});break}
   }
 });
